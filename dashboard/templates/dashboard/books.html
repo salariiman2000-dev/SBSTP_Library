@@ -1,0 +1,929 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}
+    مدیریت کتاب‌ها
+{% endblock %}
+
+
+{% block page_title %}
+    مدیریت کتاب‌ها
+{% endblock %}
+
+
+{% block content %}
+
+<style>
+
+    .books-page {
+        padding: 5px 0 30px;
+    }
+
+
+    .books-box {
+
+        width: 100%;
+
+        background: var(--surface);
+
+        border:
+            1px solid var(--border);
+
+        border-radius: var(--radius);
+
+        overflow: hidden;
+
+        box-shadow: var(--shadow);
+    }
+
+
+    /* HEADER */
+
+    .books-header {
+
+        padding: 22px 25px;
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: space-between;
+
+        gap: 20px;
+
+        flex-wrap: wrap;
+
+        border-bottom:
+            1px solid var(--border);
+    }
+
+
+    .books-header h2 {
+
+        color: var(--text);
+
+        font-size: 23px;
+
+        font-weight: 800;
+    }
+
+
+    .books-header p {
+
+        color: var(--text-soft);
+
+        font-size: 16px;
+
+        margin-top: 6px;
+    }
+
+
+    .add-btn {
+
+        display: inline-flex;
+
+        align-items: center;
+        justify-content: center;
+
+        gap: 6px;
+
+        padding: 10px 17px;
+
+        border-radius: 9px;
+
+        background: var(--primary);
+
+        color: white;
+
+        font-size: 16px;
+
+        font-weight: 800;
+
+        text-decoration: none;
+
+        transition:
+            background .2s ease,
+            transform .2s ease,
+            box-shadow .2s ease;
+    }
+
+
+    .add-btn:hover {
+
+        background: var(--primary-dark);
+
+        transform: translateY(-1px);
+
+        box-shadow:
+            0 7px 18px
+            rgba(232, 155, 61, .18);
+    }
+
+
+    /* SEARCH */
+
+    .search-box {
+
+        padding: 18px 25px;
+
+        display: flex;
+
+        align-items: center;
+
+        gap: 10px;
+
+        background: var(--surface-soft);
+
+        border-bottom:
+            1px solid var(--border);
+    }
+
+
+    .search-box input {
+
+        flex: 1;
+
+        min-width: 0;
+
+        height: 43px;
+
+        border:
+            1px solid var(--border);
+
+        border-radius: 9px;
+
+        padding: 0 14px;
+
+        background: var(--surface);
+
+        color: var(--text);
+
+        font-family: inherit;
+
+        font-size: 16px;
+
+        outline: none;
+
+        transition:
+            border-color .2s ease,
+            box-shadow .2s ease;
+    }
+
+
+    .search-box input::placeholder {
+        color: var(--text-soft);
+    }
+
+
+    .search-box input:focus {
+
+        border-color: var(--primary);
+
+        box-shadow:
+            0 0 0 3px
+            rgba(232, 155, 61, .10);
+    }
+
+
+    .search-box button {
+
+        height: 43px;
+
+        border: 0;
+
+        padding: 0 22px;
+
+        border-radius: 9px;
+
+        background: var(--sidebar);
+
+        color: white;
+
+        font-family: inherit;
+
+        font-size: 16px;
+
+        font-weight: 800;
+
+        cursor: pointer;
+
+        transition:
+            background .2s ease,
+            transform .2s ease;
+    }
+
+
+    .search-box button:hover {
+
+        background: var(--sidebar-soft);
+
+        transform: translateY(-1px);
+    }
+
+
+    /* TABLE */
+
+    .table-wrapper {
+
+        width: 100%;
+
+        overflow-x: auto;
+    }
+
+
+    table {
+
+        width: 100%;
+
+        min-width: 950px;
+
+        border-collapse: collapse;
+    }
+
+
+    th {
+
+        padding: 14px 15px;
+
+        background: var(--surface-soft);
+
+        color: var(--text-soft);
+
+        text-align: right;
+
+        font-size: 15px;
+
+        font-weight: 800;
+
+        white-space: nowrap;
+    }
+
+
+    td {
+
+        padding: 15px;
+
+        border-top:
+            1px solid var(--border);
+
+        color: var(--text);
+
+        font-size: 16px;
+
+        vertical-align: middle;
+    }
+
+
+    tbody tr {
+
+        transition:
+            background .2s ease;
+    }
+
+
+    tbody tr:hover {
+        background: var(--surface-soft);
+    }
+
+
+    .book-title {
+
+        color: var(--text);
+
+        font-weight: 800;
+
+        font-size: 16px;
+
+        line-height: 1.7;
+    }
+
+
+    .author {
+
+        color: var(--text-soft);
+
+        font-size: 16px;
+    }
+
+
+    .category {
+
+        color: var(--text);
+
+        font-size: 16px;
+    }
+
+
+    /* COPIES */
+
+    .copies {
+
+        display: flex;
+
+        align-items: center;
+
+        gap: 7px;
+
+        flex-wrap: wrap;
+
+        white-space: nowrap;
+    }
+
+
+    .copy-item {
+
+        display: inline-flex;
+
+        align-items: center;
+
+        gap: 4px;
+
+        padding: 5px 8px;
+
+        border-radius: 7px;
+
+        background: var(--surface-soft);
+
+        border:
+            1px solid var(--border);
+
+        font-size: 14px;
+
+        color: var(--text-soft);
+    }
+
+
+    .copy-item strong {
+
+        color: var(--text);
+
+        font-size: 15px;
+
+        font-weight: 800;
+    }
+
+
+    .copy-item.available-count {
+
+        border-color:
+            rgba(48, 150, 91, .18);
+
+        background:
+            rgba(48, 150, 91, .07);
+    }
+
+
+    .copy-item.available-count strong {
+        color: #31965b;
+    }
+
+
+    .copy-item.borrowed-count {
+
+        border-color:
+            rgba(200, 92, 80, .18);
+
+        background:
+            rgba(200, 92, 80, .07);
+    }
+
+
+    .copy-item.borrowed-count strong {
+        color: #c85c50;
+    }
+
+
+    /* STATUS */
+
+    .status {
+
+        display: inline-flex;
+
+        align-items: center;
+
+        gap: 6px;
+
+        padding: 5px 10px;
+
+        border-radius: 20px;
+
+        font-size: 14px;
+
+        font-weight: 800;
+
+        white-space: nowrap;
+    }
+
+
+    .status::before {
+
+        content: "";
+
+        width: 6px;
+
+        height: 6px;
+
+        border-radius: 50%;
+
+        background: currentColor;
+    }
+
+
+    .available {
+
+        background:
+            rgba(48, 150, 91, .10);
+
+        color: #31965b;
+    }
+
+
+    .unavailable {
+
+        background:
+            rgba(200, 92, 80, .10);
+
+        color: #c85c50;
+    }
+
+
+    /* ACTIONS */
+
+    .actions {
+        white-space: nowrap;
+    }
+
+
+    .action-link {
+
+        font-size: 15px;
+
+        font-weight: 800;
+
+        text-decoration: none;
+
+        transition:
+            color .2s ease;
+    }
+
+
+    .view {
+        color: var(--text);
+    }
+
+
+    .view:hover {
+        color: var(--primary-dark);
+    }
+
+
+    .edit {
+        color: var(--primary);
+    }
+
+
+    .edit:hover {
+        color: var(--primary-dark);
+    }
+
+
+    .delete {
+        color: #c85c50;
+    }
+
+
+    .delete:hover {
+        color: #a9433b;
+    }
+
+
+    .action-separator {
+
+        color: var(--border);
+
+        margin: 0 8px;
+    }
+
+
+    /* EMPTY */
+
+    .empty {
+
+        padding: 55px 30px;
+
+        text-align: center;
+
+        color: var(--text-soft);
+
+        font-size: 16px;
+    }
+
+
+    .empty-icon {
+
+        width: 55px;
+
+        height: 55px;
+
+        margin: 0 auto 14px;
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: center;
+
+        border-radius: 14px;
+
+        background: var(--primary-soft);
+
+        font-size: 27px;
+    }
+
+
+    .empty strong {
+
+        display: block;
+
+        margin-bottom: 5px;
+
+        color: var(--text);
+
+        font-size: 17px;
+    }
+
+
+    /* MOBILE */
+
+    @media (max-width: 650px) {
+
+        .books-header {
+
+            padding: 20px 17px;
+
+            align-items: stretch;
+        }
+
+
+        .books-header h2 {
+            font-size: 20px;
+        }
+
+
+        .books-header p {
+            font-size: 15px;
+        }
+
+
+        .add-btn {
+            width: 100%;
+        }
+
+
+        .search-box {
+
+            padding: 15px 17px;
+
+            flex-direction: column;
+
+            align-items: stretch;
+        }
+
+
+        .search-box input {
+            width: 100%;
+        }
+
+
+        .search-box button {
+            width: 100%;
+        }
+
+
+        th,
+        td {
+            padding: 13px 12px;
+        }
+
+
+        th {
+            font-size: 14px;
+        }
+
+
+        td {
+            font-size: 15px;
+        }
+
+
+        .book-title,
+        .author,
+        .category {
+            font-size: 15px;
+        }
+
+
+        .action-link {
+            font-size: 14px;
+        }
+
+    }
+
+</style>
+
+
+<section class="books-page">
+
+    <div class="books-box">
+
+
+        <!-- HEADER -->
+
+        <div class="books-header">
+
+            <div>
+
+                <h2>
+                    کتاب‌های کتابخانه
+                </h2>
+
+                <p>
+                    مدیریت، جستجو و ویرایش کتاب‌ها
+                </p>
+
+            </div>
+
+
+            <a
+                href="{% url 'add_book' %}"
+                class="add-btn"
+            >
+                + افزودن کتاب
+            </a>
+
+        </div>
+
+
+        <!-- SEARCH -->
+
+        <form
+            method="get"
+            class="search-box"
+        >
+
+            <input
+                type="text"
+                name="q"
+                value="{{ query }}"
+                placeholder="جستجوی نام کتاب، نویسنده یا دسته‌بندی..."
+            >
+
+
+            <button type="submit">
+                جستجو
+            </button>
+
+        </form>
+
+
+        <!-- TABLE -->
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            کتاب
+                        </th>
+
+                        <th>
+                            نویسنده
+                        </th>
+
+                        <th>
+                            دسته‌بندی
+                        </th>
+
+                        <th>
+                            نسخه‌ها
+                        </th>
+
+                        <th>
+                            وضعیت
+                        </th>
+
+                        <th>
+                            عملیات
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for book in books %}
+
+                        <tr>
+
+
+                            <!-- BOOK -->
+
+                            <td>
+
+                                <strong class="book-title">
+                                    {{ book.title }}
+                                </strong>
+
+                            </td>
+
+
+                            <!-- AUTHOR -->
+
+                            <td class="author">
+                                {{ book.author }}
+                            </td>
+
+
+                            <!-- CATEGORY -->
+
+                            <td class="category">
+
+                                {% if book.category %}
+
+                                    {{ book.category.name }}
+
+                                {% else %}
+
+                                    —
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- COPIES -->
+
+                            <td>
+
+                                <div class="copies">
+
+
+                                    <span class="copy-item">
+
+                                        کل:
+
+                                        <strong>
+                                            {{ book.total_copies }}
+                                        </strong>
+
+                                    </span>
+
+
+                                    <span class="copy-item borrowed-count">
+
+                                        امانت:
+
+                                        <strong>
+                                            {{ book.borrowed_count }}
+                                        </strong>
+
+                                    </span>
+
+
+                                    <span class="copy-item available-count">
+
+                                        موجود:
+
+                                        <strong>
+                                            {{ book.available_copies }}
+                                        </strong>
+
+                                    </span>
+
+
+                                </div>
+
+                            </td>
+
+
+                            <!-- STATUS -->
+
+                            <td>
+
+                                {% if book.available_copies > 0 %}
+
+                                    <span class="status available">
+                                        موجود
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="status unavailable">
+                                        همه نسخه‌ها امانت هستند
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- ACTIONS -->
+
+                            <td class="actions">
+
+
+                                <a
+                                    href="{% url 'book_detail' book.pk %}"
+                                    class="action-link view"
+                                >
+                                    مشاهده
+                                </a>
+
+
+                                <span class="action-separator">
+                                    |
+                                </span>
+
+
+                                <a
+                                    href="{% url 'edit_book' book.pk %}"
+                                    class="action-link edit"
+                                >
+                                    ویرایش
+                                </a>
+
+
+                                <span class="action-separator">
+                                    |
+                                </span>
+
+
+                                <a
+                                    href="{% url 'delete_book' book.pk %}"
+                                    class="action-link delete"
+                                >
+                                    حذف
+                                </a>
+
+                            </td>
+
+
+                        </tr>
+
+
+                    {% empty %}
+
+                        <tr>
+
+                            <td
+                                colspan="6"
+                                class="empty"
+                            >
+
+                                <div class="empty-icon">
+                                    📚
+                                </div>
+
+
+                                {% if query %}
+
+                                    <strong>
+                                        نتیجه‌ای پیدا نشد
+                                    </strong>
+
+                                    کتابی برای
+                                    «{{ query }}»
+                                    پیدا نشد.
+
+                                {% else %}
+
+                                    <strong>
+                                        هنوز کتابی ثبت نشده است
+                                    </strong>
+
+                                    برای شروع، یک کتاب جدید به کتابخانه اضافه کنید.
+
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}

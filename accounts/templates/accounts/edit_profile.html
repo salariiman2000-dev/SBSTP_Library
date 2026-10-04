@@ -1,0 +1,385 @@
+{% extends "blog/base.html" %}
+
+{% block title %}
+    ویرایش پروفایل | کتابخانه پارک علم و فناوری
+{% endblock %}
+
+{% block content %}
+
+<style>
+    .auth-page {
+        padding: 70px 0 90px;
+        min-height: calc(100vh - 150px);
+    }
+
+    .auth-wrapper {
+        width: 100%;
+        max-width: 650px;
+        margin: 0 auto;
+    }
+
+    .auth-heading {
+        margin-bottom: 25px;
+    }
+
+    .auth-heading-label {
+        color: var(--orange-dark);
+        font-size: 15px;
+        font-weight: 800;
+    }
+
+    .auth-heading h1 {
+        margin-top: 7px;
+        color: var(--heading);
+        font-size: 38px;
+        line-height: 1.5;
+    }
+
+    .auth-heading p {
+        margin-top: 7px;
+        color: var(--muted);
+        font-size: 16px;
+        line-height: 1.9;
+    }
+
+    .auth-card {
+        padding: 28px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        box-shadow: var(--shadow);
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 15px;
+    }
+
+    .form-group {
+        margin-bottom: 19px;
+    }
+
+    .form-group.full {
+        grid-column: 1 / -1;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--heading);
+        font-size: 17px;
+        font-weight: 800;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="email"],
+    .form-group input[type="file"] {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 12px 14px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: var(--surface-2);
+        color: var(--text);
+        font-family: inherit;
+        font-size: 16px;
+        outline: none;
+        transition:
+            border-color .2s ease,
+            box-shadow .2s ease,
+            background .2s ease;
+    }
+
+    .form-group input:focus {
+        border-color: var(--orange);
+        background: var(--surface);
+        box-shadow:
+            0 0 0 3px rgba(232, 155, 61, .08);
+    }
+
+    .form-group input::placeholder {
+        color: var(--muted);
+    }
+
+    .form-group input[type="file"] {
+        padding: 9px 10px;
+        cursor: pointer;
+    }
+
+    .current-image {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 12px;
+        padding: 12px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: var(--surface-2);
+    }
+
+    .current-image img {
+        width: 58px;
+        height: 58px;
+        flex-shrink: 0;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 2px solid var(--border);
+    }
+
+    .current-image span {
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.8;
+    }
+
+    .field-error {
+        margin-top: 6px;
+        color: #c85c50;
+        font-size: 14px;
+        line-height: 1.7;
+    }
+
+    .form-errors {
+        margin-bottom: 18px;
+        padding: 12px 14px;
+        border: 1px solid rgba(200, 92, 80, .20);
+        border-radius: 10px;
+        background: rgba(200, 92, 80, .07);
+        color: #c85c50;
+        font-size: 15px;
+        line-height: 1.9;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 5px;
+    }
+
+    .save-button,
+    .cancel-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 11px 18px;
+        border-radius: 10px;
+        font-family: inherit;
+        font-size: 16px;
+        font-weight: 800;
+        text-decoration: none;
+        cursor: pointer;
+        transition:
+            background .2s ease,
+            border-color .2s ease,
+            color .2s ease,
+            transform .2s ease,
+            box-shadow .2s ease;
+    }
+
+    .save-button {
+        flex: 1;
+        border: 0;
+        background: var(--navy);
+        color: white;
+    }
+
+    .save-button:hover {
+        background: var(--orange-dark);
+        transform: translateY(-1px);
+        box-shadow:
+            0 8px 20px rgba(23, 35, 60, .12);
+    }
+
+    .save-button:active {
+        transform: translateY(0);
+    }
+
+    .cancel-button {
+        border: 1px solid var(--border);
+        background: var(--surface-2);
+        color: var(--heading);
+    }
+
+    .cancel-button:hover {
+        background: var(--surface);
+        border-color: var(--orange);
+        color: var(--orange-dark);
+    }
+
+    @media (max-width: 600px) {
+        .auth-page {
+            padding: 45px 0 65px;
+        }
+
+        .auth-heading h1 {
+            font-size: 32px;
+        }
+
+        .auth-heading p {
+            font-size: 15px;
+        }
+
+        .auth-card {
+            padding: 22px;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+            gap: 0;
+        }
+
+        .form-group.full {
+            grid-column: auto;
+        }
+
+        .form-group label {
+            font-size: 16px;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+        .form-group input[type="file"] {
+            font-size: 15px;
+        }
+
+        .current-image span {
+            font-size: 14px;
+        }
+
+        .field-error {
+            font-size: 13px;
+        }
+
+        .form-errors {
+            font-size: 14px;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .save-button,
+        .cancel-button {
+            width: 100%;
+            font-size: 15px;
+        }
+    }
+</style>
+
+<section class="auth-page">
+    <div class="container">
+        <div class="auth-wrapper">
+
+            <div class="auth-heading">
+                <span class="auth-heading-label">
+                    حساب کاربری
+                </span>
+
+                <h1>
+                    ویرایش پروفایل
+                </h1>
+
+                <p>
+                    اطلاعات حساب خود را به‌روزرسانی کنید.
+                </p>
+            </div>
+
+            <div class="auth-card">
+
+                {% if form.non_field_errors %}
+                    <div class="form-errors">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                <form
+                    method="post"
+                    enctype="multipart/form-data"
+                >
+                    {% csrf_token %}
+
+                    <div class="form-row">
+
+                        <div class="form-group">
+                            <label for="{{ form.first_name.id_for_label }}">
+                                نام
+                            </label>
+
+                            {{ form.first_name }}
+
+                            {% for error in form.first_name.errors %}
+                                <div class="field-error">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.last_name.id_for_label }}">
+                                نام خانوادگی
+                            </label>
+
+                            {{ form.last_name }}
+
+                            {% for error in form.last_name.errors %}
+                                <div class="field-error">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="form-group full">
+                            <label for="{{ form.profile_image.id_for_label }}">
+                                تصویر پروفایل
+                            </label>
+
+                            {% if user.profile_image %}
+                                <div class="current-image">
+                                    <img
+                                        src="{{ user.profile_image.url }}"
+                                        alt="تصویر فعلی پروفایل"
+                                    >
+
+                                    <span>
+                                        تصویر فعلی پروفایل
+                                    </span>
+                                </div>
+                            {% endif %}
+
+                            {{ form.profile_image }}
+
+                            {% for error in form.profile_image.errors %}
+                                <div class="field-error">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                    </div>
+
+                    <div class="form-actions">
+
+                        <button
+                            type="submit"
+                            class="save-button"
+                        >
+                            ذخیره تغییرات
+                        </button>
+
+                        <a
+                            href="{% url 'accounts:profile' %}"
+                            class="cancel-button"
+                        >
+                            انصراف
+                        </a>
+
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

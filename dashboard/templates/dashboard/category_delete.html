@@ -1,0 +1,329 @@
+{% extends "dashboard/base.html" %}
+
+
+{% block title %}
+    حذف دسته‌بندی
+{% endblock %}
+
+
+{% block page_title %}
+    حذف دسته‌بندی
+{% endblock %}
+
+
+{% block content %}
+
+<style>
+
+    .delete-page {
+        padding: 15px 0 30px;
+    }
+
+
+    .delete-box {
+
+        width: 100%;
+
+        max-width: 600px;
+
+        margin: 30px auto;
+
+        padding: 35px;
+
+        background: var(--surface);
+
+        border:
+            1px solid var(--border);
+
+        border-radius: 18px;
+
+        box-shadow: var(--shadow);
+
+        text-align: center;
+    }
+
+
+    .delete-icon {
+
+        width: 70px;
+
+        height: 70px;
+
+        margin: 0 auto 20px;
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: center;
+
+        border-radius: 50%;
+
+        background:
+            rgba(200, 92, 80, .08);
+
+        border:
+            1px solid rgba(200, 92, 80, .15);
+
+        font-size: 32px;
+    }
+
+
+    .delete-box h2 {
+
+        margin-bottom: 12px;
+
+        color: var(--text);
+
+        font-size: 24px;
+
+        font-weight: 800;
+    }
+
+
+    .delete-box p {
+
+        color: var(--text-soft);
+
+        font-size: 17px;
+
+        line-height: 2;
+    }
+
+
+    .category-name {
+
+        color: var(--text);
+
+        font-weight: 800;
+    }
+
+
+    .warning {
+
+        margin-top: 20px;
+
+        padding: 14px;
+
+        border:
+            1px solid rgba(232, 155, 61, .18);
+
+        border-radius: 10px;
+
+        background: var(--primary-soft);
+
+        color: var(--primary-dark);
+
+        font-size: 16px;
+
+        line-height: 1.8;
+    }
+
+
+    .actions {
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: center;
+
+        gap: 10px;
+
+        margin-top: 28px;
+    }
+
+
+    .btn {
+
+        min-width: 130px;
+
+        display: inline-flex;
+
+        align-items: center;
+
+        justify-content: center;
+
+        border: 0;
+
+        border-radius: 9px;
+
+        padding: 12px 20px;
+
+        font-family: inherit;
+
+        font-size: 16px;
+
+        font-weight: 800;
+
+        cursor: pointer;
+
+        text-decoration: none;
+
+        transition:
+            background .2s ease,
+            border-color .2s ease,
+            color .2s ease,
+            transform .2s ease,
+            box-shadow .2s ease;
+    }
+
+
+    .delete-btn {
+
+        background: #c85c50;
+
+        color: white;
+    }
+
+
+    .delete-btn:hover {
+
+        background: #b44d43;
+
+        transform: translateY(-1px);
+
+        box-shadow:
+            0 8px 20px
+            rgba(200, 92, 80, .16);
+    }
+
+
+    .cancel-btn {
+
+        border:
+            1px solid var(--border);
+
+        background: var(--surface-soft);
+
+        color: var(--text);
+    }
+
+
+    .cancel-btn:hover {
+
+        border-color: var(--primary);
+
+        background: var(--primary-soft);
+
+        color: var(--primary-dark);
+
+        transform: translateY(-1px);
+    }
+
+
+    @media (max-width: 600px) {
+
+        .delete-page {
+            padding-top: 5px;
+        }
+
+
+        .delete-box {
+
+            margin: 15px auto;
+
+            padding: 25px 20px;
+
+            border-radius: 15px;
+        }
+
+
+        .delete-box h2 {
+            font-size: 21px;
+        }
+
+
+        .delete-box p {
+            font-size: 16px;
+        }
+
+
+        .warning {
+            font-size: 15px;
+        }
+
+
+        .actions {
+
+            flex-direction: column;
+
+            width: 100%;
+        }
+
+
+        .btn {
+            width: 100%;
+        }
+
+    }
+
+</style>
+
+
+<section class="delete-page">
+
+    <div class="delete-box">
+
+
+        <div class="delete-icon">
+            🗑️
+        </div>
+
+
+        <h2>
+            حذف دسته‌بندی
+        </h2>
+
+
+        <p>
+
+            آیا مطمئنی می‌خواهی دسته‌بندی
+
+            <span class="category-name">
+                «{{ category.name }}»
+            </span>
+
+            را حذف کنی؟
+
+        </p>
+
+
+        <div class="warning">
+            ⚠️ این عملیات قابل بازگشت نیست.
+        </div>
+
+
+        <div class="actions">
+
+
+            <form method="post">
+
+                {% csrf_token %}
+
+                <button
+                    type="submit"
+                    class="btn delete-btn"
+                >
+                    بله، حذف کن
+                </button>
+
+            </form>
+
+
+            <a
+                href="{% url 'manage_categories' %}"
+                class="btn cancel-btn"
+            >
+                انصراف
+            </a>
+
+
+        </div>
+
+
+    </div>
+
+</section>
+
+{% endblock %}

@@ -1,0 +1,1314 @@
+{% extends "dashboard/base.html" %}
+
+
+{% block title %}
+    داشبورد | کتابخانه
+{% endblock %}
+
+
+{% block page_title %}
+    داشبورد
+{% endblock %}
+
+
+{% block content %}
+
+<style>
+
+    .dashboard-page {
+        display: flex;
+        flex-direction: column;
+        gap: 22px;
+    }
+
+
+    /* =========================
+       STAT CARDS
+    ========================= */
+
+    .stats-grid {
+
+        display: grid;
+
+        grid-template-columns:
+            repeat(5, minmax(0, 1fr));
+
+        gap: 16px;
+    }
+
+
+    .stat-card {
+
+        position: relative;
+
+        min-width: 0;
+
+        padding: 21px;
+
+        background: var(--surface);
+
+        border:
+            1px solid var(--border);
+
+        border-radius: var(--radius);
+
+        box-shadow: var(--shadow);
+
+        overflow: hidden;
+
+        transition:
+            border-color .2s ease,
+            transform .2s ease;
+    }
+
+
+    .stat-card:hover {
+
+        border-color:
+            rgba(232, 155, 61, .28);
+
+        transform: translateY(-2px);
+    }
+
+
+    .stat-icon {
+
+        width: 44px;
+
+        height: 44px;
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: center;
+
+        margin-bottom: 14px;
+
+        border-radius: 12px;
+
+        background: var(--primary-soft);
+
+        font-size: 21px;
+    }
+
+
+    .stat-label {
+
+        display: block;
+
+        margin-bottom: 7px;
+
+        color: var(--text-soft);
+
+        font-size: 15px;
+
+        font-weight: 600;
+    }
+
+
+    .stat-number {
+
+        margin: 0;
+
+        color: var(--text);
+
+        font-size: 25px;
+
+        font-weight: 800;
+
+        line-height: 1.2;
+    }
+
+
+    .loan-card {
+
+        border-color:
+            rgba(232, 155, 61, .32);
+    }
+
+
+    .loan-card .stat-icon {
+
+        background:
+            rgba(232, 155, 61, .13);
+    }
+
+
+    /* =========================
+       STATISTICS SECTION
+    ========================= */
+
+    .statistics-box {
+
+        width: 100%;
+
+        background: var(--surface);
+
+        border:
+            1px solid var(--border);
+
+        border-radius: var(--radius);
+
+        box-shadow: var(--shadow);
+
+        overflow: hidden;
+    }
+
+
+    .statistics-header {
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: space-between;
+
+        gap: 15px;
+
+        padding: 21px 24px;
+
+        border-bottom:
+            1px solid var(--border);
+    }
+
+
+    .statistics-title h2 {
+
+        margin: 0;
+
+        color: var(--text);
+
+        font-size: 21px;
+
+        font-weight: 800;
+    }
+
+
+    .statistics-title p {
+
+        margin: 5px 0 0;
+
+        color: var(--text-soft);
+
+        font-size: 15px;
+    }
+
+
+    .statistics-badge {
+
+        display: inline-flex;
+
+        align-items: center;
+
+        gap: 7px;
+
+        padding: 8px 12px;
+
+        border:
+            1px solid var(--border);
+
+        border-radius: 9px;
+
+        background: var(--surface-soft);
+
+        color: var(--text-soft);
+
+        font-size: 14px;
+
+        font-weight: 700;
+
+        white-space: nowrap;
+    }
+
+
+    .statistics-badge::before {
+
+        content: "";
+
+        width: 6px;
+
+        height: 6px;
+
+        border-radius: 50%;
+
+        background: var(--primary);
+    }
+
+
+    /* =========================
+       CHART
+    ========================= */
+
+    .chart-area {
+        padding: 30px 28px 25px;
+    }
+
+
+    .chart {
+
+        display: flex;
+
+        align-items: stretch;
+
+        gap: 22px;
+
+        width: 100%;
+
+        min-height: 320px;
+    }
+
+
+    .chart-y-axis {
+
+        width: 42px;
+
+        display: flex;
+
+        flex-direction: column;
+
+        justify-content: space-between;
+
+        padding: 3px 0 36px;
+
+        color: var(--text-soft);
+
+        font-size: 13px;
+
+        text-align: left;
+    }
+
+
+    .chart-main {
+
+        position: relative;
+
+        flex: 1;
+
+        min-width: 0;
+
+        display: flex;
+
+        align-items: stretch;
+
+        padding-bottom: 38px;
+    }
+
+
+    .chart-grid {
+
+        position: absolute;
+
+        inset: 0 0 38px 0;
+
+        display: flex;
+
+        flex-direction: column;
+
+        justify-content: space-between;
+
+        pointer-events: none;
+    }
+
+
+    .chart-grid-line {
+
+        width: 100%;
+
+        height: 1px;
+
+        background: var(--border);
+
+        opacity: .75;
+    }
+
+
+    .chart-columns {
+
+        position: relative;
+
+        z-index: 2;
+
+        width: 100%;
+
+        height: 100%;
+
+        display: grid;
+
+        grid-template-columns:
+            repeat(4, minmax(50px, 1fr));
+
+        align-items: end;
+
+        gap: 25px;
+    }
+
+
+    .chart-column {
+
+        height: 100%;
+
+        display: flex;
+
+        flex-direction: column;
+
+        align-items: center;
+
+        justify-content: flex-end;
+    }
+
+
+    .chart-value {
+
+        min-height: 18px;
+
+        margin-bottom: 7px;
+
+        color: var(--text);
+
+        font-size: 15px;
+
+        font-weight: 800;
+    }
+
+
+    .chart-bar-wrapper {
+
+        width: min(82px, 72%);
+
+        height: calc(100% - 30px);
+
+        display: flex;
+
+        align-items: flex-end;
+
+        justify-content: center;
+    }
+
+
+    .chart-bar {
+
+        width: 100%;
+
+        min-height: 8px;
+
+        height: var(--bar-height);
+
+        border-radius:
+            9px 9px 4px 4px;
+
+        background:
+            linear-gradient(
+                to top,
+                var(--primary-dark),
+                var(--primary)
+            );
+
+        transition:
+            height .3s ease,
+            opacity .2s ease;
+    }
+
+
+    .chart-bar:hover {
+        opacity: .82;
+    }
+
+
+    .chart-label {
+
+        position: absolute;
+
+        bottom: 0;
+
+        color: var(--text-soft);
+
+        font-size: 14px;
+
+        font-weight: 700;
+
+        text-align: center;
+
+        white-space: nowrap;
+    }
+
+
+    .chart-column:nth-child(1) .chart-label,
+    .chart-column:nth-child(2) .chart-label,
+    .chart-column:nth-child(3) .chart-label,
+    .chart-column:nth-child(4) .chart-label {
+
+        transform: translateY(28px);
+    }
+
+
+    /* =========================
+       SUMMARY
+    ========================= */
+
+    .statistics-summary {
+
+        display: grid;
+
+        grid-template-columns:
+            repeat(3, minmax(0, 1fr));
+
+        gap: 13px;
+
+        margin-top: 28px;
+    }
+
+
+    .summary-item {
+
+        padding: 15px 16px;
+
+        border:
+            1px solid var(--border);
+
+        border-radius: 11px;
+
+        background: var(--surface-soft);
+    }
+
+
+    .summary-label {
+
+        display: block;
+
+        margin-bottom: 6px;
+
+        color: var(--text-soft);
+
+        font-size: 14px;
+
+        font-weight: 600;
+    }
+
+
+    .summary-value {
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: space-between;
+
+        gap: 10px;
+
+        color: var(--text);
+
+        font-size: 18px;
+
+        font-weight: 800;
+    }
+
+
+    .summary-percent {
+
+        color: var(--primary);
+
+        font-size: 14px;
+
+        font-weight: 800;
+    }
+
+
+    /* =========================
+       INFO CARDS
+    ========================= */
+
+    .dashboard-info-grid {
+
+        display: grid;
+
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+
+        gap: 16px;
+    }
+
+
+    .info-card {
+
+        padding: 20px;
+
+        background: var(--surface);
+
+        border:
+            1px solid var(--border);
+
+        border-radius: var(--radius);
+
+        box-shadow: var(--shadow);
+    }
+
+
+    .info-card-header {
+
+        display: flex;
+
+        align-items: center;
+
+        gap: 11px;
+
+        margin-bottom: 15px;
+    }
+
+
+    .info-icon {
+
+        width: 38px;
+
+        height: 38px;
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: center;
+
+        flex-shrink: 0;
+
+        border-radius: 10px;
+
+        background: var(--primary-soft);
+
+        font-size: 17px;
+    }
+
+
+    .info-card h3 {
+
+        margin: 0;
+
+        color: var(--text);
+
+        font-size: 18px;
+
+        font-weight: 800;
+    }
+
+
+    .info-card p {
+
+        margin: 0;
+
+        color: var(--text-soft);
+
+        font-size: 16px;
+
+        line-height: 1.9;
+    }
+
+
+    /* =========================
+       RESPONSIVE
+    ========================= */
+
+    @media (max-width: 1300px) {
+
+        .stats-grid {
+
+            grid-template-columns:
+                repeat(3, minmax(0, 1fr));
+        }
+
+    }
+
+
+    @media (max-width: 900px) {
+
+        .chart-area {
+            padding: 25px 20px;
+        }
+
+
+        .chart {
+            gap: 12px;
+        }
+
+
+        .chart-columns {
+            gap: 14px;
+        }
+
+
+        .dashboard-info-grid {
+            grid-template-columns: 1fr;
+        }
+
+    }
+
+
+    @media (max-width: 700px) {
+
+        .stats-grid {
+
+            grid-template-columns:
+                repeat(2, minmax(0, 1fr));
+        }
+
+
+        .statistics-header {
+
+            align-items: flex-start;
+
+            flex-direction: column;
+        }
+
+
+        .chart {
+            min-height: 280px;
+        }
+
+
+        .chart-bar-wrapper {
+            width: 60%;
+        }
+
+
+        .statistics-summary {
+            grid-template-columns: 1fr;
+        }
+
+    }
+
+
+    @media (max-width: 500px) {
+
+        .dashboard-page {
+            gap: 15px;
+        }
+
+
+        .stats-grid {
+
+            grid-template-columns: 1fr;
+
+            gap: 11px;
+        }
+
+
+        .stat-card {
+            padding: 18px;
+        }
+
+
+        .stat-label {
+            font-size: 15px;
+        }
+
+
+        .statistics-header {
+            padding: 18px;
+        }
+
+
+        .statistics-title h2 {
+            font-size: 20px;
+        }
+
+
+        .statistics-title p {
+            font-size: 14px;
+        }
+
+
+        .chart-area {
+            padding: 22px 12px;
+        }
+
+
+        .chart {
+            gap: 5px;
+        }
+
+
+        .chart-y-axis {
+
+            width: 27px;
+
+            font-size: 11px;
+        }
+
+
+        .chart-columns {
+            gap: 7px;
+        }
+
+
+        .chart-bar-wrapper {
+            width: 55%;
+        }
+
+
+        .chart-label {
+            font-size: 11px;
+        }
+
+
+        .statistics-summary {
+            margin-top: 20px;
+        }
+
+
+        .summary-label {
+            font-size: 14px;
+        }
+
+
+        .summary-value {
+            font-size: 17px;
+        }
+
+
+        .summary-percent {
+            font-size: 13px;
+        }
+
+
+        .info-card {
+            padding: 17px;
+        }
+
+
+        .info-card h3 {
+            font-size: 17px;
+        }
+
+
+        .info-card p {
+            font-size: 15px;
+        }
+
+    }
+
+</style>
+
+
+<div class="dashboard-page">
+
+
+    <!-- =========================
+         STATISTICS CARDS
+    ========================= -->
+
+    <div class="stats-grid">
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                📚
+            </div>
+
+            <span class="stat-label">
+                تعداد کتاب‌ها
+            </span>
+
+            <h2 class="stat-number">
+                {{ books_count }}
+            </h2>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                📂
+            </div>
+
+            <span class="stat-label">
+                دسته‌بندی‌ها
+            </span>
+
+            <h2 class="stat-number">
+                {{ categories_count }}
+            </h2>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                ✅
+            </div>
+
+            <span class="stat-label">
+                کتاب‌های موجود
+            </span>
+
+            <h2 class="stat-number">
+                {{ available_count }}
+            </h2>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                📤
+            </div>
+
+            <span class="stat-label">
+                امانت داده شده
+            </span>
+
+            <h2 class="stat-number">
+                {{ unavailable_count }}
+            </h2>
+
+        </div>
+
+
+        <div class="stat-card loan-card">
+
+            <div class="stat-icon">
+                📋
+            </div>
+
+            <span class="stat-label">
+                درخواست‌های در انتظار
+            </span>
+
+            <h2 class="stat-number">
+                {{ pending_loans_count }}
+            </h2>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- =========================
+         LIBRARY STATISTICS
+    ========================= -->
+
+    <div class="statistics-box">
+
+
+        <div class="statistics-header">
+
+
+            <div class="statistics-title">
+
+                <h2>
+                    آمار کتابخانه
+                </h2>
+
+                <p>
+                    نمای کلی از وضعیت کتاب‌ها و منابع کتابخانه
+                </p>
+
+            </div>
+
+
+            <div class="statistics-badge">
+                آمار کلی
+            </div>
+
+
+        </div>
+
+
+        <div class="chart-area">
+
+
+            <div class="chart">
+
+
+                <div class="chart-y-axis">
+
+                    <span>100%</span>
+
+                    <span>75%</span>
+
+                    <span>50%</span>
+
+                    <span>25%</span>
+
+                    <span>0%</span>
+
+                </div>
+
+
+                <div class="chart-main">
+
+
+                    <div class="chart-grid">
+
+                        <div class="chart-grid-line"></div>
+
+                        <div class="chart-grid-line"></div>
+
+                        <div class="chart-grid-line"></div>
+
+                        <div class="chart-grid-line"></div>
+
+                        <div class="chart-grid-line"></div>
+
+                    </div>
+
+
+                    <div class="chart-columns">
+
+
+                        <!-- TOTAL BOOKS -->
+
+                        <div class="chart-column">
+
+
+                            <div class="chart-value">
+                                {{ books_count }}
+                            </div>
+
+
+                            <div class="chart-bar-wrapper">
+
+                                {% if books_count > 0 %}
+
+                                    <div
+                                        class="chart-bar"
+                                        style="--bar-height: 100%;"
+                                    ></div>
+
+                                {% else %}
+
+                                    <div
+                                        class="chart-bar"
+                                        style="--bar-height: 8px;"
+                                    ></div>
+
+                                {% endif %}
+
+                            </div>
+
+
+                            <span class="chart-label">
+                                کل کتاب‌ها
+                            </span>
+
+
+                        </div>
+
+
+                        <!-- AVAILABLE -->
+
+                        <div class="chart-column">
+
+
+                            <div class="chart-value">
+                                {{ available_count }}
+                            </div>
+
+
+                            <div class="chart-bar-wrapper">
+
+                                {% if books_count > 0 %}
+
+                                    <div
+                                        class="chart-bar"
+                                        style="--bar-height: {% widthratio available_count books_count 100 %}%;"
+                                    ></div>
+
+                                {% else %}
+
+                                    <div
+                                        class="chart-bar"
+                                        style="--bar-height: 8px;"
+                                    ></div>
+
+                                {% endif %}
+
+                            </div>
+
+
+                            <span class="chart-label">
+                                موجود
+                            </span>
+
+
+                        </div>
+
+
+                        <!-- BORROWED -->
+
+                        <div class="chart-column">
+
+
+                            <div class="chart-value">
+                                {{ unavailable_count }}
+                            </div>
+
+
+                            <div class="chart-bar-wrapper">
+
+                                {% if books_count > 0 %}
+
+                                    <div
+                                        class="chart-bar"
+                                        style="--bar-height: {% widthratio unavailable_count books_count 100 %}%;"
+                                    ></div>
+
+                                {% else %}
+
+                                    <div
+                                        class="chart-bar"
+                                        style="--bar-height: 8px;"
+                                    ></div>
+
+                                {% endif %}
+
+                            </div>
+
+
+                            <span class="chart-label">
+                                امانت داده شده
+                            </span>
+
+
+                        </div>
+
+
+                        <!-- PENDING -->
+
+                        <div class="chart-column">
+
+
+                            <div class="chart-value">
+                                {{ pending_loans_count }}
+                            </div>
+
+
+                            <div class="chart-bar-wrapper">
+
+                                {% if pending_loans_count > 0 %}
+
+                                    <div
+                                        class="chart-bar"
+                                        style="--bar-height: 55%;"
+                                    ></div>
+
+                                {% else %}
+
+                                    <div
+                                        class="chart-bar"
+                                        style="--bar-height: 8px;"
+                                    ></div>
+
+                                {% endif %}
+
+                            </div>
+
+
+                            <span class="chart-label">
+                                درخواست‌های در انتظار
+                            </span>
+
+
+                        </div>
+
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+            <!-- SUMMARY -->
+
+            <div class="statistics-summary">
+
+
+                <div class="summary-item">
+
+
+                    <span class="summary-label">
+                        میزان موجودی کتاب‌ها
+                    </span>
+
+
+                    <div class="summary-value">
+
+
+                        <span>
+
+                            {% if books_count > 0 %}
+
+                                {% widthratio available_count books_count 100 %}%
+
+                            {% else %}
+
+                                0%
+
+                            {% endif %}
+
+                        </span>
+
+
+                        <span class="summary-percent">
+                            موجود
+                        </span>
+
+
+                    </div>
+
+
+                </div>
+
+
+                <div class="summary-item">
+
+
+                    <span class="summary-label">
+                        کتاب‌های در حال امانت
+                    </span>
+
+
+                    <div class="summary-value">
+
+
+                        <span>
+
+                            {% if books_count > 0 %}
+
+                                {% widthratio unavailable_count books_count 100 %}%
+
+                            {% else %}
+
+                                0%
+
+                            {% endif %}
+
+                        </span>
+
+
+                        <span class="summary-percent">
+                            امانت
+                        </span>
+
+
+                    </div>
+
+
+                </div>
+
+
+                <div class="summary-item">
+
+
+                    <span class="summary-label">
+                        تعداد دسته‌بندی‌ها
+                    </span>
+
+
+                    <div class="summary-value">
+
+
+                        <span>
+                            {{ categories_count }}
+                        </span>
+
+
+                        <span class="summary-percent">
+                            دسته
+                        </span>
+
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+    <!-- =========================
+         DASHBOARD INFORMATION
+    ========================= -->
+
+    <div class="dashboard-info-grid">
+
+
+        <div class="info-card">
+
+
+            <div class="info-card-header">
+
+
+                <div class="info-icon">
+                    📚
+                </div>
+
+
+                <h3>
+                    وضعیت مجموعه
+                </h3>
+
+
+            </div>
+
+
+            <p>
+
+                در حال حاضر {{ books_count }} کتاب در سیستم ثبت شده است
+                که {{ available_count }} مورد از آن‌ها در دسترس کاربران
+                قرار دارد.
+
+            </p>
+
+
+        </div>
+
+
+        <div class="info-card">
+
+
+            <div class="info-card-header">
+
+
+                <div class="info-icon">
+                    📋
+                </div>
+
+
+                <h3>
+                    درخواست‌های امانت
+                </h3>
+
+
+            </div>
+
+
+            <p>
+
+                تعداد درخواست‌های در انتظار بررسی در حال حاضر
+                {{ pending_loans_count }} مورد است.
+
+            </p>
+
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+{% endblock %}

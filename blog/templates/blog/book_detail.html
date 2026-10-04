@@ -1,0 +1,924 @@
+{% extends "blog/base.html" %}
+
+{% block title %}
+    {{ book.title }} | کتابخانه پارک علم و فناوری
+{% endblock %}
+
+{% block content %}
+
+<style>
+    .detail-page {
+        padding: 70px 0 100px;
+    }
+
+    /* BACK */
+    .detail-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 25px;
+        color: var(--muted);
+        font-size: 15px;
+        font-weight: 700;
+        transition: color .2s ease;
+    }
+
+    .detail-back:hover {
+        color: var(--orange-dark);
+    }
+
+    /* DETAIL BOX */
+    .detail-box {
+        display: grid;
+        grid-template-columns: 300px minmax(0, 1fr);
+        gap: 45px;
+        padding: 28px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 26px;
+        box-shadow: var(--shadow);
+    }
+
+    /* LEFT COLUMN */
+    .detail-left {
+        min-width: 0;
+    }
+
+    /* COVER */
+    .detail-cover {
+        width: 100%;
+        height: 420px;
+        padding: 0;
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        overflow: hidden;
+    }
+
+    .detail-cover img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        border-radius: 0;
+    }
+
+    .detail-cover-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--orange-dark);
+        font-size: 48px;
+    }
+
+    /* BOOK RATING UNDER COVER */
+    .detail-rating-box {
+        margin-top: 15px;
+        padding: 18px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 15px;
+        text-align: center;
+        box-shadow: 0 7px 20px rgba(30, 40, 50, .05);
+    }
+
+    .detail-rating-label {
+        margin-bottom: 10px;
+        color: var(--muted);
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .detail-rating-main {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+    }
+
+    .detail-rating-average {
+        color: var(--heading);
+        font-size: 28px;
+        font-weight: 900;
+        line-height: 1;
+    }
+
+    .detail-rating-stars {
+        color: var(--orange-dark);
+        font-family: Arial, sans-serif;
+        font-size: 20px;
+        letter-spacing: 2px;
+        line-height: 1;
+    }
+
+    .detail-rating-count {
+        margin-top: 9px;
+        color: var(--muted);
+        font-size: 13px;
+    }
+
+    /* CONTENT */
+    .detail-content {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-width: 0;
+    }
+
+    .detail-category {
+        display: inline-flex;
+        align-self: flex-start;
+        padding: 6px 12px;
+        background: rgba(232, 155, 61, .10);
+        border: 1px solid rgba(232, 155, 61, .18);
+        border-radius: 30px;
+        color: var(--orange-dark);
+        font-size: 14px;
+        font-weight: 800;
+    }
+
+    .detail-title {
+        margin-top: 16px;
+        color: var(--heading);
+        font-size: clamp(30px, 4vw, 48px);
+        font-weight: 900;
+        line-height: 1.45;
+        letter-spacing: -.8px;
+    }
+
+    .detail-author {
+        margin-top: 10px;
+        color: var(--muted);
+        font-size: 17px;
+    }
+
+    .detail-author strong {
+        color: var(--heading);
+        font-weight: 800;
+    }
+
+    .detail-divider {
+        width: 100%;
+        height: 1px;
+        margin: 28px 0;
+        background: var(--border);
+    }
+
+    /* DESCRIPTION */
+    .detail-description-title {
+        margin-bottom: 9px;
+        color: var(--heading);
+        font-size: 17px;
+        font-weight: 800;
+    }
+
+    .detail-description {
+        color: var(--muted);
+        font-size: 17px;
+        line-height: 2.2;
+        white-space: pre-line;
+    }
+
+    .detail-description.empty {
+        color: var(--muted);
+        opacity: .8;
+    }
+
+    /* META */
+    .detail-meta {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-top: 28px;
+    }
+
+    .meta-item {
+        padding: 14px 15px;
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: 13px;
+    }
+
+    .meta-label {
+        display: block;
+        margin-bottom: 3px;
+        color: var(--muted);
+        font-size: 14px;
+    }
+
+    .meta-value {
+        color: var(--heading);
+        font-size: 15px;
+        font-weight: 800;
+    }
+
+    /* AVAILABILITY */
+    .availability-box {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 22px;
+        padding: 14px 16px;
+        border-radius: 13px;
+        font-size: 16px;
+        font-weight: 700;
+    }
+
+    .availability-box.available {
+        background: rgba(34, 197, 94, .09);
+        border: 1px solid rgba(34, 197, 94, .18);
+        color: #16803a;
+    }
+
+    .availability-box.unavailable {
+        background: rgba(220, 38, 38, .08);
+        border: 1px solid rgba(220, 38, 38, .16);
+        color: #b42323;
+    }
+
+    .availability-dot {
+        width: 8px;
+        height: 8px;
+        flex-shrink: 0;
+        border-radius: 50%;
+        background: currentColor;
+    }
+
+    /* FAVORITE */
+    .favorite-form {
+        margin-top: 15px;
+    }
+
+    .favorite-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 10px 16px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        color: var(--heading);
+        font-family: inherit;
+        font-size: 15px;
+        font-weight: 800;
+        text-decoration: none;
+        cursor: pointer;
+        transition:
+            background .2s ease,
+            border-color .2s ease,
+            color .2s ease,
+            transform .2s ease;
+    }
+
+    .favorite-button:hover {
+        transform: translateY(-1px);
+        border-color: rgba(232, 155, 61, .45);
+        color: var(--orange-dark);
+    }
+
+    .favorite-button.active {
+        background: rgba(232, 155, 61, .08);
+        border-color: rgba(232, 155, 61, .35);
+        color: var(--orange-dark);
+    }
+
+    /* REVIEWS */
+    .reviews-section {
+        margin-top: 35px;
+        padding: 30px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 26px;
+        box-shadow: var(--shadow);
+    }
+
+    .reviews-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        margin-bottom: 25px;
+    }
+
+    .reviews-title {
+        margin: 0;
+        color: var(--heading);
+        font-size: 24px;
+        font-weight: 900;
+    }
+
+    /* REVIEW ACTION */
+    .review-action-box {
+        margin-bottom: 25px;
+        padding: 18px;
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: 15px;
+    }
+
+    .review-action-text {
+        margin: 0 0 12px;
+        color: var(--muted);
+        font-size: 16px;
+        line-height: 1.9;
+    }
+
+    .review-action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 11px 18px;
+        background: var(--orange-dark);
+        color: #fff;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: 800;
+        text-decoration: none;
+        transition:
+            transform .2s ease,
+            opacity .2s ease;
+    }
+
+    .review-action-btn:hover {
+        opacity: .9;
+        transform: translateY(-1px);
+    }
+
+    .review-login-text {
+        color: var(--muted);
+        font-size: 16px;
+    }
+
+    .review-login-text a {
+        color: var(--orange-dark);
+        font-weight: 800;
+    }
+
+    /* REVIEW ITEM */
+    .review-item {
+        padding: 20px 0;
+        border-top: 1px solid var(--border);
+    }
+
+    .review-item:first-child {
+        border-top: none;
+    }
+
+    .review-user-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        margin-bottom: 10px;
+    }
+
+    .review-user {
+        color: var(--heading);
+        font-size: 16px;
+        font-weight: 900;
+    }
+
+    .review-date {
+        color: var(--muted);
+        font-size: 14px;
+    }
+
+    .review-item-rating {
+        margin-bottom: 8px;
+        color: var(--orange-dark);
+        font-size: 16px;
+        letter-spacing: 2px;
+    }
+
+    .review-item-comment {
+        margin: 0;
+        color: var(--muted);
+        font-size: 16px;
+        line-height: 2;
+        white-space: pre-line;
+    }
+
+    .no-reviews {
+        padding: 25px;
+        text-align: center;
+        color: var(--muted);
+        background: var(--surface-2);
+        border-radius: 13px;
+        font-size: 16px;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 950px) {
+        .detail-box {
+            grid-template-columns: 270px minmax(0, 1fr);
+            gap: 30px;
+        }
+
+        .detail-cover {
+            height: 380px;
+        }
+
+        .detail-meta {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 780px) {
+        .detail-page {
+            padding: 50px 0 70px;
+        }
+
+        .detail-box {
+            grid-template-columns: 1fr;
+            gap: 30px;
+            padding: 22px;
+        }
+
+        .detail-cover {
+            height: 380px;
+            width: 100%;
+        }
+
+        .detail-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .detail-content {
+            justify-content: flex-start;
+        }
+
+        .reviews-section {
+            padding: 22px;
+        }
+
+        .reviews-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+    }
+
+    @media (max-width: 500px) {
+        .detail-box {
+            padding: 16px;
+            border-radius: 20px;
+        }
+
+        .detail-cover {
+            height: 330px;
+            border-radius: 16px;
+        }
+
+        .detail-rating-box {
+            padding: 16px;
+            border-radius: 14px;
+        }
+
+        .detail-rating-average {
+            font-size: 25px;
+        }
+
+        .detail-rating-stars {
+            font-size: 18px;
+        }
+
+        .detail-title {
+            font-size: 28px;
+        }
+
+        .detail-meta {
+            grid-template-columns: 1fr;
+        }
+
+        .reviews-section {
+            padding: 16px;
+            border-radius: 20px;
+        }
+
+        .review-user-row {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .favorite-button {
+            width: 100%;
+        }
+    }
+</style>
+
+<section class="detail-page">
+    <div class="container">
+
+        <a
+            href="{% url 'books' %}"
+            class="detail-back"
+        >
+            <span>→</span>
+            بازگشت به کتاب‌ها
+        </a>
+
+        <!-- BOOK DETAIL -->
+        <div class="detail-box">
+
+            <!-- LEFT COLUMN -->
+            <div class="detail-left">
+
+                <!-- COVER -->
+                <div class="detail-cover">
+                    {% if book.cover %}
+                        <img
+                            src="{{ book.cover.url }}"
+                            alt="{{ book.title }}"
+                        >
+                    {% else %}
+                        <div class="detail-cover-placeholder">
+                            📚
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- RATING UNDER COVER -->
+                <div class="detail-rating-box">
+
+                    <div class="detail-rating-label">
+                        امتیاز کتاب
+                    </div>
+
+                    <div class="detail-rating-main">
+
+                        {% if average_rating %}
+
+                            <span class="detail-rating-average">
+                                {{ average_rating|floatformat:1 }}
+                            </span>
+
+                            <span class="detail-rating-stars">
+                                ★★★★★
+                            </span>
+
+                        {% else %}
+
+                            <span class="detail-rating-average">
+                                —
+                            </span>
+
+                            <span class="detail-rating-stars">
+                                ☆☆☆☆☆
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+                    <div class="detail-rating-count">
+
+                        {% if reviews|length %}
+                            {{ reviews|length }} نظر
+                        {% else %}
+                            هنوز نظری ثبت نشده
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- CONTENT -->
+            <div class="detail-content">
+
+                {% if book.category %}
+                    <span class="detail-category">
+                        {{ book.category.name }}
+                    </span>
+                {% endif %}
+
+                <h1 class="detail-title">
+                    {{ book.title }}
+                </h1>
+
+                <p class="detail-author">
+                    نویسنده:
+                    <strong>
+                        {{ book.author }}
+                    </strong>
+                </p>
+
+                <div class="detail-divider"></div>
+
+                <!-- DESCRIPTION -->
+                <div>
+
+                    <div class="detail-description-title">
+                        درباره کتاب
+                    </div>
+
+                    {% if book.description %}
+
+                        <p class="detail-description">
+                            {{ book.description }}
+                        </p>
+
+                    {% else %}
+
+                        <p class="detail-description empty">
+                            توضیحی برای این کتاب ثبت نشده است.
+                        </p>
+
+                    {% endif %}
+
+                </div>
+
+
+                <!-- META -->
+                <div class="detail-meta">
+
+                    {% if book.category %}
+                        <div class="meta-item">
+
+                            <span class="meta-label">
+                                دسته‌بندی
+                            </span>
+
+                            <span class="meta-value">
+                                {{ book.category.name }}
+                            </span>
+
+                        </div>
+                    {% endif %}
+
+
+                    <div class="meta-item">
+
+                        <span class="meta-label">
+                            تعداد نسخه‌ها
+                        </span>
+
+                        <span class="meta-value">
+                            {{ book.available_copies }}
+                            از
+                            {{ book.total_copies }}
+                            نسخه موجود
+                        </span>
+
+                    </div>
+
+
+                    <div class="meta-item">
+
+                        <span class="meta-label">
+                            وضعیت کتاب
+                        </span>
+
+                        <span class="meta-value">
+
+                            {% if book.is_available %}
+                                موجود
+                            {% else %}
+                                ناموجود
+                            {% endif %}
+
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- AVAILABILITY -->
+                {% if book.is_available %}
+
+                    <div class="availability-box available">
+
+                        <span class="availability-dot"></span>
+
+                        این کتاب در حال حاضر موجود است.
+
+                        {% if book.available_copies %}
+                            {{ book.available_copies }}
+                            نسخه برای امانت موجود است.
+                        {% endif %}
+
+                    </div>
+
+                {% else %}
+
+                    <div class="availability-box unavailable">
+
+                        <span class="availability-dot"></span>
+
+                        در حال حاضر تمام نسخه‌های این کتاب در امانت هستند.
+
+                    </div>
+
+                {% endif %}
+
+
+                <!-- FAVORITE -->
+                {% if user.is_authenticated %}
+
+                    <form
+                        method="post"
+                        action="{% url 'toggle_favorite' book.pk %}"
+                        class="favorite-form"
+                    >
+
+                        {% csrf_token %}
+
+                        <button
+                            type="submit"
+                            class="favorite-button {% if user_favorite %}active{% endif %}"
+                        >
+
+                            {% if user_favorite %}
+
+                                ♥
+                                حذف از علاقه‌مندی‌ها
+
+                            {% else %}
+
+                                ♡
+                                افزودن به علاقه‌مندی‌ها
+
+                            {% endif %}
+
+                        </button>
+
+                    </form>
+
+                {% else %}
+
+                    <a
+                        href="{% url 'accounts:login' %}?next={{ request.path }}"
+                        class="favorite-button"
+                    >
+                        ♡
+                        افزودن به علاقه‌مندی‌ها
+                    </a>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+        <!-- REVIEWS -->
+        <section class="reviews-section">
+
+            <div class="reviews-header">
+
+                <h2 class="reviews-title">
+                    نظرات کاربران
+                </h2>
+
+            </div>
+
+
+            <!-- REVIEW ACTION -->
+            {% if user.is_authenticated %}
+
+                {% if user_can_review %}
+
+                    <div class="review-action-box">
+
+                        {% if user_review %}
+
+                            <p class="review-action-text">
+                                شما قبلاً برای این کتاب نظر ثبت کرده‌اید.
+                            </p>
+
+                            <a
+                                href="{% url 'add_book_review' book.pk %}"
+                                class="review-action-btn"
+                            >
+                                ویرایش نظر من
+                            </a>
+
+                        {% else %}
+
+                            <p class="review-action-text">
+                                شما این کتاب را در حال حاضر امانت دارید و می‌توانید نظر خود را ثبت کنید.
+                            </p>
+
+                            <a
+                                href="{% url 'add_book_review' book.pk %}"
+                                class="review-action-btn"
+                            >
+                                ثبت نظر و امتیاز
+                            </a>
+
+                        {% endif %}
+
+                    </div>
+
+                {% else %}
+
+                    <div class="review-action-box">
+
+                        <p class="review-action-text">
+                            شما تا وقتی این کتاب را به امانت نگرفته‌اید،
+                            حق ثبت امتیاز و نظر برای این کتاب را ندارید.
+                        </p>
+
+                    </div>
+
+                {% endif %}
+
+            {% else %}
+
+                <div class="review-action-box">
+
+                    <p class="review-login-text">
+
+                        برای ثبت نظر ابتدا
+
+                        <a href="{% url 'accounts:login' %}">
+                            وارد حساب کاربری
+                        </a>
+
+                        خود شوید.
+
+                    </p>
+
+                </div>
+
+            {% endif %}
+
+
+            <!-- REVIEWS LIST -->
+            {% if reviews %}
+
+                {% for review in reviews %}
+
+                    <article class="review-item">
+
+                        <div class="review-user-row">
+
+                            <span class="review-user">
+                                {{ review.user.username }}
+                            </span>
+
+                            <span class="review-date">
+                                {{ review.created_at|date:"Y/m/d" }}
+                            </span>
+
+                        </div>
+
+
+                        <div class="review-item-rating">
+
+                            {% if review.rating == 5 %}
+
+                                ★★★★★
+
+                            {% elif review.rating == 4 %}
+
+                                ★★★★☆
+
+                            {% elif review.rating == 3 %}
+
+                                ★★★☆☆
+
+                            {% elif review.rating == 2 %}
+
+                                ★★☆☆☆
+
+                            {% else %}
+
+                                ★☆☆☆☆
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <p class="review-item-comment">
+                            {{ review.comment }}
+                        </p>
+
+                    </article>
+
+                {% endfor %}
+
+            {% else %}
+
+                <div class="no-reviews">
+                    هنوز نظری برای این کتاب ثبت نشده است.
+                </div>
+
+            {% endif %}
+
+        </section>
+
+    </div>
+</section>
+
+{% endblock %}

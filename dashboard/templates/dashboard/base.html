@@ -1,0 +1,988 @@
+{% load static %}
+
+<!DOCTYPE html>
+
+<html lang="fa" dir="rtl">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        {% block title %}
+            پنل مدیریت کتابخانه
+        {% endblock %}
+    </title>
+
+
+    <style>
+
+        @font-face {
+            font-family: "B Nazanin";
+            src: url("{% static 'fonts/BNAZANIN.woff2' %}") format("woff2");
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: "B Nazanin";
+            src: url("{% static 'fonts/BNAZANB.woff2' %}") format("woff2");
+            font-weight: 700;
+            font-style: normal;
+            font-display: swap;
+        }
+
+
+        :root {
+
+            --bg: #f6f4ef;
+            --surface: #ffffff;
+            --surface-soft: #faf8f3;
+
+            --sidebar: #17233c;
+            --sidebar-soft: #202e4b;
+
+            --text: #17233c;
+            --text-soft: #7a8290;
+            --text-sidebar: #dbe2ef;
+
+            --border: #e9e4da;
+
+            --primary: #4f6f8f;
+            --primary-dark: #405d79;
+            --primary-soft: #edf2f7;
+
+            --danger: #c85c50;
+
+            --shadow:
+                0 8px 30px rgba(23, 35, 60, 0.06);
+
+            --radius: 16px;
+            --sidebar-width: 268px;
+        }
+
+
+        body.dark-mode {
+
+            --bg: #101722;
+            --surface: #172131;
+            --surface-soft: #1d293b;
+
+            --sidebar: #0d1522;
+            --sidebar-soft: #172235;
+
+            --text: #edf2f7;
+            --text-soft: #a7b0bd;
+            --text-sidebar: #dce4ef;
+
+            --border: #2a3648;
+
+            --primary: #6f8eac;
+            --primary-dark: #5e7d9c;
+            --primary-soft: rgba(111, 142, 172, 0.14);
+
+            --danger: #d8786c;
+
+            --shadow:
+                0 8px 30px rgba(0, 0, 0, 0.18);
+        }
+
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+
+        body {
+
+            font-family:
+                "B Nazanin",
+                Tahoma,
+                sans-serif;
+
+            background: var(--bg);
+            color: var(--text);
+
+            min-height: 100vh;
+
+            font-size: 17px;
+            line-height: 1.9;
+
+            transition:
+                background .2s ease,
+                color .2s ease;
+
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+
+        button,
+        input,
+        select,
+        textarea {
+
+            font-family: inherit;
+            font-size: inherit;
+        }
+
+
+        /* =========================
+           SIDEBAR
+        ========================= */
+
+        .sidebar {
+
+            position: fixed;
+
+            top: 0;
+            right: 0;
+
+            width: var(--sidebar-width);
+            height: 100vh;
+
+            padding: 22px 15px;
+
+            background: var(--sidebar);
+            color: var(--text-sidebar);
+
+            z-index: 1000;
+
+            overflow-y: auto;
+
+            scrollbar-width: thin;
+
+            scrollbar-color:
+                rgba(255, 255, 255, .15)
+                transparent;
+        }
+
+
+        .sidebar-brand {
+
+            display: flex;
+            align-items: center;
+
+            gap: 12px;
+
+            padding:
+                5px 10px 25px;
+
+            margin-bottom: 20px;
+
+            border-bottom:
+                1px solid
+                rgba(255, 255, 255, .08);
+        }
+
+
+        .sidebar-brand img {
+
+            width: 45px;
+            height: 45px;
+
+            flex-shrink: 0;
+
+            object-fit: contain;
+
+            border-radius: 10px;
+
+            background: white;
+
+            padding: 4px;
+        }
+
+
+        .sidebar-brand-text {
+
+            display: flex;
+            flex-direction: column;
+
+            gap: 3px;
+
+            min-width: 0;
+        }
+
+
+        .sidebar-brand-text strong {
+
+            color: white;
+
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+
+        .sidebar-brand-text span {
+
+            color: #aeb8c8;
+
+            font-size: 14px;
+        }
+
+
+        .sidebar-menu {
+
+            display: flex;
+            flex-direction: column;
+
+            gap: 7px;
+        }
+
+
+        .sidebar-link {
+
+            position: relative;
+
+            display: flex;
+            align-items: center;
+
+            gap: 12px;
+
+            min-height: 48px;
+
+            padding: 0 14px;
+
+            border-radius: 11px;
+
+            color: var(--text-sidebar);
+
+            font-size: 16px;
+            font-weight: 600;
+
+            transition:
+                background .2s ease,
+                color .2s ease,
+                transform .2s ease;
+        }
+
+
+        .sidebar-link > span:first-child {
+
+            width: 22px;
+
+            flex-shrink: 0;
+
+            text-align: center;
+
+            font-size: 20px;
+
+            line-height: 1;
+        }
+
+
+        .sidebar-link:hover {
+
+            background: var(--sidebar-soft);
+
+            color: white;
+
+            transform: translateX(-1px);
+        }
+
+
+        .sidebar-link.active {
+            background: var(--sidebar-soft);
+            color: #ffffff;
+
+            border-right: 4px solid var(--primary);
+
+            box-shadow:
+                inset 0 0 0 1px rgba(255, 255, 255, .05),
+                0 8px 20px rgba(0, 0, 0, .10);
+
+            font-weight: 800;
+        }
+
+        .sidebar-link.active > span:first-child {
+            color: var(--primary);
+        }
+
+        .sidebar-link.active:hover {
+            background: var(--sidebar-soft);
+            color: #ffffff;
+        }
+
+        .loan-badge {
+
+            margin-right: auto;
+
+            min-width: 24px;
+            height: 24px;
+
+            padding: 0 6px;
+
+            display: inline-flex;
+
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 20px;
+
+            background: #d9534f;
+
+            color: white;
+
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+
+        /* =========================
+           MAIN
+        ========================= */
+
+        .main {
+
+            margin-right: var(--sidebar-width);
+
+            min-height: 100vh;
+
+            transition:
+                margin-right .2s ease;
+        }
+
+
+        .topbar {
+
+            height: 78px;
+
+            padding: 0 30px;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 20px;
+
+            position: sticky;
+
+            top: 0;
+
+            z-index: 900;
+
+            background: var(--surface);
+
+            border-bottom:
+                1px solid var(--border);
+        }
+
+
+        .page-title {
+
+            color: var(--text);
+
+            font-size: 22px;
+            font-weight: 800;
+        }
+
+
+        .topbar-actions {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 9px;
+        }
+
+
+        .topbar-button {
+
+            display: inline-flex;
+
+            align-items: center;
+            justify-content: center;
+
+            gap: 7px;
+
+            min-height: 40px;
+
+            padding: 0 13px;
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 9px;
+
+            background: var(--surface-soft);
+
+            color: var(--text);
+
+            font-family: inherit;
+
+            font-size: 15px;
+            font-weight: 700;
+
+            cursor: pointer;
+
+            transition:
+                background .2s ease,
+                border-color .2s ease,
+                color .2s ease,
+                transform .2s ease;
+        }
+
+
+        .topbar-button:hover {
+
+            background: var(--primary-soft);
+
+            border-color: var(--primary);
+
+            color: var(--primary-dark);
+
+            transform: translateY(-1px);
+        }
+
+
+        .theme-toggle {
+
+            width: 40px;
+
+            padding: 0;
+
+            font-size: 18px;
+        }
+
+
+        .back-to-site {
+
+            display: inline-flex;
+
+            align-items: center;
+            justify-content: center;
+
+            gap: 7px;
+
+            min-height: 40px;
+
+            padding: 0 14px;
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 9px;
+
+            background: var(--surface-soft);
+
+            color: var(--text);
+
+            font-size: 15px;
+            font-weight: 600;
+
+            transition:
+                background .2s ease,
+                border-color .2s ease,
+                transform .2s ease;
+        }
+
+
+        .back-to-site:hover {
+
+            background: var(--primary-soft);
+
+            border-color: var(--primary);
+
+            transform: translateY(-1px);
+        }
+
+
+        .content {
+
+            padding: 28px 30px 40px;
+        }
+
+
+        /* =========================
+           GENERIC ELEMENTS
+        ========================= */
+
+        .dashboard-card {
+
+            background: var(--surface);
+
+            border:
+                1px solid var(--border);
+
+            border-radius: var(--radius);
+
+            box-shadow: var(--shadow);
+        }
+
+
+        /* =========================
+           MOBILE SIDEBAR
+        ========================= */
+
+        @media (max-width: 1000px) {
+
+            :root {
+                --sidebar-width: 82px;
+            }
+
+
+            .sidebar {
+                padding: 18px 9px;
+            }
+
+
+            .sidebar-brand {
+
+                justify-content: center;
+
+                padding-left: 0;
+                padding-right: 0;
+            }
+
+
+            .sidebar-brand-text {
+                display: none;
+            }
+
+
+            .sidebar-link {
+
+                justify-content: center;
+
+                padding: 0;
+
+                gap: 0;
+            }
+
+
+            .sidebar-link > span:nth-child(2) {
+                display: none;
+            }
+
+
+            .loan-badge {
+
+                position: absolute;
+
+                top: 4px;
+                right: 7px;
+
+                min-width: 18px;
+                height: 18px;
+
+                font-size: 11px;
+            }
+
+
+            .content {
+                padding: 22px;
+            }
+        }
+
+
+        @media (max-width: 600px) {
+
+            :root {
+                --sidebar-width: 68px;
+            }
+
+
+            .topbar {
+
+                height: 68px;
+
+                padding: 0 15px;
+            }
+
+
+            .page-title {
+                font-size: 18px;
+            }
+
+
+            .topbar-actions {
+                gap: 6px;
+            }
+
+
+            .topbar-button {
+
+                width: 36px;
+
+                min-height: 36px;
+
+                padding: 0;
+
+                font-size: 16px;
+            }
+
+
+            .back-to-site {
+
+                width: auto;
+
+                padding: 0 9px;
+
+                font-size: 13px;
+            }
+
+
+            .content {
+
+                padding:
+                    16px 12px 30px;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- =========================
+         SIDEBAR
+    ========================== -->
+
+    <aside class="sidebar">
+
+        <div class="sidebar-brand">
+
+            <img
+                src="{% static 'blog/images/park-logo.png' %}"
+                alt="پارک علم و فناوری"
+            >
+
+            <div class="sidebar-brand-text">
+
+                <strong>
+                    پنل مدیریت
+                </strong>
+
+                <span>
+                    کتابخانه
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <nav class="sidebar-menu">
+
+
+            <!-- Dashboard -->
+
+            {% if perms.accounts.access_dashboard %}
+
+                <a
+                    href="{% url 'dashboard_home' %}"
+                    class="sidebar-link
+                    {% if request.resolver_match.url_name == 'dashboard_home' %}
+                        active
+                    {% endif %}"
+                >
+
+                    <span>
+                        🏠
+                    </span>
+
+                    <span>
+                        داشبورد
+                    </span>
+
+                </a>
+
+            {% endif %}
+
+
+            <!-- Books -->
+
+            {% if perms.blog.manage_books %}
+
+                <a
+                    href="{% url 'manage_books' %}"
+                    class="sidebar-link
+                    {% if request.resolver_match.url_name == 'manage_books'
+                       or request.resolver_match.url_name == 'add_book'
+                       or request.resolver_match.url_name == 'edit_book'
+                       or request.resolver_match.url_name == 'delete_book' %}
+                        active
+                    {% endif %}"
+                >
+
+                    <span>
+                        📚
+                    </span>
+
+                    <span>
+                        کتاب‌ها
+                    </span>
+
+                </a>
+
+
+
+            <!-- Categories -->
+
+            {% if perms.blog.manage_categories %}
+
+                <a
+                    href="{% url 'manage_categories' %}"
+                    class="sidebar-link
+                    {% if request.resolver_match.url_name == 'manage_categories'
+                       or request.resolver_match.url_name == 'add_category'
+                       or request.resolver_match.url_name == 'edit_category'
+                       or request.resolver_match.url_name == 'delete_category' %}
+                        active
+                    {% endif %}"
+                >
+
+                    <span>
+                        📂
+                    </span>
+
+                    <span>
+                        دسته‌بندی‌ها
+                    </span>
+
+                </a>
+
+
+
+            <!-- Loans -->
+
+            {% if perms.blog.manage_loans %}
+
+                <a
+                    href="{% url 'manage_loans' %}"
+                    class="sidebar-link
+                    {% if request.resolver_match.url_name == 'manage_loans'
+                       or request.resolver_match.url_name == 'return_loan' %}
+                        active
+                    {% endif %}"
+                >
+
+                    <span>
+                        📋
+                    </span>
+
+                    <span>
+                        امانت‌ها
+                    </span>
+
+                    {% if pending_loans_count %}
+
+                        <span class="loan-badge">
+                            {{ pending_loans_count }}
+                        </span>
+
+                    {% endif %}
+
+                </a>
+
+
+
+            <!-- Users -->
+
+            {% if perms.accounts.view_user %}
+
+                <a
+                    href="{% url 'manage_users' %}"
+                    class="sidebar-link
+                    {% if request.resolver_match.url_name == 'manage_users'
+                       or request.resolver_match.url_name == 'edit_user'
+                       or request.resolver_match.url_name == 'toggle_user_active'
+                       or request.resolver_match.url_name == 'delete_user' %}
+                        active
+                    {% endif %}"
+                >
+
+                    <span>
+                        👥
+                    </span>
+
+                    <span>
+                        کاربران
+                    </span>
+
+                </a>
+
+
+
+        </nav>
+
+    </aside>
+
+
+    <!-- =========================
+         MAIN
+    ========================== -->
+
+    <main class="main">
+
+
+        <header class="topbar">
+
+
+            <div class="page-title">
+
+                {% block page_title %}
+                    پنل مدیریت
+                {% endblock %}
+
+            </div>
+
+
+            <div class="topbar-actions">
+
+
+                <button
+                    type="button"
+                    class="topbar-button theme-toggle"
+                    id="themeToggle"
+                    aria-label="تغییر حالت نمایش"
+                    title="تغییر حالت نمایش"
+                >
+                    ☾
+                </button>
+
+
+                <a
+                    href="{% url 'home' %}"
+                    class="back-to-site"
+                >
+
+                    ←
+                    مشاهده سایت
+
+                </a>
+
+
+            </div>
+
+        </header>
+
+
+        <section class="content">
+
+            {% block content %}
+            {% endblock %}
+
+        </section>
+
+
+    </main>
+
+
+    <script>
+
+        const savedTheme =
+            localStorage.getItem(
+                "library-dashboard-theme"
+            );
+
+
+        const themeToggle =
+            document.getElementById(
+                "themeToggle"
+            );
+
+
+        function updateThemeButton() {
+
+            if (!themeToggle) {
+                return;
+            }
+
+
+            const isDark =
+                document.body.classList.contains(
+                    "dark-mode"
+                );
+
+
+            themeToggle.textContent =
+                isDark ? "☀" : "☾";
+
+
+            themeToggle.setAttribute(
+                "aria-label",
+                isDark
+                    ? "فعال کردن حالت روشن"
+                    : "فعال کردن حالت تاریک"
+            );
+
+
+            themeToggle.setAttribute(
+                "title",
+                isDark
+                    ? "حالت روشن"
+                    : "حالت تاریک"
+            );
+        }
+
+
+        if (savedTheme === "dark") {
+
+            document.body.classList.add(
+                "dark-mode"
+            );
+        }
+
+
+        updateThemeButton();
+
+
+        if (themeToggle) {
+
+            themeToggle.addEventListener(
+                "click",
+                function () {
+
+                    document.body.classList.toggle(
+                        "dark-mode"
+                    );
+
+
+                    const isDark =
+                        document.body.classList.contains(
+                            "dark-mode"
+                        );
+
+
+                    localStorage.setItem(
+                        "library-dashboard-theme",
+                        isDark
+                            ? "dark"
+                            : "light"
+                    );
+
+
+                    updateThemeButton();
+
+                }
+            );
+
+        }
+
+    </script>
+
+
+</body>
+
+</html>

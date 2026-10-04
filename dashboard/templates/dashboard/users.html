@@ -1,0 +1,868 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}
+    کاربران | پنل مدیریت
+{% endblock %}
+
+{% block page_title %}
+    مدیریت کاربران
+{% endblock %}
+
+{% block content %}
+
+<style>
+    .users-page {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .users-box {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+        box-shadow: var(--shadow);
+    }
+
+    /* =========================
+       HEADER
+    ========================= */
+
+    .users-header {
+        padding: 22px 25px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .users-title {
+        min-width: 0;
+    }
+
+    .users-title h2 {
+        margin: 0;
+        color: var(--text);
+        font-size: 23px;
+        font-weight: 800;
+    }
+
+    .users-title p {
+        margin: 6px 0 0;
+        color: var(--text-soft);
+        font-size: 16px;
+        line-height: 1.8;
+    }
+
+    .users-count {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 48px;
+        height: 38px;
+        padding: 0 13px;
+        border: 1px solid rgba(217, 145, 50, .15);
+        border-radius: 9px;
+        background: var(--primary-soft);
+        color: var(--primary-dark);
+        font-size: 15px;
+        font-weight: 800;
+        flex-shrink: 0;
+    }
+
+    /* =========================
+       SEARCH
+    ========================= */
+
+    .users-search {
+        padding: 17px 25px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .search-wrapper {
+        position: relative;
+    }
+
+    .search-input {
+        width: 100%;
+        height: 46px;
+        padding: 0 14px;
+        border: 1px solid var(--border);
+        border-radius: 9px;
+        background: var(--surface-soft);
+        color: var(--text);
+        outline: none;
+        font-family: inherit;
+        font-size: 16px;
+        transition:
+            border-color .2s ease,
+            box-shadow .2s ease,
+            background .2s ease;
+    }
+
+    .search-input::placeholder {
+        color: var(--text-soft);
+    }
+
+    .search-input:focus {
+        border-color: var(--primary);
+        background: var(--surface);
+        box-shadow:
+            0 0 0 3px var(--primary-soft);
+    }
+
+    /* =========================
+       TABLE
+    ========================= */
+
+    .table-scroll {
+        overflow-x: auto;
+    }
+
+    .users-table {
+        width: 100%;
+        min-width: 1100px;
+        border-collapse: collapse;
+    }
+
+    .users-table th {
+        padding: 14px 15px;
+        background: var(--surface-soft);
+        color: var(--text-soft);
+        text-align: right;
+        font-size: 15px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .users-table td {
+        padding: 14px 15px;
+        border-top: 1px solid var(--border);
+        color: var(--text);
+        font-size: 16px;
+        vertical-align: middle;
+    }
+
+    .users-table tbody tr {
+        transition: background .15s ease;
+    }
+
+    .users-table tbody tr:hover {
+        background: var(--surface-soft);
+    }
+
+    /* =========================
+       USER
+    ========================= */
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        min-width: 190px;
+    }
+
+    .user-avatar,
+    .user-avatar-placeholder {
+        width: 42px;
+        height: 42px;
+        flex-shrink: 0;
+        border-radius: 50%;
+    }
+
+    .user-avatar {
+        object-fit: cover;
+        border: 1px solid var(--border);
+    }
+
+    .user-avatar-placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--primary-soft);
+        color: var(--primary-dark);
+        font-size: 19px;
+    }
+
+    .user-name {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        min-width: 0;
+    }
+
+    .user-name strong {
+        color: var(--text);
+        font-size: 16px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .user-name span {
+        color: var(--text-soft);
+        font-size: 14px;
+        direction: ltr;
+        text-align: right;
+    }
+
+    /* =========================
+       PHONE
+    ========================= */
+
+    .phone-number {
+        display: inline-block;
+        direction: ltr;
+        text-align: right;
+        font-size: 16px;
+    }
+
+    /* =========================
+       ROLES
+    ========================= */
+
+    .roles {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        flex-wrap: wrap;
+        max-width: 260px;
+    }
+
+    .role-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 5px 9px;
+        border: 1px solid transparent;
+        border-radius: 7px;
+        background: var(--primary-soft);
+        color: var(--primary-dark);
+        font-size: 14px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .role-badge.system {
+        background: rgba(103, 73, 168, .10);
+        border-color: rgba(103, 73, 168, .14);
+        color: #7658b6;
+    }
+
+    .role-badge.user {
+        background: rgba(53, 104, 168, .10);
+        border-color: rgba(53, 104, 168, .14);
+        color: #4a76ad;
+    }
+
+    .no-role {
+        color: var(--text-soft);
+        font-size: 14px;
+    }
+
+    /* =========================
+       STATUS
+    ========================= */
+
+    .status {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        padding: 5px 9px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 800;
+    }
+
+    .status::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+    }
+
+    .status.active {
+        background: rgba(35, 134, 77, .10);
+        color: #32905a;
+    }
+
+    .status.inactive {
+        background: rgba(196, 93, 37, .10);
+        color: #c46a38;
+    }
+
+    /* =========================
+       LOANS
+    ========================= */
+
+    .loan-count {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 32px;
+        height: 29px;
+        padding: 0 8px;
+        border-radius: 7px;
+        background: var(--primary-soft);
+        color: var(--primary-dark);
+        font-size: 15px;
+        font-weight: 800;
+    }
+
+    /* =========================
+       ACTIONS
+    ========================= */
+
+    .actions {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+        min-width: 250px;
+    }
+
+    .action-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 35px;
+        padding: 0 10px;
+        border: 1px solid var(--border);
+        border-radius: 7px;
+        background: var(--surface);
+        color: var(--text);
+        font-family: inherit;
+        font-size: 15px;
+        font-weight: 800;
+        text-decoration: none;
+        cursor: pointer;
+        transition:
+            background .2s ease,
+            border-color .2s ease,
+            color .2s ease,
+            transform .2s ease;
+    }
+
+    .action-button:hover {
+        background: var(--surface-soft);
+        border-color: var(--primary);
+        transform: translateY(-1px);
+    }
+
+    .action-button:active {
+        transform: translateY(0);
+    }
+
+    .action-button.edit:hover {
+        color: var(--primary-dark);
+    }
+
+    .action-button.toggle {
+        color: #32905a;
+    }
+
+    .action-button.toggle:hover {
+        border-color: #32905a;
+        background: rgba(35, 134, 77, .09);
+    }
+
+    .action-button.activate {
+        color: var(--primary-dark);
+    }
+
+    .action-button.activate:hover {
+        border-color: var(--primary);
+        background: var(--primary-soft);
+    }
+
+    .action-button.delete {
+        color: #c46a38;
+    }
+
+    .action-button.delete:hover {
+        border-color: #c46a38;
+        background: rgba(196, 93, 37, .09);
+    }
+
+    .action-form {
+        margin: 0;
+    }
+
+    /* =========================
+       EMPTY
+    ========================= */
+
+    .empty-users {
+        padding: 55px 20px !important;
+        color: var(--text-soft) !important;
+        text-align: center;
+        font-size: 16px !important;
+    }
+
+    /* =========================
+       NO SEARCH RESULT
+    ========================= */
+
+    .no-search-result {
+        display: none;
+        padding: 35px 20px;
+        color: var(--text-soft);
+        text-align: center;
+        font-size: 16px;
+    }
+
+    /* =========================
+       RESPONSIVE
+    ========================= */
+
+    @media (max-width: 700px) {
+        .users-header {
+            align-items: flex-start;
+            flex-direction: column;
+            padding: 19px;
+        }
+
+        .users-count {
+            align-self: flex-start;
+        }
+
+        .users-search {
+            padding: 14px 19px;
+        }
+    }
+
+    @media (max-width: 500px) {
+        .users-title h2 {
+            font-size: 20px;
+        }
+
+        .users-title p {
+            font-size: 15px;
+        }
+
+        .search-input {
+            font-size: 15px;
+        }
+    }
+</style>
+
+<div class="users-page">
+
+    <div class="users-box">
+
+        <!-- HEADER -->
+
+        <div class="users-header">
+
+            <div class="users-title">
+
+                <h2>
+                    کاربران ثبت‌نام‌شده
+                </h2>
+
+                <p>
+                    مدیریت کاربران، نقش‌ها و وضعیت حساب‌های کتابخانه
+                </p>
+
+            </div>
+
+            <div class="users-count">
+                {{ users|length }}
+            </div>
+
+        </div>
+
+        <!-- SEARCH -->
+
+        <div class="users-search">
+
+            <div class="search-wrapper">
+
+                <input
+                    type="text"
+                    id="user-search"
+                    class="search-input"
+                    placeholder="جستجو بر اساس نام، نام کاربری یا شماره موبایل..."
+                    autocomplete="off"
+                >
+
+            </div>
+
+        </div>
+
+        <!-- TABLE -->
+
+        <div class="table-scroll">
+
+            <table class="users-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            کاربر
+                        </th>
+
+                        <th>
+                            شماره موبایل
+                        </th>
+
+                        <th>
+                            نقش‌ها
+                        </th>
+
+                        <th>
+                            وضعیت
+                        </th>
+
+                        <th>
+                            امانت‌های فعال
+                        </th>
+
+                        <th>
+                            تاریخ عضویت
+                        </th>
+
+                        <th>
+                            عملیات
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="users-table-body">
+
+                    {% for user in users %}
+
+                        <tr
+                            class="user-row"
+                            data-search="{{ user.username|lower }} {{ user.first_name|lower }} {{ user.last_name|lower }} {{ user.phone_number|lower }}"
+                        >
+
+                            <!-- USER -->
+
+                            <td>
+
+                                <div class="user-info">
+
+                                    {% if user.profile_image %}
+
+                                        <img
+                                            src="{{ user.profile_image.url }}"
+                                            alt="{{ user.username }}"
+                                            class="user-avatar"
+                                        >
+
+                                    {% else %}
+
+                                        <div class="user-avatar-placeholder">
+                                            👤
+                                        </div>
+
+                                    {% endif %}
+
+                                    <div class="user-name">
+
+                                        <strong>
+
+                                            {% if user.get_full_name %}
+
+                                                {{ user.get_full_name }}
+
+                                            {% else %}
+
+                                                بدون نام
+
+                                            {% endif %}
+
+                                        </strong>
+
+                                        <span>
+                                            @{{ user.username }}
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+                            <!-- PHONE -->
+
+                            <td>
+
+                                <span class="phone-number">
+                                    {{ user.phone_number }}
+                                </span>
+
+                            </td>
+
+                            <!-- ROLES -->
+
+                            <td>
+
+                                <div class="roles">
+
+                                    {% if user.is_superuser %}
+
+                                        <span class="role-badge system">
+                                            مدیر سیستم
+                                        </span>
+
+                                    {% else %}
+
+                                        {% for group in user.groups.all %}
+
+                                            {% if group.name == "مدیر محتوا" %}
+
+                                                <span class="role-badge">
+                                                    مدیر محتوا
+                                                </span>
+
+                                            {% elif group.name == "مدیر کاربران" %}
+
+                                                <span class="role-badge user">
+                                                    مدیر کاربران
+                                                </span>
+
+                                            {% endif %}
+
+                                        {% empty %}
+
+                                            <span class="no-role">
+                                                بدون نقش مدیریتی
+                                            </span>
+
+                                        {% endfor %}
+
+                                    {% endif %}
+
+                                </div>
+
+                            </td>
+
+                            <!-- STATUS -->
+
+                            <td>
+
+                                {% if user.is_active %}
+
+                                    <span class="status active">
+                                        فعال
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="status inactive">
+                                        غیرفعال
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                            <!-- LOANS -->
+
+                            <td>
+
+                                <span class="loan-count">
+                                    {{ user.active_loans_count }}
+                                </span>
+
+                            </td>
+
+                            <!-- DATE -->
+
+                            <td>
+                                {{ user.date_joined|date:"Y/m/d" }}
+                            </td>
+
+                            <!-- ACTIONS -->
+
+                            <td>
+
+                                <div class="actions">
+
+                                    <a
+                                        href="/dashboard/users/{{ user.pk }}/edit/"
+                                        class="action-button edit"
+                                    >
+                                        ویرایش و نقش‌ها
+                                    </a>
+
+                                    <form
+                                        method="post"
+                                        action="{% url 'toggle_user_active' user.pk %}"
+                                        class="action-form"
+                                    >
+
+                                        {% csrf_token %}
+
+                                        {% if user.is_active %}
+
+                                            <button
+                                                type="submit"
+                                                class="action-button toggle"
+                                            >
+                                                غیرفعال کردن
+                                            </button>
+
+                                        {% else %}
+
+                                            <button
+                                                type="submit"
+                                                class="action-button activate"
+                                            >
+                                                فعال کردن
+                                            </button>
+
+                                        {% endif %}
+
+                                    </form>
+
+                                    <form
+                                        method="post"
+                                        action="{% url 'delete_user' user.pk %}"
+                                        class="action-form delete-user-form"
+                                    >
+
+                                        {% csrf_token %}
+
+                                        <button
+                                            type="submit"
+                                            class="action-button delete"
+                                        >
+                                            حذف
+                                        </button>
+
+                                    </form>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    {% empty %}
+
+                        <tr>
+
+                            <td
+                                colspan="7"
+                                class="empty-users"
+                            >
+                                هنوز کاربری ثبت‌نام نکرده است.
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <div
+            id="no-search-result"
+            class="no-search-result"
+        >
+            کاربری با عبارت جستجو شده پیدا نشد.
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    /* =========================
+       SEARCH
+    ========================= */
+
+    const userSearch =
+        document.getElementById("user-search");
+
+    const userRows =
+        document.querySelectorAll(".user-row");
+
+    const noSearchResult =
+        document.getElementById("no-search-result");
+
+    if (userSearch) {
+
+        userSearch.addEventListener(
+            "input",
+            function () {
+
+                const query =
+                    this.value
+                        .trim()
+                        .toLowerCase();
+
+                let visibleCount = 0;
+
+                userRows.forEach(
+                    function (row) {
+
+                        const searchText =
+                            row.dataset.search
+                                .toLowerCase();
+
+                        if (searchText.includes(query)) {
+
+                            row.style.display = "";
+
+                            visibleCount++;
+
+                        } else {
+
+                            row.style.display = "none";
+                        }
+                    }
+                );
+
+                if (noSearchResult) {
+
+                    noSearchResult.style.display =
+                        query && visibleCount === 0
+                            ? "block"
+                            : "none";
+                }
+            }
+        );
+    }
+
+    /* =========================
+       DELETE CONFIRM
+    ========================= */
+
+    document
+        .querySelectorAll(".delete-user-form")
+        .forEach(
+            function (form) {
+
+                form.addEventListener(
+                    "submit",
+                    function (event) {
+
+                        const confirmed =
+                            window.confirm(
+                                "آیا مطمئن هستید که می‌خواهید این کاربر را حذف کنید؟"
+                            );
+
+                        if (!confirmed) {
+                            event.preventDefault();
+                        }
+                    }
+                );
+            }
+        );
+</script>
+
+{% endblock %}

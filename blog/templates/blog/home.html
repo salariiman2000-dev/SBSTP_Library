@@ -1,0 +1,2150 @@
+{% extends "blog/base.html" %}
+
+{% load static %}
+
+{% block title %}
+کتابخانه پارک علم و فناوری | خانه
+{% endblock %}
+
+{% block content %}
+
+<style>
+
+    /* =====================================================
+       HOME
+    ===================================================== */
+
+    .home-page {
+        background: var(--page-bg);
+    }
+
+    html {
+        scroll-behavior: smooth;
+        scroll-padding-top: 90px;
+    }
+
+
+    /* =====================================================
+       HERO
+    ===================================================== */
+
+    .home-hero {
+        position: relative;
+        padding: 92px 0 82px;
+        background: var(--hero-bg);
+        border-bottom: 1px solid var(--line);
+        overflow: hidden;
+    }
+
+    .home-hero::before {
+        content: "";
+        position: absolute;
+        top: -180px;
+        left: -120px;
+        width: 520px;
+        height: 520px;
+        border-radius: 50%;
+        background: var(--accent-soft);
+        opacity: .6;
+        pointer-events: none;
+    }
+
+    .home-hero::after {
+        content: "";
+        position: absolute;
+        right: -180px;
+        bottom: -260px;
+        width: 560px;
+        height: 560px;
+        border-radius: 50%;
+        border: 1px solid var(--line);
+        pointer-events: none;
+    }
+
+    .hero-grid {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-template-columns:
+            minmax(0, 1.15fr)
+            minmax(310px, .85fr);
+        align-items: center;
+        gap: 75px;
+    }
+
+
+    /* =====================================================
+       HERO TEXT
+    ===================================================== */
+
+    .hero-text {
+        max-width: 680px;
+    }
+
+    .hero-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--orange-dark);
+        font-size: 15px;
+        font-weight: 800;
+    }
+
+    .hero-kicker::before {
+        content: "";
+        width: 24px;
+        height: 2px;
+        background: var(--orange);
+    }
+
+    .hero-title {
+        margin-top: 17px;
+        color: var(--heading);
+        font-size: clamp(40px, 5vw, 66px);
+        font-weight: 900;
+        line-height: 1.3;
+        letter-spacing: -2px;
+    }
+
+    .hero-title strong {
+        display: block;
+        color: var(--orange-dark);
+        font-weight: 900;
+    }
+
+    .hero-description {
+        max-width: 570px;
+        margin-top: 20px;
+        color: var(--text-soft);
+        font-size: 17px;
+        line-height: 2.15;
+    }
+
+
+    /* =====================================================
+       SEARCH
+    ===================================================== */
+
+    .hero-search {
+        display: flex;
+        align-items: center;
+        max-width: 620px;
+        margin-top: 30px;
+        padding: 5px;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        box-shadow: 0 12px 35px rgba(23, 35, 60, .06);
+    }
+
+    .hero-search:focus-within {
+        border-color: rgba(232, 155, 61, .45);
+        box-shadow: 0 14px 40px rgba(23, 35, 60, .09);
+    }
+
+    .hero-search-icon {
+        width: 43px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-soft);
+        font-size: 20px;
+    }
+
+    .hero-search input {
+        flex: 1;
+        min-width: 0;
+        border: 0;
+        outline: 0;
+        padding: 13px 8px;
+        background: transparent;
+        color: var(--body-text);
+        font-family: inherit;
+        font-size: 16px;
+    }
+
+    .hero-search input::placeholder {
+        color: var(--text-soft);
+    }
+
+    .hero-search button {
+        border: 0;
+        min-height: 43px;
+        padding: 0 20px;
+        border-radius: 10px;
+        background: var(--button-bg);
+        color: var(--button-text);
+        font-family: inherit;
+        font-size: 15px;
+        font-weight: 800;
+        cursor: pointer;
+        transition:
+            opacity .2s ease,
+            transform .2s ease;
+    }
+
+    .hero-search button:hover {
+        opacity: .9;
+        transform: translateY(-1px);
+    }
+
+    .hero-hints {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 10px;
+        color: var(--text-soft);
+        font-size: 14px;
+    }
+
+    .hero-hints span {
+        color: var(--orange-dark);
+        font-weight: 700;
+    }
+
+
+    /* =====================================================
+       HERO BRAND
+    ===================================================== */
+
+    .hero-brand-panel {
+        min-height: 370px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        padding: 30px;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 28px;
+        box-shadow: 0 25px 60px rgba(23, 35, 60, .07);
+    }
+
+    .hero-brand-panel::before {
+        content: "";
+        position: absolute;
+        inset: 14px;
+        border: 1px solid var(--line);
+        border-radius: 21px;
+        pointer-events: none;
+    }
+
+    .hero-brand-content {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .hero-brand-logo {
+        width: 175px;
+        height: 175px;
+        object-fit: contain;
+    }
+
+    .hero-brand-name {
+        margin-top: 17px;
+        color: var(--heading);
+        font-size: 17px;
+        font-weight: 800;
+    }
+
+    .hero-brand-location {
+        margin-top: 4px;
+        color: var(--text-soft);
+        font-size: 14px;
+    }
+
+    .hero-brand-line {
+        width: 40px;
+        height: 2px;
+        margin-top: 15px;
+        background: var(--orange);
+    }
+
+
+    /* =====================================================
+       BOOK SECTION
+    ===================================================== */
+
+    .latest-books {
+        padding: 90px 0 105px;
+        background: var(--surface);
+    }
+
+    .section-heading {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 25px;
+        margin-bottom: 38px;
+    }
+
+    .section-small {
+        color: var(--orange-dark);
+        font-size: 15px;
+        font-weight: 900;
+    }
+
+    .section-heading h2 {
+        margin-top: 5px;
+        color: var(--heading);
+        font-size: 30px;
+        font-weight: 900;
+    }
+
+    .section-heading p {
+        margin-top: 5px;
+        color: var(--text-soft);
+        font-size: 15px;
+    }
+
+    .all-books {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 10px 14px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        color: var(--heading);
+        font-size: 15px;
+        font-weight: 800;
+        white-space: nowrap;
+        transition: .2s ease;
+    }
+
+    .all-books:hover {
+        background: var(--accent-soft);
+        border-color: rgba(232, 155, 61, .3);
+        color: var(--orange-dark);
+        transform: translateY(-2px);
+    }
+
+
+    /* =====================================================
+       BOOK SHOWCASE GRID
+    ===================================================== */
+
+    .home-books-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 24px;
+    }
+
+
+    /* =====================================================
+       BOOK SHOWCASE CARD
+    ===================================================== */
+
+    .home-book {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        overflow: hidden;
+        color: inherit;
+        text-decoration: none;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        box-shadow:
+            0 8px 24px rgba(23, 35, 60, .045);
+        transition:
+            transform .35s cubic-bezier(.2,.7,.2,1),
+            box-shadow .35s ease,
+            border-color .35s ease;
+    }
+
+    .home-book:hover {
+        transform: translateY(-9px);
+        border-color: rgba(232, 155, 61, .35);
+        box-shadow:
+            0 25px 55px rgba(23, 35, 60, .13);
+    }
+
+
+    /* =====================================================
+       COVER STAGE
+    ===================================================== */
+
+    .home-book-cover {
+        position: relative;
+        height: 315px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+
+        background:
+            radial-gradient(
+                circle at 50% 35%,
+                rgba(232, 155, 61, .12),
+                transparent 45%
+            ),
+            linear-gradient(
+                145deg,
+                var(--surface-soft),
+                var(--accent-soft)
+            );
+    }
+
+
+    /*
+       یک لایه بسیار نرم پشت جلد.
+       خود جلد همیشه کامل دیده می‌شود.
+    */
+
+    .home-book-cover::before {
+        content: "";
+        position: absolute;
+        width: 190px;
+        height: 250px;
+        border-radius: 18px;
+        background: var(--surface);
+        box-shadow:
+            0 22px 45px rgba(23, 35, 60, .12);
+        opacity: .45;
+        transform: rotate(-4deg);
+    }
+
+
+    .home-book-cover::after {
+        content: "";
+        position: absolute;
+        left: 20px;
+        right: 20px;
+        bottom: 0;
+        height: 1px;
+        background: var(--line);
+    }
+
+
+    .home-book-cover img {
+        position: relative;
+        z-index: 2;
+
+        width: auto;
+        max-width: 76%;
+        height: 88%;
+        object-fit: contain;
+
+        filter:
+            drop-shadow(
+                0 20px 22px rgba(23, 35, 60, .2)
+            );
+
+        transition:
+            transform .4s cubic-bezier(.2,.7,.2,1),
+            filter .4s ease;
+    }
+
+
+    .home-book:hover .home-book-cover img {
+        transform: scale(1.055) translateY(-5px);
+        filter:
+            drop-shadow(
+                0 27px 28px rgba(23, 35, 60, .24)
+            );
+    }
+
+
+    /* =====================================================
+       NO COVER
+    ===================================================== */
+
+    .no-cover {
+        position: relative;
+        z-index: 2;
+
+        width: 125px;
+        height: 170px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        border: 1px solid var(--line);
+        border-radius: 12px;
+
+        background: var(--surface);
+
+        color: var(--orange-dark);
+        font-size: 38px;
+
+        box-shadow:
+            0 20px 35px rgba(23, 35, 60, .13);
+    }
+
+
+    /* =====================================================
+       STATUS
+    ===================================================== */
+
+    .book-status {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        z-index: 5;
+
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+
+        padding: 7px 11px;
+
+        background: rgba(255,255,255,.9);
+        border: 1px solid rgba(255,255,255,.65);
+        border-radius: 30px;
+
+        color: #4d8a5a;
+        font-size: 13px;
+        font-weight: 800;
+
+        box-shadow:
+            0 8px 18px rgba(23, 35, 60, .1);
+
+        backdrop-filter: blur(8px);
+    }
+
+    .book-status::before {
+        content: "";
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #56a968;
+    }
+
+    .book-status.unavailable {
+        color: #a55a5a;
+    }
+
+    .book-status.unavailable::before {
+        background: #b85c5c;
+    }
+
+
+    /* =====================================================
+       BOOK INFORMATION PANEL
+    ===================================================== */
+
+    .home-book-info {
+        position: relative;
+        z-index: 3;
+
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+
+        min-height: 205px;
+        padding: 19px 20px 20px;
+
+        background: var(--surface);
+    }
+
+
+    .home-book-category {
+        align-self: flex-start;
+
+        display: inline-flex;
+        align-items: center;
+
+        max-width: 100%;
+
+        padding: 5px 9px;
+
+        background: var(--accent-soft);
+        border-radius: 8px;
+
+        color: var(--orange-dark);
+        font-size: 12px;
+        font-weight: 800;
+
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+
+    .home-book-info h3 {
+        margin-top: 11px;
+
+        min-height: 56px;
+
+        color: var(--heading);
+        font-size: 18px;
+        font-weight: 900;
+        line-height: 1.55;
+
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+
+    .home-book-author {
+        margin-top: 5px;
+
+        color: var(--text-soft);
+        font-size: 14px;
+        line-height: 1.8;
+
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+
+    /* =====================================================
+       RATING FOOTER
+    ===================================================== */
+
+    .home-book-rating {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+
+        margin-top: auto;
+        padding-top: 14px;
+
+        border-top: 1px solid var(--line);
+
+        color: var(--heading);
+        font-size: 14px;
+        font-weight: 800;
+    }
+
+    .home-book-rating span {
+        color: var(--orange);
+        font-size: 18px;
+        line-height: 1;
+    }
+
+    .home-book-rating small {
+        color: var(--text-soft);
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .home-book-rating.no-rating {
+        color: var(--text-soft);
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+
+    /* =====================================================
+       EMPTY
+    ===================================================== */
+
+    .empty-home {
+        grid-column: 1 / -1;
+
+        padding: 65px 20px;
+
+        text-align: center;
+
+        background: var(--surface-soft);
+        border: 1px dashed var(--line);
+        border-radius: 20px;
+
+        color: var(--text-soft);
+        font-size: 16px;
+    }
+
+
+    /* =====================================================
+       ABOUT
+    ===================================================== */
+
+    .home-about {
+        position: relative;
+        padding: 105px 0;
+        background: var(--page-bg);
+        border-top: 1px solid var(--line);
+    }
+
+    .home-about-grid {
+        display: grid;
+        grid-template-columns:
+            minmax(0, .8fr)
+            minmax(0, 1.2fr);
+        align-items: center;
+        gap: 70px;
+    }
+
+    .home-about-label,
+    .home-contact-label {
+        color: var(--orange-dark);
+        font-size: 15px;
+        font-weight: 900;
+    }
+
+    .home-about-title {
+        margin-top: 8px;
+        color: var(--heading);
+        font-size: clamp(34px, 4vw, 50px);
+        font-weight: 900;
+        line-height: 1.35;
+    }
+
+    .home-about-text {
+        color: var(--text-soft);
+        font-size: 17px;
+        line-height: 2.15;
+    }
+
+    .home-about-text + .home-about-text {
+        margin-top: 15px;
+    }
+
+    .home-about-features {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 15px;
+        margin-top: 25px;
+    }
+
+    .home-about-feature {
+        padding: 20px;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+    }
+
+    .home-about-feature-icon {
+        width: 42px;
+        height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 12px;
+        border-radius: 12px;
+        background: var(--accent-soft);
+        color: var(--orange-dark);
+        font-size: 21px;
+    }
+
+    .home-about-feature h3 {
+        color: var(--heading);
+        font-size: 17px;
+        font-weight: 900;
+    }
+
+    .home-about-feature p {
+        margin-top: 5px;
+        color: var(--text-soft);
+        font-size: 14px;
+        line-height: 1.9;
+    }
+
+    .home-about-visual {
+        position: relative;
+        min-height: 430px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        overflow: hidden;
+
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 28px;
+
+        box-shadow:
+            0 20px 45px rgba(23, 35, 60, .06);
+    }
+
+    .home-about-visual::before {
+        content: "";
+        position: absolute;
+
+        width: 330px;
+        height: 330px;
+
+        border-radius: 50%;
+
+        background: var(--accent-soft);
+    }
+
+    .home-about-logo {
+        position: relative;
+        z-index: 1;
+
+        width: 210px;
+        height: 210px;
+
+        object-fit: contain;
+    }
+
+
+    /* =====================================================
+       CONTACT
+    ===================================================== */
+
+    .home-contact {
+        padding: 105px 0;
+        background: var(--surface);
+        border-top: 1px solid var(--line);
+    }
+
+    .home-contact-header {
+        max-width: 650px;
+        margin: 0 auto 40px;
+        text-align: center;
+    }
+
+    .home-contact-header h2 {
+        margin-top: 7px;
+        color: var(--heading);
+        font-size: clamp(34px, 4vw, 48px);
+        font-weight: 900;
+    }
+
+    .home-contact-header p {
+        margin-top: 10px;
+        color: var(--text-soft);
+        font-size: 17px;
+        line-height: 2;
+    }
+
+    .home-contact-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 18px;
+    }
+
+    .home-contact-card {
+        padding: 27px 23px;
+        text-align: center;
+
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+
+        transition:
+            transform .25s ease,
+            box-shadow .25s ease,
+            border-color .25s ease;
+    }
+
+    .home-contact-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(232, 155, 61, .3);
+        box-shadow: 0 18px 35px rgba(23, 35, 60, .08);
+    }
+
+    .home-contact-icon {
+        width: 52px;
+        height: 52px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        margin: 0 auto 15px;
+
+        border-radius: 15px;
+        background: var(--accent-soft);
+        color: var(--orange-dark);
+
+        font-size: 24px;
+    }
+
+    .home-contact-card h3 {
+        color: var(--heading);
+        font-size: 19px;
+        font-weight: 900;
+    }
+
+    .home-contact-card p,
+    .home-contact-card a {
+        display: block;
+        margin-top: 7px;
+        color: var(--text-soft);
+        font-size: 15px;
+        line-height: 1.9;
+    }
+
+    .home-contact-card a:hover {
+        color: var(--orange-dark);
+    }
+
+
+    /* =====================================================
+       RESPONSIVE
+    ===================================================== */
+
+    @media (max-width: 1100px) {
+
+        .home-books-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .hero-grid {
+            gap: 45px;
+        }
+    }
+
+
+    @media (max-width: 850px) {
+
+        .home-hero {
+            padding: 65px 0;
+        }
+
+        .hero-grid {
+            grid-template-columns: 1fr;
+            text-align: center;
+        }
+
+        .hero-text {
+            max-width: 680px;
+            margin-inline: auto;
+        }
+
+        .hero-description {
+            margin-inline: auto;
+        }
+
+        .hero-search {
+            margin-inline: auto;
+        }
+
+        .hero-hints {
+            justify-content: center;
+        }
+
+        .hero-brand-panel {
+            max-width: 470px;
+            min-height: 300px;
+            margin-inline: auto;
+            width: 100%;
+        }
+
+        .home-about-grid {
+            grid-template-columns: 1fr;
+            gap: 40px;
+        }
+
+        .home-about-visual {
+            order: -1;
+            min-height: 350px;
+        }
+
+        .home-contact-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+
+    @media (max-width: 650px) {
+
+        .home-hero {
+            padding: 48px 0 50px;
+        }
+
+        .hero-kicker {
+            font-size: 14px;
+        }
+
+        .hero-title {
+            font-size: 37px;
+            letter-spacing: -1px;
+        }
+
+        .hero-description {
+            font-size: 16px;
+        }
+
+        .hero-search {
+            flex-direction: column;
+            padding: 5px;
+        }
+
+        .hero-search-icon {
+            display: none;
+        }
+
+        .hero-search input {
+            width: 100%;
+            min-height: 45px;
+            text-align: center;
+            font-size: 15px;
+        }
+
+        .hero-search button {
+            width: 100%;
+            font-size: 15px;
+        }
+
+        .hero-hints {
+            display: none;
+        }
+
+        .hero-brand-panel {
+            min-height: 270px;
+            border-radius: 18px;
+        }
+
+        .hero-brand-logo {
+            width: 125px;
+            height: 125px;
+        }
+
+        .hero-brand-name {
+            font-size: 16px;
+        }
+
+        .hero-brand-location {
+            font-size: 13px;
+        }
+
+
+        /* BOOKS */
+
+        .latest-books {
+            padding: 70px 0 80px;
+        }
+
+        .section-heading {
+            align-items: flex-start;
+            flex-direction: column;
+            margin-bottom: 27px;
+        }
+
+        .section-small {
+            font-size: 14px;
+        }
+
+        .section-heading h2 {
+            font-size: 25px;
+        }
+
+        .section-heading p {
+            font-size: 14px;
+        }
+
+        .all-books {
+            font-size: 14px;
+        }
+
+        .home-books-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .home-book {
+            border-radius: 19px;
+        }
+
+        .home-book-cover {
+            height: 240px;
+        }
+
+        .home-book-cover img {
+            max-width: 78%;
+            height: 86%;
+        }
+
+        .home-book-info {
+            min-height: 195px;
+            padding: 15px;
+        }
+
+        .home-book-category {
+            font-size: 11px;
+        }
+
+        .home-book-info h3 {
+            min-height: 50px;
+            font-size: 16px;
+        }
+
+        .home-book-author {
+            font-size: 13px;
+        }
+
+        .home-book-rating {
+            font-size: 13px;
+        }
+
+        .home-book-rating small {
+            font-size: 11px;
+        }
+
+        .book-status {
+            top: 10px;
+            right: 10px;
+            padding: 5px 8px;
+            font-size: 12px;
+        }
+
+
+        /* ABOUT */
+
+        .home-about,
+        .home-contact {
+            padding: 75px 0;
+        }
+
+        .home-about-title,
+        .home-contact-header h2 {
+            font-size: 34px;
+        }
+
+        .home-about-text,
+        .home-contact-header p {
+            font-size: 16px;
+        }
+
+        .home-about-features {
+            grid-template-columns: 1fr;
+        }
+
+        .home-about-visual {
+            min-height: 290px;
+        }
+
+        .home-about-logo {
+            width: 160px;
+            height: 160px;
+        }
+    }
+
+
+    @media (max-width: 430px) {
+
+        .home-books-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .home-book-cover {
+            height: 330px;
+        }
+
+        .home-book-cover img {
+            max-width: 68%;
+            height: 88%;
+        }
+
+        .home-book-info {
+            min-height: 205px;
+            padding: 18px;
+        }
+
+        .home-book-info h3 {
+            min-height: auto;
+            font-size: 18px;
+        }
+
+        .home-book-author {
+            font-size: 14px;
+        }
+
+        .home-book-rating {
+            font-size: 14px;
+        }
+
+        .home-book-rating small {
+            font-size: 12px;
+        }
+
+        .home-about-title,
+        .home-contact-header h2 {
+            font-size: 31px;
+        }
+    }
+    /* =====================================================
+    FULL BLEED IMAGES
+    تصاویر کاملاً چسبیده به کادر
+    ===================================================== */
+
+
+    /* HERO LOGO BOX */
+
+    .hero-brand-panel {
+        padding: 0;
+    }
+
+    .hero-brand-content {
+        width: 100%;
+        height: 100%;
+    }
+
+    .hero-brand-logo {
+        width: 100%;
+        height: 100%;
+        max-width: none;
+
+        object-fit: cover;
+
+        filter: none;
+
+        border-radius: 23px;
+
+        transition: transform .35s ease;
+    }
+
+    .hero-brand-panel:hover .hero-brand-logo {
+        transform: scale(1.03);
+    }
+
+
+    /* =====================================================
+    ABOUT IMAGE BOX
+    ===================================================== */
+
+    .home-about-visual {
+        padding: 0;
+    }
+
+    .home-about-logo {
+        width: 100%;
+        height: 100%;
+
+        object-fit: cover;
+
+        filter: none;
+
+        border-radius: 23px;
+
+        transition: transform .35s ease;
+    }
+
+    .home-about-visual:hover .home-about-logo {
+        transform: scale(1.03);
+    }
+
+
+    /* =====================================================
+    BOOK COVER
+    ===================================================== */
+
+    .home-book-cover {
+        padding: 0;
+    }
+
+    .home-book-cover img {
+        position: absolute;
+
+        inset: 0;
+
+        width: 100%;
+        height: 100%;
+
+        max-width: none;
+
+        object-fit: cover;
+        object-position: center;
+
+        filter: none;
+
+        border-radius: 0;
+
+        transition:
+            transform .35s ease,
+            filter .35s ease;
+    }
+
+    .home-book:hover .home-book-cover img {
+        transform: scale(1.035);
+
+        filter: none;
+    }
+
+
+    /* =====================================================
+    REMOVE DECORATIVE LAYERS BEHIND FULL IMAGES
+    ===================================================== */
+
+    .home-book-cover::before {
+        display: none;
+    }
+
+    .home-about-visual::before,
+    .home-about-visual::after {
+        display: none;
+    }
+
+    .hero-brand-panel::before,
+    .hero-brand-panel::after {
+        display: none;
+    }
+
+
+    /* =====================================================
+    NO COVER
+    ===================================================== */
+
+    .home-book-cover .no-cover {
+        position: absolute;
+
+        left: 50%;
+        top: 50%;
+
+        transform: translate(-50%, -50%);
+    }
+
+    /* اندازه لوگوی پارک را به حالت عادی برگردان */
+
+    .hero-brand-panel {
+        padding: 30px;
+    }
+
+    .hero-brand-content {
+        width: auto;
+        height: auto;
+    }
+
+    .hero-brand-logo {
+        width: 175px;
+        height: 175px;
+        max-width: 100%;
+        object-fit: contain;
+        border-radius: 0;
+        filter: drop-shadow(0 14px 24px rgba(15, 23, 42, .14));
+        transform: none;
+    }
+
+    .hero-brand-panel:hover .hero-brand-logo {
+        transform: none;
+    }
+
+    /* لوگوی بخش درباره ما هم کوچک بماند */
+
+    .home-about-visual {
+        padding: 30px;
+    }
+
+    .home-about-logo {
+        width: 210px;
+        height: 210px;
+        max-width: 100%;
+        object-fit: contain;
+        border-radius: 0;
+        filter: drop-shadow(0 14px 24px rgba(15, 23, 42, .14));
+    }
+
+    .home-about-visual:hover .home-about-logo {
+        transform: none;
+    }
+
+
+    .home-contact-list {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 50px;
+        margin-top: 50px;
+    }
+
+    .home-contact-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 18px;
+        padding: 10px 0;
+    }
+
+    .home-contact-icon {
+        width: 52px;
+        height: 52px;
+        flex-shrink: 0;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        font-size: 25px;
+    }
+
+    .home-contact-item h3 {
+        margin: 0 0 8px;
+        font-size: 18px;
+        font-weight: 800;
+    }
+
+    .home-contact-item p {
+        margin: 0;
+        line-height: 1.9;
+        color: var(--muted);
+        font-size: 14px;
+    }
+
+
+    /* موبایل */
+
+    @media (max-width: 850px) {
+
+        .home-contact-list {
+            grid-template-columns: 1fr;
+            gap: 25px;
+        }
+
+    }
+
+    /* =====================================================
+    TYPOGRAPHY IMPROVEMENT
+    نوشته‌ها کمی بزرگ‌تر و خواناتر
+    ===================================================== */
+
+    .hero-kicker {
+        font-size: 16px;
+    }
+
+    .hero-description {
+        font-size: 18px;
+        line-height: 2.15;
+    }
+
+    .hero-search input {
+        font-size: 17px;
+    }
+
+    .hero-search button {
+        font-size: 16px;
+    }
+
+    .hero-hints {
+        font-size: 15px;
+    }
+
+    .hero-brand-name {
+        font-size: 18px;
+    }
+
+    .hero-brand-location {
+        font-size: 15px;
+    }
+
+
+    /* =====================================================
+    BOOKS
+    ===================================================== */
+
+    .section-small {
+        font-size: 16px;
+    }
+
+    .section-heading h2 {
+        font-size: 32px;
+    }
+
+    .section-heading p {
+        font-size: 16px;
+    }
+
+    .home-book-category {
+        font-size: 13px;
+    }
+
+    .home-book-info h3 {
+        font-size: 19px;
+    }
+
+    .home-book-author {
+        font-size: 15px;
+    }
+
+    .home-book-rating {
+        font-size: 15px;
+    }
+
+    .home-book-rating small {
+        font-size: 13px;
+    }
+
+
+    /* =====================================================
+    ABOUT
+    ===================================================== */
+
+    .home-about-label {
+        font-size: 16px;
+    }
+
+    .home-about-text {
+        font-size: 18px;
+        line-height: 2.15;
+    }
+
+    .home-about-feature h3 {
+        font-size: 18px;
+    }
+
+    .home-about-feature p {
+        font-size: 15px;
+        line-height: 2;
+    }
+
+
+    /* لوگوی About بدون کادر */
+
+    .home-about-logo-box {
+        width: 100%;
+        min-height: 300px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        background: transparent;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .home-about-logo-box .home-about-logo {
+        width: 230px;
+        height: 230px;
+
+        object-fit: contain;
+
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+
+    /* =====================================================
+    CONTACT
+    ===================================================== */
+
+    .home-contact-label {
+        font-size: 16px;
+    }
+
+    .home-contact-header h2 {
+        font-size: 50px;
+    }
+
+    .home-contact-header p {
+        font-size: 18px;
+        line-height: 2.1;
+    }
+
+    .home-contact-item h3 {
+        font-size: 19px;
+    }
+
+    .home-contact-item p {
+        font-size: 15px;
+        line-height: 2;
+    }
+
+    /* =====================================================
+    BIGGER & CLEARER TYPOGRAPHY
+    ===================================================== */
+
+    /* HERO */
+
+    .hero-kicker {
+        font-size: 18px;
+        font-weight: 900;
+    }
+
+    .hero-title {
+        font-size: clamp(46px, 5.5vw, 72px);
+        font-weight: 900;
+        line-height: 1.35;
+    }
+
+    .hero-description {
+        max-width: 650px;
+        font-size: 20px;
+        font-weight: 500;
+        line-height: 2.2;
+    }
+
+    .hero-search input {
+        font-size: 18px;
+        font-weight: 500;
+    }
+
+    .hero-search button {
+        font-size: 17px;
+        font-weight: 900;
+    }
+
+    .hero-hints {
+        font-size: 16px;
+    }
+
+
+    /* HERO LOGO */
+
+    .hero-brand-name {
+        font-size: 20px;
+        font-weight: 900;
+    }
+
+    .hero-brand-location {
+        font-size: 16px;
+    }
+
+
+    /* =====================================================
+    BOOK SECTION
+    ===================================================== */
+
+    .section-small {
+        font-size: 17px;
+        font-weight: 900;
+    }
+
+    .section-heading h2 {
+        font-size: 36px;
+        font-weight: 900;
+    }
+
+    .section-heading p {
+        font-size: 17px;
+        font-weight: 500;
+    }
+
+
+    /* BOOK CARD */
+
+    .home-book-category {
+        font-size: 14px;
+        font-weight: 900;
+    }
+
+    .home-book-info h3 {
+        font-size: 21px;
+        font-weight: 900;
+        line-height: 1.6;
+    }
+
+    .home-book-author {
+        font-size: 16px;
+        font-weight: 500;
+    }
+
+    .home-book-rating {
+        font-size: 16px;
+        font-weight: 900;
+    }
+
+    .home-book-rating small {
+        font-size: 14px;
+    }
+
+    .book-status {
+        font-size: 14px;
+        font-weight: 900;
+    }
+
+
+    /* =====================================================
+    ABOUT
+    ===================================================== */
+
+    .home-about-label {
+        font-size: 18px;
+        font-weight: 900;
+    }
+
+    .home-about-text {
+        font-size: 20px;
+        font-weight: 500;
+        line-height: 2.25;
+    }
+
+    .home-about-feature h3 {
+        font-size: 20px;
+        font-weight: 900;
+    }
+
+    .home-about-feature p {
+        font-size: 16px;
+        font-weight: 500;
+        line-height: 2.1;
+    }
+
+
+    /* لوگوی About بدون هیچ کادر */
+
+    .home-about-logo-box {
+        width: 100%;
+        min-height: 300px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        background: transparent !important;
+        border: none !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+    }
+
+    .home-about-logo-box .home-about-logo {
+        width: 240px;
+        height: 240px;
+
+        object-fit: contain;
+
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+
+    /* =====================================================
+    CONTACT
+    ===================================================== */
+
+    .home-contact-label {
+        font-size: 18px;
+        font-weight: 900;
+    }
+
+    .home-contact-header h2 {
+        font-size: 52px;
+        font-weight: 900;
+    }
+
+    .home-contact-header p {
+        font-size: 19px;
+        font-weight: 500;
+        line-height: 2.2;
+    }
+
+    .home-contact-item h3 {
+        font-size: 21px;
+        font-weight: 900;
+    }
+
+    .home-contact-item p {
+        font-size: 17px;
+        font-weight: 500;
+        line-height: 2.1;
+    }
+
+    .home-contact-icon {
+        font-size: 28px;
+    }
+</style>
+
+
+<div class="home-page">
+
+
+    <!-- =====================================================
+         HERO
+    ====================================================== -->
+
+    <section class="home-hero">
+
+        <div class="container hero-grid">
+
+            <div class="hero-text">
+
+                <span class="hero-kicker">
+                    کتابخانه پارک علم و فناوری سیستان و بلوچستان
+                </span>
+
+
+                <h1 class="hero-title">
+
+                    جستجو،
+
+                    <strong>
+                        کشف، مطالعه
+                    </strong>
+
+                </h1>
+
+
+                <p class="hero-description">
+
+                    به مجموعه‌ای از منابع علمی، آموزشی و مطالعاتی
+                    کتابخانه پارک علم و فناوری سیستان و بلوچستان
+                    دسترسی داشته باشید و کتاب موردنظر خود را
+                    سریع پیدا کنید
+
+                </p>
+
+
+                <form
+                    class="hero-search"
+                    method="get"
+                    action="{% url 'books' %}"
+                >
+
+                    <div class="hero-search-icon">
+                        ⌕
+                    </div>
+
+
+                    <input
+                        type="text"
+                        name="q"
+                        placeholder="نام کتاب، نویسنده یا موضوع..."
+                        autocomplete="off"
+                    >
+
+
+                    <button type="submit">
+                        جستجوی کتاب
+                    </button>
+
+                </form>
+
+
+                <div class="hero-hints">
+
+                    جستجو در
+
+                    <span>عنوان</span>
+
+                    <span>·</span>
+
+                    <span>نویسنده</span>
+
+                    <span>·</span>
+
+                    <span>دسته‌بندی</span>
+
+                </div>
+
+            </div>
+
+
+            <div class="hero-brand-panel">
+
+                <div class="hero-brand-content">
+
+                    <img
+                        class="hero-brand-logo"
+                        src="{% static 'blog/images/park-logo.png' %}"
+                        alt="پارک علم و فناوری سیستان و بلوچستان"
+                    >
+
+
+                    <div class="hero-brand-name">
+                        پارک علم و فناوری
+                        سیستان و بلوچستان
+                    </div>
+
+
+                    <div class="hero-brand-location">
+                        کتابخانه دیجیتال
+                    </div>
+
+
+                    <div class="hero-brand-line"></div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         BOOKS
+    ====================================================== -->
+
+    <section class="latest-books" id="books">
+
+        <div class="container">
+
+            <div class="section-heading">
+
+                <div>
+
+                    <span class="section-small">
+                        مجموعه کتابخانه
+                    </span>
+
+
+                    <h2>
+                        برترین کتاب‌ها
+                    </h2>
+
+
+                    <p>
+                        کتاب‌هایی با بالاترین امتیاز کاربران
+                    </p>
+
+                </div>
+
+
+                <a
+                    href="{% url 'books' %}"
+                    class="all-books"
+                >
+
+                    مشاهده همه کتاب‌ها
+
+                    <span>←</span>
+
+                </a>
+
+            </div>
+
+
+            <div class="home-books-grid">
+
+                {% for book in books %}
+
+                    <a
+                        href="{% url 'book_detail' book.pk %}"
+                        class="home-book"
+                    >
+
+                        <div class="home-book-cover">
+
+                            {% if book.is_available %}
+
+                                <span class="book-status">
+                                    موجود
+                                </span>
+
+                            {% else %}
+
+                                <span class="book-status unavailable">
+                                    ناموجود
+                                </span>
+
+                            {% endif %}
+
+
+                            {% if book.cover %}
+
+                                <img
+                                    src="{{ book.cover.url }}"
+                                    alt="جلد {{ book.title }}"
+                                >
+
+                            {% else %}
+
+                                <div class="no-cover">
+                                    📚
+                                </div>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <div class="home-book-info">
+
+                            {% if book.category %}
+
+                                <span class="home-book-category">
+                                    {{ book.category.name }}
+                                </span>
+
+                            {% endif %}
+
+
+                            <h3>
+                                {{ book.title }}
+                            </h3>
+
+
+                            <p class="home-book-author">
+                                {{ book.author }}
+                            </p>
+
+
+                            {% if book.review_count > 0 %}
+
+                                <div class="home-book-rating">
+
+                                    <span>★</span>
+
+                                    {{ book.average_rating|floatformat:1 }}
+
+                                    <small>
+                                        ({{ book.review_count }} نظر)
+                                    </small>
+
+                                </div>
+
+                            {% else %}
+
+                                <div class="home-book-rating no-rating">
+                                    بدون امتیاز
+                                </div>
+
+                            {% endif %}
+
+                        </div>
+
+                    </a>
+
+                {% empty %}
+
+                    <div class="empty-home">
+                        هنوز کتابی در کتابخانه ثبت نشده است.
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+    </section>
+
+<!-- =====================================================
+     ABOUT
+====================================================== -->
+
+<section
+    class="home-about"
+    id="about"
+>
+
+    <div class="container home-about-grid">
+
+        <div>
+
+
+
+            <div class="home-about-logo-box">
+                <img
+                    class="home-about-logo"
+                    src="{% static 'blog/images/park-logo.png' %}"
+                    alt="پارک علم و فناوری سیستان و بلوچستان"
+                >
+            </div>
+
+        </div>
+
+
+        <div>
+
+            <p class="home-about-text">
+                کتابخانه پارک علم و فناوری سیستان و بلوچستان
+                فضایی برای دسترسی آسان‌تر به منابع علمی،
+                آموزشی و مطالعاتی فراهم کرده است.
+            </p>
+
+
+            <p class="home-about-text">
+                هدف ما این است که پیدا کردن کتاب موردنظر،
+                بررسی اطلاعات آن و استفاده از منابع کتابخانه
+                برای کاربران ساده و سریع باشد.
+            </p>
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     CONTACT
+====================================================== -->
+
+<section
+    class="home-contact"
+    id="contact"
+>
+
+    <div class="container">
+
+        <div class="home-contact-header">
+
+            <span class="home-contact-label">
+                ارتباط با ما
+            </span>
+
+            <h2>
+                تماس با کتابخانه
+            </h2>
+
+            <p>
+                برای دریافت اطلاعات بیشتر درباره کتابخانه،
+                منابع و خدمات آن می‌توانید از راه‌های ارتباطی
+                زیر با ما در تماس باشید.
+            </p>
+
+        </div>
+
+
+        <div class="home-contact-list">
+
+
+            <div class="home-contact-item">
+
+                <div class="home-contact-icon">
+                    📍
+                </div>
+
+                <div>
+                    <h3>
+                        آدرس
+                    </h3>
+
+                    <p>
+                        پارک علم و فناوری سیستان و بلوچستان
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="home-contact-item">
+
+                <div class="home-contact-icon">
+                    ☎
+                </div>
+
+                <div>
+                    <h3>
+                        تلفن
+                    </h3>
+
+                    <p>
+                        برای ارتباط با کتابخانه با مجموعه تماس بگیرید.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="home-contact-item">
+
+                <div class="home-contact-icon">
+                    ✉
+                </div>
+
+                <div>
+                    <h3>
+                        ایمیل
+                    </h3>
+
+                    <p>
+                        راه ارتباطی الکترونیکی کتابخانه
+                    </p>
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</section>
+
+
+</div>
+
+{% endblock %}

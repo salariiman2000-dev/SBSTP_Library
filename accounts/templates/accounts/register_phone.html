@@ -1,0 +1,403 @@
+{% extends "blog/base.html" %}
+{% load static %}
+
+{% block title %}
+    ثبت نام | کتابخانه پارک علم و فناوری
+{% endblock %}
+
+{% block content %}
+
+<style>
+    .auth-page {
+        min-height: calc(100vh - 150px);
+        padding: 50px 20px 70px;
+        display: grid;
+        place-items: center;
+    }
+
+    .auth-shell {
+        width: min(920px, 100%);
+        display: grid;
+        grid-template-columns: 1.05fr 0.95fr;
+        overflow: hidden;
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        background: var(--surface);
+        box-shadow: 0 30px 80px rgba(23, 35, 60, .16);
+    }
+
+    /* سمت لوگوی پارک */
+    .auth-brand {
+        min-height: 480px;
+        padding: 45px 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background:
+            linear-gradient(
+                160deg,
+                rgba(232, 155, 61, .12),
+                transparent 65%
+            ),
+            repeating-linear-gradient(
+                -45deg,
+                transparent,
+                transparent 18px,
+                rgba(23, 35, 60, .025) 18px,
+                rgba(23, 35, 60, .025) 19px
+            );
+        border-left: 1px solid var(--border);
+    }
+
+    .park-logo-wrap {
+        width: auto;
+        height: auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        box-shadow: none;
+    }
+
+    .park-logo {
+        width: 280px;
+        height: 280px;
+        object-fit: contain;
+        display: block;
+    }
+
+    /* سمت فرم */
+    .auth-panel {
+        padding: 48px 36px;
+        background: var(--surface-2);
+    }
+
+    .auth-heading {
+        margin-bottom: 28px;
+    }
+
+    .auth-heading-label {
+        display: block;
+        margin-bottom: 6px;
+        color: var(--orange-dark);
+        font-size: 14px;
+        font-weight: 800;
+    }
+
+    .auth-heading h1 {
+        margin: 0 0 7px;
+        color: var(--heading);
+        font-size: 28px;
+        line-height: 1.5;
+        font-weight: 900;
+    }
+
+    .auth-heading p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.9;
+    }
+
+    .form-group {
+        margin-bottom: 18px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--heading);
+        font-size: 15px;
+        font-weight: 800;
+    }
+
+    .form-group input {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 13px 14px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: var(--surface);
+        color: var(--text);
+        font-family: inherit;
+        font-size: 16px;
+        direction: ltr;
+        text-align: left;
+        outline: none;
+        transition:
+            border-color .2s ease,
+            box-shadow .2s ease,
+            background .2s ease;
+    }
+
+    .form-group input::placeholder {
+        color: var(--muted);
+    }
+
+    .form-group input:focus {
+        border-color: var(--orange);
+        background: var(--surface);
+        box-shadow: 0 0 0 3px rgba(232, 155, 61, .14);
+    }
+
+    .form-help {
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.9;
+    }
+
+    /* خطاها */
+    .form-errors {
+        margin-bottom: 18px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: rgba(200, 92, 80, .08);
+        border: 1px solid rgba(200, 92, 80, .20);
+        color: #c85c50;
+        font-size: 14px;
+        line-height: 1.8;
+    }
+
+    .field-error {
+        margin-top: 6px;
+        color: #c85c50;
+        font-size: 13px;
+        line-height: 1.7;
+    }
+
+    /* دکمه */
+    .auth-button {
+        width: 100%;
+        display: block;
+        box-sizing: border-box;
+        margin-top: 8px;
+        padding: 13px;
+        border: 0;
+        border-radius: 12px;
+        background: linear-gradient(
+            90deg,
+            var(--orange),
+            var(--orange-dark)
+        );
+        color: #ffffff;
+        font-family: inherit;
+        font-size: 16px;
+        font-weight: 800;
+        line-height: 1.5;
+        cursor: pointer;
+        transition:
+            transform .2s ease,
+            box-shadow .2s ease,
+            filter .2s ease;
+    }
+
+    .auth-button:hover {
+        filter: brightness(1.06);
+        transform: translateY(-1px);
+        box-shadow: 0 10px 25px rgba(23, 35, 60, .14);
+    }
+
+    .auth-button:active {
+        transform: translateY(0);
+    }
+
+    /* پایین فرم */
+    .auth-footer {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid var(--border);
+        text-align: center;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.8;
+    }
+
+    .auth-footer a {
+        color: var(--orange-dark);
+        font-weight: 800;
+        text-decoration: none;
+        transition: opacity .2s ease;
+    }
+
+    .auth-footer a:hover {
+        opacity: .7;
+    }
+
+    @media (max-width: 760px) {
+
+        .auth-page {
+            padding: 35px 15px 55px;
+        }
+
+        .auth-shell {
+            grid-template-columns: 1fr;
+        }
+
+        .auth-brand {
+            min-height: 230px;
+            padding: 30px 24px;
+            border-left: 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .park-logo-wrap {
+            width: auto;
+            height: auto;
+            padding: 0;
+        }
+
+        .park-logo {
+            width: 190px;
+            height: 190px;
+        }
+
+        .auth-panel {
+            padding: 30px 22px;
+        }
+
+        .auth-heading h1 {
+            font-size: 25px;
+        }
+
+        .auth-heading-label {
+            font-size: 13px;
+        }
+
+        .auth-heading p {
+            font-size: 14px;
+        }
+    }
+
+    @media (max-width: 500px) {
+
+        .auth-page {
+            padding: 25px 12px 45px;
+        }
+
+        .auth-brand {
+            min-height: 190px;
+        }
+
+        .park-logo {
+            width: 160px;
+            height: 160px;
+        }
+
+        .auth-panel {
+            padding: 26px 18px;
+        }
+
+        .auth-footer {
+            font-size: 13px;
+        }
+    }
+</style>
+
+
+<section class="auth-page">
+
+    <div class="auth-shell">
+
+        <!-- لوگوی پارک -->
+        <section class="auth-brand">
+
+            <div class="park-logo-wrap">
+
+                <img
+                    src="{% static 'blog/images/park-logo.png' %}"
+                    alt="پارک علم و فناوری"
+                    class="park-logo"
+                >
+
+            </div>
+
+        </section>
+
+
+        <!-- فرم ثبت نام -->
+        <main class="auth-panel">
+
+            <div class="auth-heading">
+
+                <span class="auth-heading-label">
+                    عضویت در کتابخانه
+                </span>
+
+                <h1>
+                    شماره موبایل خود را وارد کنید
+                </h1>
+
+                <p>
+                    برای ساخت حساب کاربری، شماره موبایل خود را وارد کنید.
+                </p>
+
+            </div>
+
+
+            {% if form.non_field_errors %}
+
+                <div class="form-errors">
+                    {{ form.non_field_errors }}
+                </div>
+
+            {% endif %}
+
+
+            <form method="post">
+
+                {% csrf_token %}
+
+
+                <div class="form-group">
+
+                    <label for="{{ form.phone_number.id_for_label }}">
+                        شماره موبایل
+                    </label>
+
+                    {{ form.phone_number }}
+
+                    <div class="form-help">
+                        شماره موبایل خود را به صورت ۰۹۱۲۳۴۵۶۷۸۹ وارد کنید.
+                    </div>
+
+                    {% for error in form.phone_number.errors %}
+
+                        <div class="field-error">
+                            {{ error }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="auth-button"
+                >
+                    ادامه
+                </button>
+
+            </form>
+
+
+            <div class="auth-footer">
+
+                قبلاً حساب ساخته‌اید؟
+
+                <a href="{% url 'accounts:login' %}">
+                    وارد شوید
+                </a>
+
+            </div>
+
+        </main>
+
+    </div>
+
+</section>
+
+{% endblock %}

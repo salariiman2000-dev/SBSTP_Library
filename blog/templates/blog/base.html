@@ -1,0 +1,935 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>
+        {% block title %}کتابخانه پارک علم و فناوری{% endblock %}
+    </title>
+
+
+    <script>
+        (function () {
+            const savedTheme = localStorage.getItem("library-theme");
+
+            if (savedTheme === "dark") {
+                document.documentElement.classList.add("dark");
+            }
+        })();
+    </script>
+
+
+    <style>
+
+        /* =====================================================
+           B NAZANIN FONT
+        ===================================================== */
+
+        @font-face {
+            font-family: "B Nazanin";
+            src: url("{% static 'fonts/BNAZANIN.woff2' %}") format("woff2");
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: "B Nazanin";
+            src: url("{% static 'fonts/BNAZANB.woff2' %}") format("woff2");
+            font-weight: 700;
+            font-style: normal;
+            font-display: swap;
+        }
+
+
+        /* =====================================================
+           RESET
+        ===================================================== */
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+
+        /* =====================================================
+           VARIABLES
+        ===================================================== */
+
+        :root {
+
+            --navy: #17233c;
+            --navy-light: #243454;
+
+            --orange: #e89b3d;
+            --orange-dark: #c97c20;
+
+            --cream: #faf8f3;
+            --cream-dark: #f2eee5;
+
+            --white: #ffffff;
+
+            --text: #202938;
+            --muted: #7b8492;
+
+            --border: #e9e4da;
+
+            --shadow:
+                0 18px 50px rgba(23, 35, 60, 0.08);
+
+
+            /* New design system */
+
+            --page-bg: #f5f7fa;
+            --surface: #ffffff;
+            --surface-soft: #f8fafc;
+            --surface-hover: #f2f5f8;
+
+            --heading: #17233c;
+            --body-text: #303a4b;
+            --text-soft: #748096;
+
+            --line: #e5e9ef;
+
+            --header-bg: rgba(255, 255, 255, .88);
+
+            --accent-soft: rgba(232, 155, 61, .10);
+
+            --button-bg: #17233c;
+            --button-text: #ffffff;
+
+            --footer-bg: #111b2f;
+            --footer-text: #ffffff;
+
+            --hero-bg: #f5f7fa;
+        }
+
+
+        /* =====================================================
+           DARK MODE
+        ===================================================== */
+
+        html.dark {
+
+            --page-bg: #101827;
+            --surface: #162236;
+            --surface-soft: #1a293f;
+            --surface-hover: #203049;
+
+            --heading: #edf2f8;
+            --body-text: #d5dce7;
+            --text-soft: #96a4b8;
+
+            --line: #26364d;
+
+            --header-bg: rgba(16, 24, 39, .90);
+
+            --accent-soft: rgba(232, 155, 61, .09);
+
+            --button-bg: #e89b3d;
+            --button-text: #152138;
+
+            --footer-bg: #0c1423;
+            --footer-text: #edf2f8;
+
+            --hero-bg: #101827;
+
+            --cream: #101827;
+            --cream-dark: #162236;
+            --white: #162236;
+
+            --text: #d5dce7;
+            --muted: #96a4b8;
+
+            --border: #26364d;
+
+            --navy: #edf2f8;
+            --navy-light: #dbe3ee;
+        }
+
+
+        /* =====================================================
+           GLOBAL
+        ===================================================== */
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+
+        html,
+        body,
+        button,
+        input,
+        textarea,
+        select {
+            font-family:
+                "B Nazanin",
+                Tahoma,
+                sans-serif;
+        }
+
+
+        body {
+
+            min-height: 100vh;
+
+            background: var(--page-bg);
+            color: var(--body-text);
+
+            font-size: 17px;
+
+            line-height: 1.9;
+
+            transition:
+                background-color .2s ease,
+                color .2s ease;
+        }
+
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+
+        button,
+        input,
+        textarea,
+        select {
+            font-size: inherit;
+        }
+
+
+        img {
+            max-width: 100%;
+            display: block;
+        }
+
+
+        .container {
+
+            width: min(
+                1180px,
+                calc(100% - 40px)
+            );
+
+            margin-inline: auto;
+        }
+
+
+        /* =====================================================
+           HEADER
+        ===================================================== */
+
+        .site-header {
+
+            position: sticky;
+            top: 0;
+            z-index: 100;
+
+            background: var(--header-bg);
+
+            border-bottom:
+                1px solid var(--line);
+
+            backdrop-filter: blur(16px);
+
+            transition:
+                background-color .2s ease,
+                border-color .2s ease;
+        }
+
+
+        .header-inner {
+
+            min-height: 76px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 25px;
+        }
+
+
+        .brand {
+
+            display: flex;
+            align-items: center;
+
+            gap: 12px;
+
+            flex-shrink: 0;
+        }
+
+
+        .brand img {
+
+            width: 48px;
+            height: 48px;
+
+            object-fit: contain;
+        }
+
+
+        .brand-text {
+
+            display: flex;
+            flex-direction: column;
+
+            line-height: 1.45;
+        }
+
+
+        .brand-title {
+
+            color: var(--heading);
+
+            font-size: 17px;
+            font-weight: 700;
+        }
+
+
+        .brand-subtitle {
+
+            margin-top: 2px;
+
+            color: var(--text-soft);
+
+            font-size: 13px;
+            font-weight: 400;
+        }
+
+
+        /* =====================================================
+           NAVIGATION
+        ===================================================== */
+
+        .header-right {
+
+            display: flex;
+            align-items: center;
+
+            gap: 18px;
+        }
+
+
+        .main-nav {
+
+            display: flex;
+            align-items: center;
+
+            gap: 3px;
+        }
+
+
+        .main-nav a {
+
+            position: relative;
+
+            padding: 8px 11px;
+
+            color: var(--text-soft);
+
+            font-size: 15px;
+            font-weight: 700;
+
+            border-radius: 8px;
+
+            line-height: 1.5;
+
+            transition:
+                color .2s ease,
+                background-color .2s ease;
+        }
+
+
+        .main-nav a:hover {
+
+            color: var(--heading);
+
+            background:
+                var(--surface-hover);
+        }
+
+
+        .header-tools {
+
+            display: flex;
+            align-items: center;
+
+            gap: 7px;
+        }
+
+
+        .theme-toggle {
+
+            width: 37px;
+            height: 37px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border: 1px solid var(--line);
+            border-radius: 9px;
+
+            background: var(--surface);
+
+            color: var(--heading);
+
+            cursor: pointer;
+
+            font-family:
+                "B Nazanin",
+                Tahoma,
+                sans-serif;
+
+            font-size: 18px;
+
+            line-height: 1;
+
+            transition:
+                background-color .2s ease,
+                border-color .2s ease,
+                transform .2s ease;
+        }
+
+
+        .theme-toggle:hover {
+
+            background:
+                var(--surface-hover);
+
+            transform: translateY(-1px);
+        }
+
+
+        .theme-icon-light {
+            display: inline;
+        }
+
+
+        .theme-icon-dark {
+            display: none;
+        }
+
+
+        html.dark .theme-icon-light {
+            display: none;
+        }
+
+
+        html.dark .theme-icon-dark {
+            display: inline;
+        }
+
+
+        .account-link {
+
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+
+            min-height: 37px;
+
+            padding: 0 14px;
+
+            border-radius: 9px;
+
+            background: var(--button-bg);
+            color: var(--button-text);
+
+            font-size: 14px;
+            font-weight: 700;
+
+            line-height: 1.5;
+
+            transition:
+                opacity .2s ease,
+                transform .2s ease;
+        }
+
+
+        .account-link:hover {
+
+            opacity: .9;
+            transform: translateY(-1px);
+        }
+
+
+        /* =====================================================
+           MAIN
+        ===================================================== */
+
+        main {
+            min-height: 65vh;
+        }
+
+
+        .page-content {
+            overflow: hidden;
+        }
+
+
+        /* =====================================================
+           FOOTER
+        ===================================================== */
+
+        .site-footer {
+
+            margin-top: 70px;
+
+            padding: 42px 0;
+
+            background: var(--footer-bg);
+
+            color: var(--footer-text);
+        }
+
+
+        .footer-inner {
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 30px;
+        }
+
+
+        .footer-brand {
+
+            display: flex;
+            align-items: center;
+
+            gap: 13px;
+        }
+
+
+        /* =====================================================
+           PROFILE NOTIFICATION BADGE
+        ===================================================== */
+
+        .account-link-wrapper {
+
+            position: relative;
+            display: inline-flex;
+        }
+
+
+        .profile-badge {
+
+            position: absolute;
+
+            top: -6px;
+            right: -6px;
+
+            min-width: 18px;
+            height: 18px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            padding: 0 4px;
+
+            border-radius: 50%;
+
+            background: #e53935;
+            color: #ffffff;
+
+            font-family:
+                Tahoma,
+                sans-serif;
+
+            font-size: 10px;
+            font-weight: 700;
+
+            line-height: 1;
+
+            border: 2px solid var(--page-bg);
+
+            box-shadow:
+                0 3px 8px rgba(229, 57, 53, .25);
+
+            z-index: 5;
+        }
+
+
+        .footer-brand img {
+
+            width: 50px;
+            height: 50px;
+
+            object-fit: contain;
+
+            padding: 5px;
+
+            background: #ffffff;
+
+            border-radius: 10px;
+        }
+
+
+        .footer-title {
+
+            font-size: 16px;
+            font-weight: 700;
+
+            line-height: 1.6;
+        }
+
+
+        .footer-description {
+
+            margin-top: 3px;
+
+            color: rgba(255,255,255,.58);
+
+            font-size: 13px;
+
+            line-height: 1.7;
+        }
+
+
+        .footer-copy {
+
+            color: rgba(255,255,255,.52);
+
+            font-size: 13px;
+
+            line-height: 1.7;
+        }
+
+
+        /* =====================================================
+           MOBILE
+        ===================================================== */
+
+        @media (max-width: 950px) {
+
+            .header-inner {
+
+                min-height: auto;
+
+                padding: 14px 0;
+
+                flex-wrap: wrap;
+            }
+
+
+            .header-right {
+
+                width: 100%;
+
+                justify-content: space-between;
+            }
+
+
+            .main-nav {
+
+                overflow-x: auto;
+
+                max-width: 100%;
+
+                scrollbar-width: none;
+            }
+
+
+            .main-nav::-webkit-scrollbar {
+                display: none;
+            }
+
+        }
+
+
+        @media (max-width: 650px) {
+
+            .container {
+
+                width: min(
+                    100% - 28px,
+                    1180px
+                );
+            }
+
+
+            .brand-title {
+                font-size: 15px;
+            }
+
+
+            .brand-subtitle {
+                font-size: 12px;
+            }
+
+
+            .brand img {
+
+                width: 43px;
+                height: 43px;
+            }
+
+
+            .main-nav a {
+
+                padding: 7px 9px;
+
+                font-size: 14px;
+            }
+
+
+            .header-tools {
+                flex-shrink: 0;
+            }
+
+
+            .account-link {
+
+                padding: 0 11px;
+
+                font-size: 13px;
+            }
+
+
+            .footer-inner {
+
+                flex-direction: column;
+
+                text-align: center;
+            }
+
+
+            .footer-brand {
+
+                flex-direction: column;
+            }
+
+
+            .footer-title {
+                font-size: 15px;
+            }
+
+
+            .footer-description,
+            .footer-copy {
+                font-size: 12px;
+            }
+
+        }
+
+    </style>
+
+    {% block extra_css %}{% endblock %}
+
+</head>
+
+
+<body>
+
+
+<header class="site-header">
+
+    <div class="container header-inner">
+
+
+        <a href="/" class="brand">
+
+            <img
+                src="{% static 'blog/images/park-logo.png' %}"
+                alt="لوگوی پارک علم و فناوری"
+            >
+
+            <div class="brand-text">
+
+                <span class="brand-title">
+                    کتابخانه پارک علم و فناوری
+                </span>
+
+                <span class="brand-subtitle">
+                    سیستان و بلوچستان
+                </span>
+
+            </div>
+
+        </a>
+
+
+        <div class="header-right">
+
+
+            <nav class="main-nav">
+
+                <a href="/">
+                    خانه
+                </a>
+                <a href="{% url 'home' %}#about">درباره ما</a>
+
+                <a href="{% url 'home' %}#contact">تماس با ما</a>
+
+                <a href="{% url 'books' %}">
+                    کتاب‌ها
+                </a>
+
+
+
+
+            </nav>
+
+
+            <div class="header-tools">
+
+                <button
+                    type="button"
+                    class="theme-toggle"
+                    id="themeToggle"
+                    aria-label="تغییر تم"
+                    title="تغییر تم"
+                >
+
+                    <span class="theme-icon-light">
+                        ☀
+                    </span>
+
+                    <span class="theme-icon-dark">
+                        ☾
+                    </span>
+
+                </button>
+
+
+                {% if user.is_authenticated %}
+
+                    <div class="account-link-wrapper">
+
+                        <a
+                            href="{% url 'accounts:profile' %}"
+                            class="account-link"
+                        >
+                            پروفایل
+                        </a>
+
+                        {% if request.session.favorite_notification %}
+
+                            <span
+                                class="profile-badge"
+                                aria-label="اعلان جدید"
+                            >
+                                1
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+                {% else %}
+
+                    <a
+                        href="{% url 'accounts:login' %}"
+                        class="account-link"
+                    >
+                        ورود
+                    </a>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+<main>
+
+    <div class="page-content">
+
+        {% block content %}
+        {% endblock %}
+
+    </div>
+
+</main>
+
+
+<footer class="site-footer">
+
+    <div class="container footer-inner">
+
+
+        <div class="footer-brand">
+
+            <img
+                src="{% static 'blog/images/park-logo.png' %}"
+                alt="پارک علم و فناوری سیستان و بلوچستان"
+            >
+
+            <div>
+
+                <div class="footer-title">
+                    کتابخانه پارک علم و فناوری
+                </div>
+
+                <p class="footer-description">
+                    دسترسی ساده‌تر به منابع علمی و آموزشی
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="footer-copy">
+            © ۱۴۰۵ — تمامی حقوق محفوظ است.
+        </div>
+
+
+    </div>
+
+</footer>
+
+
+<script>
+
+    const themeToggle =
+        document.getElementById("themeToggle");
+
+    if (themeToggle) {
+
+        themeToggle.addEventListener(
+            "click",
+            function () {
+
+                const html =
+                    document.documentElement;
+
+                html.classList.toggle("dark");
+
+                const isDark =
+                    html.classList.contains("dark");
+
+                localStorage.setItem(
+                    "library-theme",
+                    isDark ? "dark" : "light"
+                );
+
+            }
+        );
+
+    }
+
+</script>
+
+
+</body>
+</html>

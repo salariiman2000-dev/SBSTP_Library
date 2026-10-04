@@ -1,0 +1,428 @@
+{% extends "dashboard/base.html" %}
+
+
+{% block title %}
+
+    {% if edit_mode %}
+        ویرایش دسته‌بندی
+    {% else %}
+        افزودن دسته‌بندی
+    {% endif %}
+
+{% endblock %}
+
+
+{% block page_title %}
+
+    {% if edit_mode %}
+        ویرایش دسته‌بندی
+    {% else %}
+        افزودن دسته‌بندی
+    {% endif %}
+
+{% endblock %}
+
+
+{% block content %}
+
+<style>
+
+    .category-form-page {
+        padding: 5px 0 30px;
+    }
+
+
+    .form-box {
+
+        width: 100%;
+
+        max-width: 650px;
+
+        padding: 30px;
+
+        background: var(--surface);
+
+        border:
+            1px solid var(--border);
+
+        border-radius: var(--radius);
+
+        box-shadow: var(--shadow);
+    }
+
+
+    .form-header {
+
+        padding-bottom: 20px;
+
+        margin-bottom: 25px;
+
+        border-bottom:
+            1px solid var(--border);
+    }
+
+
+    .form-header h2 {
+
+        color: var(--text);
+
+        font-size: 23px;
+
+        font-weight: 800;
+
+        margin-bottom: 7px;
+    }
+
+
+    .form-header p {
+
+        color: var(--text-soft);
+
+        font-size: 16px;
+
+        line-height: 1.8;
+    }
+
+
+    .field {
+        margin-bottom: 22px;
+    }
+
+
+    .field label {
+
+        display: block;
+
+        margin-bottom: 8px;
+
+        color: var(--text);
+
+        font-size: 17px;
+
+        font-weight: 700;
+    }
+
+
+    .field input {
+
+        width: 100%;
+
+        box-sizing: border-box;
+
+        padding: 12px 14px;
+
+        border:
+            1px solid var(--border);
+
+        border-radius: 9px;
+
+        background: var(--surface-soft);
+
+        color: var(--text);
+
+        font-family: inherit;
+
+        font-size: 16px;
+
+        outline: none;
+
+        transition:
+            border-color .2s ease,
+            background .2s ease,
+            box-shadow .2s ease;
+    }
+
+
+    .field input::placeholder {
+        color: var(--text-soft);
+    }
+
+
+    .field input:focus {
+
+        border-color: var(--primary);
+
+        background: var(--surface);
+
+        box-shadow:
+            0 0 0 3px
+            rgba(232, 155, 61, .11);
+    }
+
+
+    .field-hint {
+
+        margin-top: 7px;
+
+        color: var(--text-soft);
+
+        font-size: 15px;
+
+        line-height: 1.8;
+    }
+
+
+    .actions {
+
+        display: flex;
+
+        align-items: center;
+
+        gap: 10px;
+
+        margin-top: 28px;
+
+        padding-top: 22px;
+
+        border-top:
+            1px solid var(--border);
+    }
+
+
+    .btn {
+
+        min-width: 130px;
+
+        display: inline-flex;
+
+        align-items: center;
+
+        justify-content: center;
+
+        border-radius: 9px;
+
+        padding: 12px 22px;
+
+        font-family: inherit;
+
+        font-size: 16px;
+
+        font-weight: 800;
+
+        cursor: pointer;
+
+        text-decoration: none;
+
+        transition:
+            background .2s ease,
+            border-color .2s ease,
+            color .2s ease,
+            transform .2s ease,
+            box-shadow .2s ease;
+    }
+
+
+    .save-btn {
+
+        border: 0;
+
+        background: var(--primary);
+
+        color: white;
+    }
+
+
+    .save-btn:hover {
+
+        background: var(--primary-dark);
+
+        transform: translateY(-1px);
+
+        box-shadow:
+            0 7px 18px
+            rgba(232, 155, 61, .18);
+    }
+
+
+    .cancel-btn {
+
+        border:
+            1px solid var(--border);
+
+        background: var(--surface-soft);
+
+        color: var(--text);
+    }
+
+
+    .cancel-btn:hover {
+
+        border-color: var(--primary);
+
+        background: var(--primary-soft);
+
+        color: var(--primary-dark);
+
+        transform: translateY(-1px);
+    }
+
+
+    @media (max-width: 600px) {
+
+        .category-form-page {
+            padding-top: 0;
+        }
+
+
+        .form-box {
+
+            padding: 22px 18px;
+
+            border-radius: 14px;
+        }
+
+
+        .form-header h2 {
+            font-size: 20px;
+        }
+
+
+        .form-header p {
+            font-size: 15px;
+        }
+
+
+        .field label {
+            font-size: 16px;
+        }
+
+
+        .field input {
+            font-size: 16px;
+        }
+
+
+        .field-hint {
+            font-size: 14px;
+        }
+
+
+        .actions {
+
+            flex-direction: column;
+
+            align-items: stretch;
+        }
+
+
+        .btn {
+
+            width: 100%;
+
+            font-size: 16px;
+        }
+
+    }
+
+</style>
+
+
+<section class="category-form-page">
+
+    <div class="form-box">
+
+
+        <div class="form-header">
+
+            <h2>
+
+                {% if edit_mode %}
+
+                    ویرایش اطلاعات دسته‌بندی
+
+                {% else %}
+
+                    ایجاد دسته‌بندی جدید
+
+                {% endif %}
+
+            </h2>
+
+
+            <p>
+
+                {% if edit_mode %}
+
+                    نام دسته‌بندی را تغییر دهید و تغییرات را ذخیره کنید.
+
+                {% else %}
+
+                    نام دسته‌بندی جدید را وارد کنید تا به کتابخانه اضافه شود.
+
+                {% endif %}
+
+            </p>
+
+        </div>
+
+
+        <form method="post">
+
+            {% csrf_token %}
+
+
+            <div class="field">
+
+                <label>
+                    نام دسته‌بندی
+                </label>
+
+
+                <input
+                    type="text"
+                    name="name"
+                    value="{{ category.name|default:'' }}"
+                    placeholder="مثلاً کامپیوتر و فناوری"
+                    required
+                >
+
+
+                <div class="field-hint">
+
+                    نامی کوتاه و مشخص برای دسته‌بندی انتخاب کنید.
+
+                </div>
+
+            </div>
+
+
+            <div class="actions">
+
+
+                <button
+                    type="submit"
+                    class="btn save-btn"
+                >
+
+                    {% if edit_mode %}
+
+                        ذخیره تغییرات
+
+                    {% else %}
+
+                        افزودن دسته‌بندی
+
+                    {% endif %}
+
+                </button>
+
+
+                <a
+                    href="{% url 'manage_categories' %}"
+                    class="btn cancel-btn"
+                >
+                    انصراف
+                </a>
+
+
+            </div>
+
+
+        </form>
+
+
+    </div>
+
+</section>
+
+{% endblock %}

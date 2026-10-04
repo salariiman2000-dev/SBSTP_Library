@@ -1,0 +1,655 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>ورود به پنل مدیریت | کتابخانه</title>
+
+    <style>
+        @font-face {
+            font-family: "B Nazanin";
+            src: url("{% static 'fonts/BNAZANIN.woff2' %}") format("woff2");
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: "B Nazanin";
+            src: url("{% static 'fonts/BNAZANB.woff2' %}") format("woff2");
+            font-weight: 700;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        :root {
+            --bg: #f4f6f8;
+            --surface: #ffffff;
+            --surface-soft: #f8fafc;
+            --text: #202936;
+            --text-soft: #748091;
+            --border: #e2e7ed;
+
+            --primary: #d99132;
+            --primary-dark: #b8731f;
+            --primary-soft: rgba(217, 145, 50, .11);
+
+            --danger: #c85c50;
+            --danger-soft: rgba(200, 92, 80, .10);
+
+            --shadow:
+                0 16px 45px rgba(31, 42, 55, .08);
+
+            --radius: 16px;
+        }
+
+        [data-theme="dark"] {
+            --bg: #101722;
+            --surface: #172131;
+            --surface-soft: #1d293b;
+            --text: #edf2f7;
+            --text-soft: #a7b0bd;
+            --border: #2a3648;
+
+            --primary: #e39a3c;
+            --primary-dark: #c77d24;
+            --primary-soft: rgba(227, 154, 60, .12);
+
+            --danger: #d56b5f;
+            --danger-soft: rgba(213, 107, 95, .11);
+
+            --shadow:
+                0 18px 45px rgba(0, 0, 0, .20);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            min-height: 100%;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            padding: 25px;
+
+            background: var(--bg);
+            color: var(--text);
+
+            font-family:
+                "B Nazanin",
+                Tahoma,
+                Arial,
+                sans-serif;
+
+            font-size: 17px;
+            line-height: 1.9;
+
+            transition:
+                background .2s ease,
+                color .2s ease;
+        }
+
+        button,
+        input {
+            font-family: inherit;
+        }
+
+        /* =========================
+           PAGE
+        ========================= */
+
+        .login-page {
+            width: 100%;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-wrapper {
+            width: 100%;
+            max-width: 420px;
+        }
+
+        /* =========================
+           BRAND
+        ========================= */
+
+        .brand {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .brand-icon {
+            width: 56px;
+            height: 56px;
+
+            margin: 0 auto 12px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 15px;
+
+            background: var(--primary-soft);
+
+            border: 1px solid
+                rgba(217, 145, 50, .16);
+
+            font-size: 27px;
+        }
+
+        .brand h2 {
+            margin: 0;
+
+            color: var(--text);
+
+            font-size: 20px;
+            font-weight: 700;
+            line-height: 1.7;
+        }
+
+        .brand span {
+            display: block;
+
+            margin-top: 4px;
+
+            color: var(--text-soft);
+
+            font-size: 15px;
+            line-height: 1.8;
+        }
+
+        /* =========================
+           LOGIN CARD
+        ========================= */
+
+        .login-box {
+            width: 100%;
+
+            padding: 30px;
+
+            background: var(--surface);
+
+            border: 1px solid var(--border);
+
+            border-radius: var(--radius);
+
+            box-shadow: var(--shadow);
+        }
+
+        .login-box h1 {
+            margin: 0 0 8px;
+
+            color: var(--text);
+
+            text-align: center;
+
+            font-size: 24px;
+            font-weight: 700;
+            line-height: 1.7;
+        }
+
+        .login-description {
+            margin: 0 0 25px;
+
+            color: var(--text-soft);
+
+            text-align: center;
+
+            font-size: 16px;
+            line-height: 1.9;
+        }
+
+        /* =========================
+           MESSAGES
+        ========================= */
+
+        .messages {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+
+            margin-bottom: 18px;
+        }
+
+        .message {
+            padding: 11px 13px;
+
+            border-radius: 9px;
+
+            background: var(--danger-soft);
+
+            border: 1px solid
+                rgba(200, 92, 80, .18);
+
+            color: var(--danger);
+
+            font-size: 15px;
+            line-height: 1.8;
+        }
+
+        /* =========================
+           FORM
+        ========================= */
+
+        .field {
+            margin-bottom: 18px;
+        }
+
+        .field label {
+            display: block;
+
+            margin-bottom: 7px;
+
+            color: var(--text);
+
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .field input {
+            width: 100%;
+            height: 48px;
+
+            padding: 0 14px;
+
+            border: 1px solid var(--border);
+            border-radius: 9px;
+
+            outline: none;
+
+            background: var(--surface-soft);
+            color: var(--text);
+
+            font-family: inherit;
+            font-size: 16px;
+
+            transition:
+                border-color .2s ease,
+                box-shadow .2s ease,
+                background .2s ease;
+        }
+
+        .field input::placeholder {
+            color: var(--text-soft);
+        }
+
+        .field input:focus {
+            border-color: var(--primary);
+
+            background: var(--surface);
+
+            box-shadow:
+                0 0 0 3px var(--primary-soft);
+        }
+
+        /* =========================
+           BUTTON
+        ========================= */
+
+        .login-button {
+            width: 100%;
+            height: 48px;
+
+            margin-top: 5px;
+
+            border: none;
+            border-radius: 9px;
+
+            background: var(--primary);
+            color: #fff;
+
+            font-family: inherit;
+            font-size: 17px;
+            font-weight: 700;
+
+            cursor: pointer;
+
+            transition:
+                background .2s ease,
+                transform .2s ease,
+                box-shadow .2s ease;
+        }
+
+        .login-button:hover {
+            background: var(--primary-dark);
+
+            transform: translateY(-1px);
+
+            box-shadow:
+                0 8px 20px
+                rgba(217, 145, 50, .18);
+        }
+
+        .login-button:active {
+            transform: translateY(0);
+        }
+
+        /* =========================
+           FOOTER
+        ========================= */
+
+        .login-footer {
+            margin-top: 20px;
+
+            padding-top: 17px;
+
+            border-top: 1px solid var(--border);
+
+            text-align: center;
+
+            color: var(--text-soft);
+
+            font-size: 14px;
+            line-height: 1.9;
+        }
+
+        /* =========================
+           THEME TOGGLE
+        ========================= */
+
+        .theme-toggle {
+            position: fixed;
+
+            top: 20px;
+            left: 20px;
+
+            width: 42px;
+            height: 42px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border: 1px solid var(--border);
+            border-radius: 10px;
+
+            background: var(--surface);
+            color: var(--text);
+
+            font-size: 19px;
+
+            cursor: pointer;
+
+            box-shadow:
+                0 5px 18px
+                rgba(31, 42, 55, .06);
+
+            transition:
+                background .2s ease,
+                border-color .2s ease,
+                transform .2s ease;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--primary);
+            transform: translateY(-1px);
+        }
+
+        /* =========================
+           RESPONSIVE
+        ========================= */
+
+        @media (max-width: 500px) {
+            body {
+                padding: 18px;
+            }
+
+            .login-box {
+                padding: 24px 20px;
+            }
+
+            .brand h2 {
+                font-size: 19px;
+            }
+
+            .brand span {
+                font-size: 14px;
+            }
+
+            .login-box h1 {
+                font-size: 22px;
+            }
+
+            .login-description {
+                font-size: 15px;
+            }
+
+            .field label {
+                font-size: 15px;
+            }
+
+            .field input {
+                font-size: 15px;
+            }
+
+            .login-button {
+                font-size: 16px;
+            }
+
+            .login-footer {
+                font-size: 13px;
+            }
+
+            .theme-toggle {
+                top: 15px;
+                left: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <button
+        type="button"
+        class="theme-toggle"
+        id="themeToggle"
+        aria-label="تغییر حالت نمایش"
+        title="تغییر حالت نمایش"
+    >
+        ☾
+    </button>
+
+    <main class="login-page">
+
+        <div class="login-wrapper">
+
+            <!-- BRAND -->
+
+            <div class="brand">
+
+                <div class="brand-icon">
+                    📚
+                </div>
+
+                <h2>
+                    کتابخانه پارک علم و فناوری
+                </h2>
+
+                <span>
+                    سیستان و بلوچستان
+                </span>
+
+            </div>
+
+            <!-- LOGIN -->
+
+            <div class="login-box">
+
+                <h1>
+                    ورود به پنل مدیریت
+                </h1>
+
+                <p class="login-description">
+                    برای ورود به داشبورد مدیریت،
+                    اطلاعات حساب خود را وارد کنید.
+                </p>
+
+                    {% if messages %}
+                        <div class="messages">
+                            {% for message in messages %}
+                                {% if message.tags == "error" %}
+                                    <div class="message">
+                                        {{ message }}
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                <form method="post">
+
+                    {% csrf_token %}
+
+                    <div class="field">
+
+                        <label for="username">
+                            نام کاربری
+                        </label>
+
+                        <div class="input-wrapper">
+
+                            <input
+                                type="text"
+                                id="username"
+                                name="username"
+                                autocomplete="username"
+                                placeholder="نام کاربری خود را وارد کنید"
+                                required
+                            >
+
+                        </div>
+
+                    </div>
+
+                    <div class="field">
+
+                        <label for="password">
+                            رمز عبور
+                        </label>
+
+                        <div class="input-wrapper">
+
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                autocomplete="current-password"
+                                placeholder="رمز عبور خود را وارد کنید"
+                                required
+                            >
+
+                        </div>
+
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="login-button"
+                    >
+                        ورود به داشبورد
+                    </button>
+
+                </form>
+
+                <div class="login-footer">
+                    دسترسی این بخش فقط برای کاربران
+                    مجاز پنل مدیریت امکان‌پذیر است.
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <script>
+        const themeToggle =
+            document.getElementById(
+                "themeToggle"
+            );
+
+        const savedTheme =
+            localStorage.getItem(
+                "library-dashboard-theme"
+            );
+
+        if (savedTheme === "dark") {
+
+            document.documentElement
+                .setAttribute(
+                    "data-theme",
+                    "dark"
+                );
+
+            themeToggle.textContent = "☀";
+        }
+
+        themeToggle.addEventListener(
+            "click",
+            function () {
+
+                const isDark =
+                    document.documentElement
+                        .getAttribute(
+                            "data-theme"
+                        ) === "dark";
+
+                if (isDark) {
+
+                    document.documentElement
+                        .removeAttribute(
+                            "data-theme"
+                        );
+
+                    localStorage.setItem(
+                        "library-dashboard-theme",
+                        "light"
+                    );
+
+                    themeToggle.textContent = "☾";
+
+                } else {
+
+                    document.documentElement
+                        .setAttribute(
+                            "data-theme",
+                            "dark"
+                        );
+
+                    localStorage.setItem(
+                        "library-dashboard-theme",
+                        "dark"
+                    );
+
+                    themeToggle.textContent = "☀";
+                }
+            }
+        );
+    </script>
+
+</body>
+
+</html>

@@ -54,4 +54,10 @@ urlpatterns = [
         views.verify_otp_view,
         name="verify_otp",
     ),
+
+    path(
+        "membership-card/",
+        views.membership_card_view,
+        name="membership_card",
+    ),
 ]

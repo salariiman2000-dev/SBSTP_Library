@@ -8,344 +8,349 @@
 {% block content %}
 
 <style>
+
+.auth-page {
+    min-height: calc(100vh - 150px);
+    padding: 50px 20px 70px;
+    display: grid;
+    place-items: center;
+}
+
+.auth-shell {
+    width: min(980px, 100%);
+    display: grid;
+    grid-template-columns: .85fr 1.15fr;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    background: var(--surface);
+    box-shadow: 0 30px 80px rgba(23, 35, 60, .16);
+}
+
+.auth-brand {
+    min-height: 650px;
+    padding: 45px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background:
+        linear-gradient(
+            160deg,
+            rgba(232, 155, 61, .12),
+            transparent 65%
+        ),
+        repeating-linear-gradient(
+            -45deg,
+            transparent,
+            transparent 18px,
+            rgba(23, 35, 60, .025) 18px,
+            rgba(23, 35, 60, .025) 19px
+        );
+    border-left: 1px solid var(--border);
+}
+
+.park-logo-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.park-logo {
+    width: 260px;
+    height: 260px;
+    object-fit: contain;
+    display: block;
+}
+
+.auth-panel {
+    padding: 45px 36px;
+    background: var(--surface-2);
+}
+
+.auth-heading {
+    margin-bottom: 28px;
+}
+
+.auth-heading-label {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--orange-dark);
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.auth-heading h1 {
+    margin: 0 0 7px;
+    color: var(--heading);
+    font-size: 28px;
+    line-height: 1.5;
+    font-weight: 900;
+}
+
+.auth-heading p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.9;
+}
+
+.phone-info {
+    margin-bottom: 22px;
+    padding: 11px 14px;
+    border: 1px solid rgba(232, 155, 61, .22);
+    border-radius: 10px;
+    background: rgba(232, 155, 61, .07);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.9;
+}
+
+.phone-info strong {
+    color: var(--heading);
+}
+
+.form-errors {
+    margin-bottom: 18px;
+    padding: 12px 14px;
+    border: 1px solid rgba(200, 92, 80, .20);
+    border-radius: 10px;
+    background: rgba(200, 92, 80, .07);
+    color: #c85c50;
+    font-size: 14px;
+    line-height: 1.9;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 15px;
+}
+
+.form-group {
+    margin-bottom: 17px;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 7px;
+    color: var(--heading);
+    font-size: 15px;
+    font-weight: 800;
+}
+
+.required-mark {
+    color: #c85c50;
+    margin-right: 3px;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 15px;
+    outline: none;
+    transition:
+        border-color .2s ease,
+        box-shadow .2s ease,
+        background .2s ease;
+}
+.birth-date-row {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr 1fr;
+    gap: 12px;
+}
+
+.birth-label {
+    display: block;
+    margin-bottom: 7px;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.birth-select {
+    cursor: pointer;
+}
+
+@media (max-width: 560px) {
+    .birth-date-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+}
+.form-group textarea {
+    min-height: 110px;
+    resize: vertical;
+    line-height: 1.9;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: var(--muted);
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    border-color: var(--orange);
+    background: var(--surface);
+    box-shadow:
+        0 0 0 3px rgba(232, 155, 61, .14);
+}
+
+.jalali-date-input {
+    text-align: left;
+    direction: ltr;
+}
+
+.field-help {
+    margin-top: 6px;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.8;
+}
+
+.field-error {
+    margin-top: 6px;
+    color: #c85c50;
+    font-size: 13px;
+    line-height: 1.8;
+}
+
+.password-help {
+    margin-top: 7px;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.9;
+}
+
+.auth-button {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 7px;
+    padding: 13px;
+    border: 0;
+    border-radius: 12px;
+    background:
+        linear-gradient(
+            90deg,
+            var(--orange),
+            var(--orange-dark)
+        );
+    color: #fff;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 1.5;
+    cursor: pointer;
+    transition:
+        background .2s ease,
+        transform .2s ease,
+        box-shadow .2s ease,
+        filter .2s ease;
+}
+
+.auth-button:hover {
+    filter: brightness(1.06);
+    transform: translateY(-1px);
+    box-shadow:
+        0 10px 25px rgba(23, 35, 60, .14);
+}
+
+.auth-button:active {
+    transform: translateY(0);
+}
+
+.auth-footer {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+}
+
+.auth-footer a {
+    color: var(--orange-dark);
+    font-size: 14px;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.auth-footer a:hover {
+    opacity: .75;
+}
+
+@media (max-width: 800px) {
+
     .auth-page {
-        min-height: calc(100vh - 150px);
-        padding: 50px 20px 70px;
-        display: grid;
-        place-items: center;
+        padding: 35px 15px 55px;
     }
 
     .auth-shell {
-        width: min(920px, 100%);
-        display: grid;
-        grid-template-columns: 1.05fr 0.95fr;
-        overflow: hidden;
-        border: 1px solid var(--border);
-        border-radius: 24px;
-        background: var(--surface);
-        box-shadow: 0 30px 80px rgba(23, 35, 60, .16);
+        grid-template-columns: 1fr;
     }
-
-    /* بخش لوگو */
 
     .auth-brand {
-        min-height: 480px;
-        padding: 45px 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        background:
-            linear-gradient(
-                160deg,
-                rgba(232, 155, 61, .12),
-                transparent 65%
-            ),
-            repeating-linear-gradient(
-                -45deg,
-                transparent,
-                transparent 18px,
-                rgba(23, 35, 60, .025) 18px,
-                rgba(23, 35, 60, .025) 19px
-            );
-
-        border-left: 1px solid var(--border);
-    }
-
-    .park-logo-wrap {
-        width: auto;
-        height: auto;
-
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        padding: 0;
-        border: 0;
-        background: transparent;
-        box-shadow: none;
+        min-height: 220px;
+        padding: 30px 24px;
+        border-left: 0;
+        border-bottom: 1px solid var(--border);
     }
 
     .park-logo {
-        width: 280px;
-        height: 280px;
-        object-fit: contain;
-        display: block;
+        width: 180px;
+        height: 180px;
     }
-
-    /* پنل فرم */
 
     .auth-panel {
-        padding: 48px 36px;
-        background: var(--surface-2);
+        padding: 30px 22px;
+    }
+}
+
+@media (max-width: 560px) {
+
+    .auth-page {
+        padding: 25px 12px 45px;
     }
 
-    .auth-heading {
-        margin-bottom: 28px;
+    .auth-brand {
+        min-height: 180px;
     }
 
-    .auth-heading-label {
-        display: block;
-        margin-bottom: 6px;
-        color: var(--orange-dark);
-        font-size: 14px;
-        font-weight: 800;
+    .park-logo {
+        width: 150px;
+        height: 150px;
     }
 
-    .auth-heading h1 {
-        margin: 0 0 7px;
-        color: var(--heading);
-        font-size: 28px;
-        line-height: 1.5;
-        font-weight: 900;
+    .auth-panel {
+        padding: 26px 18px;
     }
-
-    .auth-heading p {
-        margin: 0;
-        color: var(--muted);
-        font-size: 15px;
-        line-height: 1.9;
-    }
-
-    /* خطاها */
-
-    .form-errors {
-        margin-bottom: 18px;
-        padding: 12px 14px;
-
-        border: 1px solid rgba(200, 92, 80, .20);
-        border-radius: 10px;
-
-        background: rgba(200, 92, 80, .07);
-        color: #c85c50;
-
-        font-size: 14px;
-        line-height: 1.9;
-    }
-
-    /* فرم */
 
     .form-row {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 15px;
+        grid-template-columns: 1fr;
+        gap: 0;
     }
 
-    .form-group {
-        margin-bottom: 17px;
+    .form-group.full-width {
+        grid-column: auto;
     }
+}
 
-    .form-group label {
-        display: block;
-        margin-bottom: 7px;
-
-        color: var(--heading);
-        font-size: 15px;
-        font-weight: 800;
-    }
-
-    .form-group input {
-        width: 100%;
-        box-sizing: border-box;
-
-        padding: 12px 14px;
-
-        border: 1px solid var(--border);
-        border-radius: 10px;
-
-        background: var(--surface);
-        color: var(--text);
-
-        font-family: inherit;
-        font-size: 15px;
-
-        outline: none;
-
-        transition:
-            border-color .2s ease,
-            box-shadow .2s ease,
-            background .2s ease;
-    }
-
-    .form-group input::placeholder {
-        color: var(--muted);
-    }
-
-    .form-group input:focus {
-        border-color: var(--orange);
-        background: var(--surface);
-
-        box-shadow:
-            0 0 0 3px rgba(232, 155, 61, .14);
-    }
-
-    .field-error {
-        margin-top: 6px;
-
-        color: #c85c50;
-        font-size: 13px;
-        line-height: 1.8;
-    }
-
-    .password-help {
-        margin-top: 7px;
-
-        color: var(--muted);
-        font-size: 13px;
-        line-height: 1.9;
-    }
-
-    /* دکمه */
-
-    .auth-button {
-        display: block;
-        width: 100%;
-        box-sizing: border-box;
-
-        margin-top: 6px;
-        padding: 13px;
-
-        border: 0;
-        border-radius: 12px;
-
-        background:
-            linear-gradient(
-                90deg,
-                var(--orange),
-                var(--orange-dark)
-            );
-
-        color: #fff;
-
-        font-family: inherit;
-        font-size: 16px;
-        font-weight: 800;
-        line-height: 1.5;
-
-        cursor: pointer;
-
-        transition:
-            background .2s ease,
-            transform .2s ease,
-            box-shadow .2s ease,
-            filter .2s ease;
-    }
-
-    .auth-button:hover {
-        filter: brightness(1.06);
-        transform: translateY(-1px);
-
-        box-shadow:
-            0 10px 25px rgba(23, 35, 60, .14);
-    }
-
-    .auth-button:active {
-        transform: translateY(0);
-    }
-
-    /* پایین فرم */
-
-    .auth-footer {
-        margin-top: 20px;
-        padding-top: 20px;
-
-        border-top: 1px solid var(--border);
-
-        text-align: center;
-    }
-
-    .auth-footer a {
-        color: var(--orange-dark);
-
-        font-size: 14px;
-        font-weight: 800;
-
-        text-decoration: none;
-
-        transition: opacity .2s ease;
-    }
-
-    .auth-footer a:hover {
-        opacity: .75;
-    }
-
-    /* تبلت و موبایل */
-
-    @media (max-width: 760px) {
-
-        .auth-page {
-            padding: 35px 15px 55px;
-        }
-
-        .auth-shell {
-            grid-template-columns: 1fr;
-        }
-
-        .auth-brand {
-            min-height: 230px;
-            padding: 30px 24px;
-
-            border-left: 0;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .park-logo {
-            width: 190px;
-            height: 190px;
-        }
-
-        .auth-panel {
-            padding: 30px 22px;
-        }
-
-        .auth-heading h1 {
-            font-size: 25px;
-        }
-
-        .auth-heading p {
-            font-size: 14px;
-        }
-    }
-
-    @media (max-width: 500px) {
-
-        .auth-page {
-            padding: 25px 12px 45px;
-        }
-
-        .auth-brand {
-            min-height: 190px;
-        }
-
-        .park-logo {
-            width: 160px;
-            height: 160px;
-        }
-
-        .auth-panel {
-            padding: 26px 18px;
-        }
-
-        .form-row {
-            grid-template-columns: 1fr;
-            gap: 0;
-        }
-
-        .form-group input {
-            font-size: 15px;
-        }
-
-        .auth-button {
-            font-size: 15px;
-        }
-    }
 </style>
+
 
 <section class="auth-page">
 
     <div class="auth-shell">
-
-        <!-- لوگوی پارک -->
 
         <section class="auth-brand">
 
@@ -362,8 +367,6 @@
         </section>
 
 
-        <!-- فرم تکمیل اطلاعات -->
-
         <main class="auth-panel">
 
             <div class="auth-heading">
@@ -373,12 +376,23 @@
                 </span>
 
                 <h1>
-                    تکمیل اطلاعات حساب
+                    اطلاعات حساب
                 </h1>
 
                 <p>
-                    اطلاعات حساب کاربری خود را وارد کنید.
+                    لطفاً اطلاعات خود را با دقت وارد کنید.
                 </p>
+
+            </div>
+
+
+            <div class="phone-info">
+
+                شماره موبایل تأییدشده:
+
+                <strong dir="ltr">
+                    {{ phone }}
+                </strong>
 
             </div>
 
@@ -392,12 +406,13 @@
             {% endif %}
 
 
-            <form method="post">
+            <form
+                method="post"
+                enctype="multipart/form-data"
+            >
 
                 {% csrf_token %}
 
-
-                <!-- نام و نام خانوادگی -->
 
                 <div class="form-row">
 
@@ -405,16 +420,15 @@
 
                         <label for="{{ form.first_name.id_for_label }}">
                             نام
+                            <span class="required-mark">*</span>
                         </label>
 
                         {{ form.first_name }}
 
                         {% for error in form.first_name.errors %}
-
                             <div class="field-error">
                                 {{ error }}
                             </div>
-
                         {% endfor %}
 
                     </div>
@@ -424,16 +438,15 @@
 
                         <label for="{{ form.last_name.id_for_label }}">
                             نام خانوادگی
+                            <span class="required-mark">*</span>
                         </label>
 
                         {{ form.last_name }}
 
                         {% for error in form.last_name.errors %}
-
                             <div class="field-error">
                                 {{ error }}
                             </div>
-
                         {% endfor %}
 
                     </div>
@@ -441,69 +454,215 @@
                 </div>
 
 
-                <!-- نام کاربری -->
+                <div class="form-row">
+
+                    <div class="form-group">
+
+                        <label for="{{ form.father_name.id_for_label }}">
+                            نام پدر
+                            <span class="required-mark">*</span>
+                        </label>
+
+                        {{ form.father_name }}
+
+                        {% for error in form.father_name.errors %}
+                            <div class="field-error">
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="{{ form.national_code.id_for_label }}">
+                            کد ملی
+                            <span class="required-mark">*</span>
+                        </label>
+
+                        {{ form.national_code }}
+
+                        {% for error in form.national_code.errors %}
+                            <div class="field-error">
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-row">
+
+                    <div class="form-group full-width">
+                        <label>
+                            تاریخ تولد
+                            <span class="required-mark">*</span>
+                        </label>
+
+                        <div class="birth-date-row">
+
+                            <div>
+                                <label
+                                    class="birth-label"
+                                    for="{{ form.birth_year.id_for_label }}"
+                                >
+                                    سال
+                                </label>
+
+                                {{ form.birth_year }}
+
+                                {% for error in form.birth_year.errors %}
+                                    <div class="field-error">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            <div>
+                                <label
+                                    class="birth-label"
+                                    for="{{ form.birth_month.id_for_label }}"
+                                >
+                                    ماه
+                                </label>
+
+                                {{ form.birth_month }}
+
+                                {% for error in form.birth_month.errors %}
+                                    <div class="field-error">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            <div>
+                                <label
+                                    class="birth-label"
+                                    for="{{ form.birth_day.id_for_label }}"
+                                >
+                                    روز
+                                </label>
+
+                                {{ form.birth_day }}
+
+                                {% for error in form.birth_day.errors %}
+                                    <div class="field-error">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                        </div>
+
+                        <div class="field-help">
+                            سال، ماه و روز تولد خود را انتخاب کنید.
+                        </div>
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="{{ form.profile_image.id_for_label }}">
+                            تصویر پروفایل
+                            <span class="required-mark">*</span>
+                        </label>
+
+                        {{ form.profile_image }}
+
+                        <div class="field-help">
+                            انتخاب تصویر برای تکمیل ثبت نام الزامی است.
+                        </div>
+
+                        {% for error in form.profile_image.errors %}
+                            <div class="field-error">
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+
+                    <div class="form-group full-width">
+
+                        <label for="{{ form.home_address.id_for_label }}">
+                            آدرس منزل
+                            <span class="required-mark">*</span>
+                        </label>
+
+                        {{ form.home_address }}
+
+                        {% for error in form.home_address.errors %}
+                            <div class="field-error">
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+
+                    </div>
+
 
                 <div class="form-group">
 
                     <label for="{{ form.username.id_for_label }}">
                         نام کاربری
+                        <span class="required-mark">*</span>
                     </label>
 
                     {{ form.username }}
 
                     {% for error in form.username.errors %}
-
                         <div class="field-error">
                             {{ error }}
                         </div>
-
                     {% endfor %}
 
                 </div>
 
 
-                <!-- رمز عبور -->
+                <div class="form-row">
 
-                <div class="form-group">
+                    <div class="form-group">
 
-                    <label for="{{ form.password1.id_for_label }}">
-                        رمز عبور
-                    </label>
+                        <label for="{{ form.password1.id_for_label }}">
+                            رمز عبور
+                            <span class="required-mark">*</span>
+                        </label>
 
-                    {{ form.password1 }}
+                        {{ form.password1 }}
 
-                    <div class="password-help">
-                        رمز عبور مناسب انتخاب کنید و آن را در اختیار دیگران قرار ندهید.
+                        <div class="password-help">
+                            رمز عبور مناسب انتخاب کنید.
+                        </div>
+
+                        {% for error in form.password1.errors %}
+                            <div class="field-error">
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+
                     </div>
 
-                    {% for error in form.password1.errors %}
 
-                        <div class="field-error">
-                            {{ error }}
-                        </div>
+                    <div class="form-group">
 
-                    {% endfor %}
+                        <label for="{{ form.password2.id_for_label }}">
+                            تکرار رمز عبور
+                            <span class="required-mark">*</span>
+                        </label>
 
-                </div>
+                        {{ form.password2 }}
 
+                        {% for error in form.password2.errors %}
+                            <div class="field-error">
+                                {{ error }}
+                            </div>
+                        {% endfor %}
 
-                <!-- تکرار رمز عبور -->
-
-                <div class="form-group">
-
-                    <label for="{{ form.password2.id_for_label }}">
-                        تکرار رمز عبور
-                    </label>
-
-                    {{ form.password2 }}
-
-                    {% for error in form.password2.errors %}
-
-                        <div class="field-error">
-                            {{ error }}
-                        </div>
-
-                    {% endfor %}
+                    </div>
 
                 </div>
 
@@ -531,5 +690,187 @@
     </div>
 
 </section>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
 
+    const dateInput = document.getElementById("id_birth_date");
+
+    if (!dateInput) {
+        return;
+    }
+
+    dateInput.addEventListener("input", function () {
+
+        let value = this.value;
+
+        // تبدیل اعداد فارسی و عربی به انگلیسی
+        const persianDigits = "۰۱۲۳۴۵۶۷۸۹";
+        const arabicDigits = "٠١٢٣٤٥٦٧٨٩";
+
+        value = value.replace(/[۰-۹]/g, function (char) {
+            return persianDigits.indexOf(char);
+        });
+
+        value = value.replace(/[٠-٩]/g, function (char) {
+            return arabicDigits.indexOf(char);
+        });
+
+        // فقط عدد باقی بماند
+        value = value.replace(/\D/g, "");
+
+        // حداکثر ۸ رقم: YYYYMMDD
+        value = value.substring(0, 8);
+
+        // اضافه کردن اسلش به صورت خودکار
+        if (value.length > 4) {
+            value =
+                value.substring(0, 4) +
+                "/" +
+                value.substring(4);
+        }
+
+        if (value.length > 7) {
+            value =
+                value.substring(0, 7) +
+                "/" +
+                value.substring(7);
+        }
+
+        this.value = value;
+    });
+
+});
+document.addEventListener("DOMContentLoaded", function () {
+
+    const yearSelect = document.getElementById("id_birth_year");
+    const monthSelect = document.getElementById("id_birth_month");
+    const daySelect = document.getElementById("id_birth_day");
+
+    if (!yearSelect || !monthSelect || !daySelect) {
+        return;
+    }
+
+    function isJalaliLeapYear(year) {
+        try {
+            const date1 = new Date(
+                Date.UTC(year, 2, 20)
+            );
+
+            const date2 = new Date(
+                Date.UTC(year + 1, 2, 20)
+            );
+
+            const diff =
+                Math.round(
+                    (date2 - date1) /
+                    (1000 * 60 * 60 * 24)
+                );
+
+            return diff === 366;
+
+        } catch (error) {
+            return false;
+        }
+    }
+
+
+    function getDaysInMonth(year, month) {
+
+        month = parseInt(month);
+
+        // فروردین تا شهریور
+        if (month >= 1 && month <= 6) {
+            return 31;
+        }
+
+        // مهر تا بهمن
+        if (month >= 7 && month <= 11) {
+            return 30;
+        }
+
+        // اسفند
+        if (month === 12) {
+
+            if (year && isJalaliLeapYear(year)) {
+                return 30;
+            }
+
+            return 29;
+        }
+
+        return 31;
+    }
+
+
+    function updateDays() {
+
+        const year = parseInt(
+            yearSelect.value
+        );
+
+        const month = parseInt(
+            monthSelect.value
+        );
+
+        const oldValue = daySelect.value;
+
+        const days = getDaysInMonth(
+            year,
+            month
+        );
+
+        daySelect.innerHTML = "";
+
+        const emptyOption =
+            document.createElement("option");
+
+        emptyOption.value = "";
+        emptyOption.textContent =
+            "روز را انتخاب کنید";
+
+        daySelect.appendChild(
+            emptyOption
+        );
+
+        for (
+            let day = 1;
+            day <= days;
+            day++
+        ) {
+
+            const option =
+                document.createElement("option");
+
+            option.value = day;
+            option.textContent = day;
+
+            daySelect.appendChild(
+                option
+            );
+        }
+
+        // اگر روز قبلی هنوز معتبر است
+        if (
+            oldValue &&
+            parseInt(oldValue) <= days
+        ) {
+            daySelect.value = oldValue;
+        }
+    }
+
+
+    yearSelect.addEventListener(
+        "change",
+        updateDays
+    );
+
+    monthSelect.addEventListener(
+        "change",
+        updateDays
+    );
+
+    updateDays();
+
+});
+</script>
 {% endblock %}

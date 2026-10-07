@@ -23,4 +23,33 @@ urlpatterns = [
     path("users/<int:pk>/toggle-active/", views.toggle_user_active, name="toggle_user_active"),
     path("users/<int:pk>/delete/", views.delete_user, name="delete_user"),
     path("login/", views.dashboard_login, name="dashboard_login"),
+
+    path(
+        "books/print/",
+        views.print_books,
+        name="print_books"
+    ),
+
+    path(
+        "books/export-excel/",
+        views.export_books_excel,
+        name="export_books_excel"
+    ),
+    path(
+        "support/",
+        views.support_logs,
+        name="support_logs",
+    ),
+
+    path(
+        "loans/export-excel/",
+        views.export_loans_excel,
+        name="export_loans_excel",
+    ),
+
+    path(
+        "support/export-excel/",
+        views.export_support_excel,
+        name="export_support_excel",
+    ),
 ]

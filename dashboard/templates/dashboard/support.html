@@ -1,0 +1,1025 @@
+{% extends "dashboard/base.html" %}
+
+{% load jalali %}
+
+{% block title %}
+پشتیبانی
+{% endblock %}
+
+{% block content %}
+
+<style>
+
+    /* =========================================================
+       صفحه اصلی
+       ========================================================= */
+
+    .support-page {
+        padding: 30px;
+
+        --support-card: #ffffff;
+        --support-bg: #f6f4ef;
+        --support-text: #333333;
+        --support-title: #17233c;
+        --support-muted: #777777;
+        --support-border: #eeeeee;
+        --support-input: #ffffff;
+        --support-input-border: #dddddd;
+        --support-table-head: #f8f8f8;
+        --support-table-hover: #fcfcfc;
+        --support-reset-bg: #f1f1f1;
+        --support-reset-text: #444444;
+        --support-badge-bg: #f1f1f1;
+        --support-badge-text: #444444;
+    }
+
+
+    /* =========================================================
+       دارک مود
+       ========================================================= */
+
+    body.dark-mode .support-page {
+
+        --support-card: #202938;
+        --support-bg: #18202d;
+        --support-text: #e7eaf0;
+        --support-title: #f3f5f8;
+        --support-muted: #a5adba;
+        --support-border: #303a4d;
+        --support-input: #18202d;
+        --support-input-border: #3b4659;
+        --support-table-head: #18202d;
+        --support-table-hover: #293447;
+        --support-reset-bg: #303a4d;
+        --support-reset-text: #e1e5eb;
+        --support-badge-bg: #303a4d;
+        --support-badge-text: #e1e5eb;
+    }
+
+
+    /* =========================================================
+       هدر
+       ========================================================= */
+
+    .support-header {
+        margin-bottom: 25px;
+    }
+
+    .support-header h1 {
+        margin: 0 0 8px;
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--support-title);
+    }
+
+    .support-header p {
+        margin: 0;
+        color: var(--support-muted);
+        font-size: 14px;
+    }
+
+
+    /* =========================================================
+       فیلترها
+       ========================================================= */
+
+    .filter-box {
+        background: var(--support-card);
+        border-radius: 16px;
+        padding: 22px;
+        margin-bottom: 25px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, .05);
+        border: 1px solid var(--support-border);
+        transition: background .2s, border-color .2s;
+    }
+
+    body.dark-mode .filter-box {
+        box-shadow: 0 5px 20px rgba(0, 0, 0, .18);
+    }
+
+    .filter-grid {
+        display: grid;
+        grid-template-columns:
+            repeat(4, minmax(160px, 1fr));
+        gap: 15px;
+        align-items: end;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+    }
+
+    .filter-group label {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--support-text);
+    }
+
+    .filter-group input,
+    .filter-group select {
+        width: 100%;
+        box-sizing: border-box;
+        border: 1px solid var(--support-input-border);
+        border-radius: 10px;
+        padding: 11px 12px;
+        font-family: inherit;
+        font-size: 13px;
+        background: var(--support-input);
+        color: var(--support-text);
+        outline: none;
+        transition:
+            border-color .2s,
+            box-shadow .2s,
+            background .2s,
+            color .2s;
+    }
+
+    .filter-group input::placeholder {
+        color: var(--support-muted);
+    }
+
+    .filter-group input:focus,
+    .filter-group select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(232, 155, 61, .12);
+    }
+
+    body.dark-mode .filter-group select option {
+        background: #18202d;
+        color: #e7eaf0;
+    }
+
+    .filter-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .btn-filter {
+        border: none;
+        border-radius: 10px;
+        padding: 11px 20px;
+        background: var(--primary);
+        color: #fff;
+        font-family: inherit;
+        font-weight: 700;
+        cursor: pointer;
+        transition: .2s;
+    }
+
+    .btn-filter:hover {
+        opacity: .9;
+        transform: translateY(-1px);
+    }
+
+    .btn-reset {
+        border-radius: 10px;
+        padding: 10px 18px;
+        background: var(--support-reset-bg);
+        color: var(--support-reset-text);
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: .2s;
+    }
+
+    .btn-reset:hover {
+        opacity: .9;
+        transform: translateY(-1px);
+    }
+
+
+    /* =========================================================
+       باکس گزارش
+       ========================================================= */
+
+    .logs-box {
+        background: var(--support-card);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, .05);
+        border: 1px solid var(--support-border);
+        transition: background .2s, border-color .2s;
+    }
+
+    body.dark-mode .logs-box {
+        box-shadow: 0 5px 20px rgba(0, 0, 0, .18);
+    }
+
+
+    /* =========================================================
+       سربرگ گزارش
+       ========================================================= */
+
+    .logs-top {
+        padding: 20px 22px;
+        border-bottom: 1px solid var(--support-border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .logs-top h2 {
+        margin: 0;
+        font-size: 18px;
+        color: var(--support-title);
+    }
+
+    .logs-count {
+        color: var(--support-muted);
+        font-size: 13px;
+        margin-top: 5px;
+    }
+
+    .logs-top-right {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+
+    /* =========================================================
+       دکمه‌های عملیات
+       ========================================================= */
+
+    .support-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        border-radius: 9px;
+        padding: 9px 15px;
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        text-decoration: none;
+        white-space: nowrap;
+        transition: .2s;
+    }
+
+    .support-action:hover {
+        opacity: .9;
+        transform: translateY(-1px);
+    }
+
+    .print-action {
+        background: #17233c;
+        color: #fff;
+    }
+
+    .excel-action {
+        background: #21733a;
+        color: #fff;
+    }
+
+
+    /* =========================================================
+       جدول
+       ========================================================= */
+
+    .table-wrapper {
+        overflow-x: auto;
+    }
+
+    .logs-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 950px;
+    }
+
+    .logs-table th {
+        background: var(--support-table-head);
+        padding: 14px;
+        text-align: right;
+        font-size: 12px;
+        color: var(--support-text);
+        white-space: nowrap;
+        border-bottom: 1px solid var(--support-border);
+    }
+
+    .logs-table td {
+        padding: 14px;
+        border-top: 1px solid var(--support-border);
+        font-size: 13px;
+        vertical-align: middle;
+        color: var(--support-text);
+    }
+
+    .logs-table tbody tr {
+        transition: background .15s;
+    }
+
+    .logs-table tbody tr:hover {
+        background: var(--support-table-hover);
+    }
+
+
+    /* =========================================================
+       نوع عملیات
+       ========================================================= */
+
+    .action-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 10px;
+        border-radius: 8px;
+        background: var(--support-badge-bg);
+        color: var(--support-badge-text);
+        font-size: 12px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+
+    /* =========================================================
+       توضیحات
+       ========================================================= */
+
+    .description {
+        min-width: 280px;
+        line-height: 1.8;
+        color: var(--support-text);
+    }
+
+
+    /* =========================================================
+       انجام‌دهنده
+       ========================================================= */
+
+    .actor-name {
+        font-weight: 700;
+        white-space: nowrap;
+        color: var(--support-text);
+    }
+
+
+    /* =========================================================
+       بخش
+       ========================================================= */
+
+    .section-name {
+        color: var(--support-muted);
+        white-space: nowrap;
+    }
+
+
+    /* =========================================================
+       تاریخ
+       ========================================================= */
+
+    .date-cell {
+        white-space: nowrap;
+        line-height: 1.8;
+        color: var(--support-text);
+    }
+
+
+    /* =========================================================
+       IP
+       ========================================================= */
+
+    .ip-cell {
+        direction: ltr;
+        text-align: right;
+        font-size: 12px;
+        color: var(--support-muted);
+    }
+
+
+    /* =========================================================
+       حالت خالی
+       ========================================================= */
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--support-muted);
+    }
+
+    .empty-state h3 {
+        margin-bottom: 8px;
+        color: var(--support-text);
+    }
+
+    .empty-state p {
+        margin: 0;
+        color: var(--support-muted);
+    }
+
+
+    /* =========================================================
+       حالت چاپ
+       ========================================================= */
+
+    @media print {
+
+        @page {
+            size: A4 landscape;
+            margin: 10mm;
+        }
+
+        body {
+            background: #fff !important;
+            color: #000 !important;
+        }
+
+        /*
+         * قسمت‌های اضافی چاپ نشوند
+         */
+
+        .sidebar,
+        .topbar,
+        .support-header,
+        .filter-box,
+        .logs-top-right {
+            display: none !important;
+        }
+
+        .support-page {
+            padding: 0 !important;
+            width: 100% !important;
+
+            --support-card: #fff;
+            --support-text: #000;
+            --support-title: #000;
+            --support-muted: #444;
+            --support-border: #bbb;
+            --support-table-head: #eee;
+            --support-table-hover: #fff;
+            --support-badge-bg: #fff;
+            --support-badge-text: #000;
+        }
+
+        .logs-box {
+            box-shadow: none !important;
+            border: none !important;
+            border-radius: 0 !important;
+            overflow: visible !important;
+            background: #fff !important;
+        }
+
+        .logs-top {
+            padding: 0 0 12px 0 !important;
+            border-bottom: 1px solid #999 !important;
+        }
+
+        .logs-top h2 {
+            color: #000 !important;
+            font-size: 18px !important;
+        }
+
+        .logs-count {
+            color: #444 !important;
+        }
+
+        .table-wrapper {
+            overflow: visible !important;
+        }
+
+        .logs-table {
+            min-width: 0 !important;
+            width: 100% !important;
+        }
+
+        .logs-table th {
+            background: #eee !important;
+            color: #000 !important;
+            font-size: 9px !important;
+            padding: 6px !important;
+            border: 1px solid #999 !important;
+        }
+
+        .logs-table td {
+            color: #000 !important;
+            font-size: 9px !important;
+            padding: 6px !important;
+            border: 1px solid #bbb !important;
+        }
+
+        .action-badge {
+            background: none !important;
+            color: #000 !important;
+            padding: 0 !important;
+        }
+
+        .description {
+            min-width: 0 !important;
+            color: #000 !important;
+        }
+
+        .actor-name,
+        .section-name,
+        .date-cell {
+            color: #000 !important;
+        }
+
+        .logs-table tr {
+            page-break-inside: avoid;
+        }
+    }
+
+
+    /* =========================================================
+       تبلت
+       ========================================================= */
+
+    @media (max-width: 1100px) {
+
+        .filter-grid {
+            grid-template-columns:
+                repeat(2, minmax(160px, 1fr));
+        }
+
+    }
+
+
+    /* =========================================================
+       موبایل
+       ========================================================= */
+
+    @media (max-width: 650px) {
+
+        .support-page {
+            padding: 15px;
+        }
+
+        .filter-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .filter-actions {
+            width: 100%;
+        }
+
+        .btn-filter,
+        .btn-reset {
+            flex: 1;
+            text-align: center;
+        }
+
+        .logs-top {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .logs-top-right {
+            width: 100%;
+        }
+
+        .support-action {
+            flex: 1;
+        }
+
+    }
+
+</style>
+
+
+<div class="support-page">
+
+
+    <!-- =====================================================
+         عنوان
+         ===================================================== -->
+
+    <div class="support-header">
+
+        <h1>
+            پشتیبانی
+        </h1>
+
+        <p>
+            تاریخچه فعالیت‌ها و اتفاقات انجام‌شده در سیستم
+        </p>
+
+    </div>
+
+
+    <!-- =====================================================
+         فیلترها
+         ===================================================== -->
+
+    <div class="filter-box">
+
+        <form method="get">
+
+            <div class="filter-grid">
+
+
+                <!-- جستجو -->
+
+                <div class="filter-group">
+
+                    <label>
+                        جستجو
+                    </label>
+
+                    <input
+                        type="text"
+                        name="q"
+                        value="{{ query }}"
+                        placeholder="جستجو در توضیحات..."
+                    >
+
+                </div>
+
+
+                <!-- بازه زمانی -->
+
+                <div class="filter-group">
+
+                    <label>
+                        بازه زمانی
+                    </label>
+
+                    <select name="date">
+
+                        <option
+                            value="all"
+                            {% if selected_date == "all" %}
+                                selected
+                            {% endif %}
+                        >
+                            همه
+                        </option>
+
+                        <option
+                            value="today"
+                            {% if selected_date == "today" %}
+                                selected
+                            {% endif %}
+                        >
+                            امروز
+                        </option>
+
+                        <option
+                            value="yesterday"
+                            {% if selected_date == "yesterday" %}
+                                selected
+                            {% endif %}
+                        >
+                            دیروز
+                        </option>
+
+                        <option
+                            value="before_yesterday"
+                            {% if selected_date == "before_yesterday" %}
+                                selected
+                            {% endif %}
+                        >
+                            پریروز
+                        </option>
+
+                        <option
+                            value="last_7"
+                            {% if selected_date == "last_7" %}
+                                selected
+                            {% endif %}
+                        >
+                            ۷ روز اخیر
+                        </option>
+
+                        <option
+                            value="last_30"
+                            {% if selected_date == "last_30" %}
+                                selected
+                            {% endif %}
+                        >
+                            ۳۰ روز اخیر
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- نوع عملیات -->
+
+                <div class="filter-group">
+
+                    <label>
+                        نوع عملیات
+                    </label>
+
+                    <select name="action">
+
+                        <option value="">
+                            همه عملیات
+                        </option>
+
+                        {% for value, label in action_choices %}
+
+                            <option
+                                value="{{ value }}"
+                                {% if selected_action == value %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ label }}
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+
+                <!-- انجام‌دهنده -->
+
+                <div class="filter-group">
+
+                    <label>
+                        انجام‌دهنده
+                    </label>
+
+                    <select name="actor">
+
+                        <option value="">
+                            همه کاربران
+                        </option>
+
+                        {% for user in users %}
+
+                            <option
+                                value="{{ user.pk }}"
+                                {% if selected_actor == user.pk|stringformat:"s" %}
+                                    selected
+                                {% endif %}
+                            >
+
+                                {% if user.get_full_name %}
+
+                                    {{ user.get_full_name }}
+
+                                {% else %}
+
+                                    {{ user.username }}
+
+                                {% endif %}
+
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+
+                <!-- دکمه‌های فیلتر -->
+
+                <div class="filter-actions">
+
+                    <button
+                        type="submit"
+                        class="btn-filter"
+                    >
+                        اعمال فیلتر
+                    </button>
+
+                    <a
+                        href="{% url 'support_logs' %}"
+                        class="btn-reset"
+                    >
+                        حذف فیلتر
+                    </a>
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <!-- =====================================================
+         گزارش فعالیت‌ها
+         ===================================================== -->
+
+    <div
+        class="logs-box"
+        id="supportLogsBox"
+    >
+
+
+        <div class="logs-top">
+
+
+            <div>
+
+                <h2>
+                    رویدادهای سیستم
+                </h2>
+
+                <div class="logs-count">
+
+                    تعداد:
+
+                    {{ logs|length }}
+
+                    مورد
+
+                </div>
+
+            </div>
+
+
+            <!-- دکمه چاپ و Excel -->
+
+            <div class="logs-top-right">
+
+                <button
+                    type="button"
+                    class="support-action print-action"
+                    onclick="printSupportLogs()"
+                >
+                    چاپ
+                </button>
+
+
+                <a
+                    href="{% url 'export_support_excel' %}"
+                    class="support-action excel-action"
+                >
+                    خروجی Excel
+                </a>
+
+            </div>
+
+        </div>
+
+
+        {% if logs %}
+
+            <div class="table-wrapper">
+
+                <table class="logs-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                تاریخ و ساعت
+                            </th>
+
+                            <th>
+                                انجام‌دهنده
+                            </th>
+
+                            <th>
+                                عملیات
+                            </th>
+
+                            <th>
+                                بخش
+                            </th>
+
+                            <th>
+                                توضیحات
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for log in logs %}
+
+                            <tr>
+
+
+                                <!-- تاریخ -->
+
+                                <td class="date-cell">
+
+                                    {{ log.created_at|jalali_date:"%Y/%m/%d" }}
+
+                                    <br>
+
+                                    {{ log.created_at|date:"H:i:s" }}
+
+                                </td>
+
+
+                                <!-- انجام‌دهنده -->
+
+                                <td>
+
+                                    <span class="actor-name">
+
+                                        {% if log.actor %}
+
+                                            {% if log.actor.get_full_name %}
+
+                                                {{ log.actor.get_full_name }}
+
+                                            {% else %}
+
+                                                {{ log.actor.username }}
+
+                                            {% endif %}
+
+                                        {% else %}
+
+                                            سیستم
+
+                                        {% endif %}
+
+                                    </span>
+
+                                </td>
+
+
+                                <!-- عملیات -->
+
+                                <td>
+
+                                    <span class="action-badge">
+
+                                        {{ log.get_action_display }}
+
+                                    </span>
+
+                                </td>
+
+
+                                <!-- بخش -->
+
+                                <td class="section-name">
+
+                                    {{ log.section|default:"-" }}
+
+                                </td>
+
+
+                                <!-- توضیحات -->
+
+                                <td class="description">
+
+                                    {{ log.description }}
+
+                                </td>
+
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+        {% else %}
+
+
+            <div class="empty-state">
+
+                <h3>
+                    رویدادی پیدا نشد
+                </h3>
+
+                <p>
+                    با فیلترهای انتخاب‌شده هیچ فعالیتی ثبت نشده است.
+                </p>
+
+            </div>
+
+
+        {% endif %}
+
+
+    </div>
+
+</div>
+
+
+<script>
+
+    /* =========================================================
+       چاپ گزارش فعالیت‌ها
+       ========================================================= */
+
+    function printSupportLogs() {
+
+        window.print();
+
+    }
+
+</script>
+
+{% endblock %}

@@ -5,11 +5,14 @@ from django.db import transaction
 from django.db.models import Count, F, Q, ExpressionWrapper, IntegerField
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
-
+from openpyxl.styles import Alignment
 from .decorators import permission_required
-from blog.models import Book, Category, Loan
-
-
+from .models import ActivityLog
+from blog.models import *
+import jdatetime
+from openpyxl import Workbook
+from django.http import HttpResponse
+from datetime import timedelta
 User = get_user_model()
 
 
@@ -120,7 +123,7 @@ def set_user_roles(user, selected_roles):
 def dashboard_home(request):
     books_count = Book.objects.count()
 
-    categories_count = Category.objects.count()
+    categories_count = Subject.objects.count()
 
     available_count = (
         Book.objects
@@ -158,13 +161,15 @@ def dashboard_home(request):
         status=Loan.STATUS_BORROWED
     ).count()
 
-    pending_loans_count = Loan.objects.filter(
-        status=Loan.STATUS_PENDING
-    ).count()
+    pending_loans_count = 0
 
     latest_books = (
         Book.objects
-        .select_related("category")
+        .select_related(
+            "subject",
+            "publisher",
+            "location",
+        )
         .order_by("-created_at")[:5]
     )
 
@@ -201,41 +206,167 @@ def dashboard_home(request):
 # BOOKS
 # =========================================================
 
-@permission_required("blog.manage_books")
-def manage_books(request):
+def normalize_digits(value):
+    """
+    تبدیل اعداد فارسی و عربی به اعداد انگلیسی.
+    """
+
+    if not value:
+        return value
+
+    translation_table = str.maketrans(
+        "۰۱۲۳۴۵۶۷۸۹٠١٢٣٤٥٦٧٨٩",
+        "01234567890123456789"
+    )
+
+    return value.translate(translation_table)
+
+
+def get_book_form_context(book=None, form_data=None):
+    context = {
+        "book": book,
+        "edit_mode": book is not None,
+        "subjects": Subject.objects.all().order_by("name"),
+        "authors": Author.objects.all().order_by("name"),
+        "translators": Translator.objects.all().order_by("name"),
+        "publishers": Publisher.objects.all().order_by("name"),
+        "locations": BookLocation.objects.all().order_by("code"),
+    }
+
+    if form_data:
+        context["form_data"] = form_data
+        context["author_values"] = form_data.getlist("authors")
+        context["translator_values"] = form_data.getlist("translators")
+
+    return context
+
+
+
+def get_filtered_books(request):
     query = request.GET.get("q", "").strip()
+    search_by = request.GET.get("search_by", "title").strip()
+    sort = request.GET.get("sort", "newest").strip()
+    availability = request.GET.get("availability", "").strip()
 
     books = (
         Book.objects
+        .select_related(
+            "subject",
+            "publisher",
+            "location",
+        )
+        .prefetch_related(
+            "authors",
+            "translators",
+        )
         .annotate(
             borrowed_count=Count(
                 "loans",
                 filter=Q(
                     loans__status=Loan.STATUS_BORROWED
                 ),
+                distinct=True,
             )
         )
         .annotate(
             available_copies=ExpressionWrapper(
                 F("total_copies") - F("borrowed_count"),
-                output_field=IntegerField()
+                output_field=IntegerField(),
             )
         )
-        .select_related("category")
-        .order_by("-created_at")
     )
 
+    # -------------------------
+    # جستجو
+    # -------------------------
+
     if query:
+        if search_by == "title":
+            books = books.filter(
+                title__icontains=query
+            )
+
+        elif search_by == "isbn":
+            books = books.filter(
+                isbn__icontains=query
+            )
+
+        elif search_by == "registration_number":
+            books = books.filter(
+                registration_number__icontains=query
+            )
+
+        elif search_by == "author":
+            books = books.filter(
+                authors__name__icontains=query
+            )
+
+        elif search_by == "translator":
+            books = books.filter(
+                translators__name__icontains=query
+            )
+
+        elif search_by == "publisher":
+            books = books.filter(
+                publisher__name__icontains=query
+            )
+
+        elif search_by == "subject":
+            books = books.filter(
+                subject__name__icontains=query
+            )
+
+        elif search_by == "location":
+            books = books.filter(
+                location__code__icontains=query
+            )
+
+    # -------------------------
+    # مرتب‌سازی
+    # -------------------------
+
+    if sort == "newest":
+        books = books.order_by("-created_at")
+
+    elif sort == "oldest":
+        books = books.order_by("created_at")
+
+    elif sort == "title_asc":
+        books = books.order_by("title")
+
+    elif sort == "title_desc":
+        books = books.order_by("-title")
+
+    # -------------------------
+    # فیلتر وضعیت موجودی
+    # -------------------------
+
+    if availability == "available":
         books = books.filter(
-            Q(title__icontains=query)
-            | Q(author__icontains=query)
-            | Q(description__icontains=query)
-            | Q(category__name__icontains=query)
+            borrowed_count__lt=F("total_copies")
         )
+
+    elif availability == "unavailable":
+        books = books.filter(
+            borrowed_count__gte=F("total_copies")
+        )
+
+    return books, {
+        "query": query,
+        "search_by": search_by,
+        "sort": sort,
+        "availability": availability,
+    }
+
+
+
+@permission_required("blog.manage_books")
+def manage_books(request):
+    books, filters = get_filtered_books(request)
 
     context = {
         "books": books,
-        "query": query,
+        **filters,
     }
 
     return render(
@@ -245,15 +376,205 @@ def manage_books(request):
     )
 
 
+
+
+@permission_required("blog.manage_books")
+def export_books_excel(request):
+    books, filters = get_filtered_books(request)
+
+    workbook = Workbook()
+    worksheet = workbook.active
+    worksheet.title = "کتاب‌ها"
+
+    # راست‌چین کردن شیت
+    worksheet.sheet_view.rightToLeft = True
+
+    headers = [
+        "شماره ثبت",
+        "عنوان کتاب",
+        "شابک",
+        "مؤلفان",
+        "مترجمان",
+        "موضوع",
+        "ناشر",
+        "سال انتشار",
+        "محل قرارگیری",
+        "تعداد نسخه",
+        "نسخه‌های امانت",
+        "نسخه‌های موجود",
+    ]
+
+    worksheet.append(headers)
+
+    for book in books:
+        authors = "، ".join(
+            author.name
+            for author in book.authors.all()
+        )
+
+        translators = "، ".join(
+            translator.name
+            for translator in book.translators.all()
+        )
+
+        subject = (
+            book.subject.name
+            if book.subject
+            else ""
+        )
+
+        publisher = (
+            book.publisher.name
+            if book.publisher
+            else ""
+        )
+
+        location = (
+            book.location.code
+            if book.location
+            else ""
+        )
+
+        borrowed_count = book.borrowed_count or 0
+
+        available_copies = max(
+            book.available_copies or 0,
+            0,
+        )
+
+        worksheet.append([
+            book.registration_number or "",
+            book.title or "",
+            book.isbn or "",
+            authors,
+            translators,
+            subject,
+            publisher,
+            book.publication_year or "",
+            location,
+            book.total_copies or 0,
+            borrowed_count,
+            available_copies,
+        ])
+
+    # -------------------------
+    # تنظیم سلول‌ها
+    # -------------------------
+
+    for row in worksheet.iter_rows():
+        for cell in row:
+            cell.alignment = Alignment(
+                horizontal="right",
+                vertical="center",
+                wrap_text=True,
+            )
+
+    # -------------------------
+    # عرض ستون‌ها
+    # -------------------------
+
+    column_widths = {
+        "A": 14,
+        "B": 35,
+        "C": 20,
+        "D": 35,
+        "E": 35,
+        "F": 25,
+        "G": 25,
+        "H": 15,
+        "I": 18,
+        "J": 15,
+        "K": 15,
+        "L": 15,
+    }
+
+    for column, width in column_widths.items():
+        worksheet.column_dimensions[column].width = width
+
+    # -------------------------
+    # تنظیمات نهایی Excel
+    # -------------------------
+
+    worksheet.freeze_panes = "A2"
+    worksheet.auto_filter.ref = worksheet.dimensions
+
+    # ارتفاع ردیف عنوان
+    worksheet.row_dimensions[1].height = 30
+
+    response = HttpResponse(
+        content_type=(
+            "application/vnd.openxmlformats-officedocument."
+            "spreadsheetml.sheet"
+        )
+    )
+
+    response["Content-Disposition"] = (
+        'attachment; filename="books_list.xlsx"'
+    )
+
+    workbook.save(response)
+
+    return response
+
+
+
+@permission_required("blog.manage_books")
+def print_books(request):
+    books, filters = get_filtered_books(request)
+
+    context = {
+        "books": books,
+        **filters,
+    }
+
+    return render(
+        request,
+        "dashboard/books_print.html",
+        context
+    )
+
+
 @permission_required("blog.manage_books")
 def add_book(request):
-    categories = Category.objects.all()
 
     if request.method == "POST":
-        title = request.POST.get("title", "").strip()
-        author = request.POST.get("author", "").strip()
-        category_id = request.POST.get("category", "").strip()
-        description = request.POST.get("description", "").strip()
+
+        print("========== ADD BOOK POST ==========")
+        print(request.POST)
+        print("authors:", request.POST.getlist("authors"))
+        print("translators:", request.POST.getlist("translators"))
+        print("===================================")
+
+        title = request.POST.get(
+            "title",
+            ""
+        ).strip()
+
+        isbn = request.POST.get(
+            "isbn",
+            ""
+        ).strip()
+
+        subject_name = request.POST.get(
+            "subject",
+            ""
+        ).strip()
+
+        location_code = request.POST.get(
+            "category",
+            ""
+        ).strip()
+
+        publisher_name = request.POST.get(
+            "publisher",
+            ""
+        ).strip()
+
+        description = request.POST.get(
+            "description",
+            ""
+        ).strip()
+
         cover = request.FILES.get("cover")
 
         total_copies = request.POST.get(
@@ -261,92 +582,311 @@ def add_book(request):
             "1"
         ).strip()
 
+        publication_year = normalize_digits(
+            request.POST.get(
+                "publication_year",
+                ""
+            ).strip()
+        )
+
+        author_names = [
+            name.strip()
+            for name in request.POST.getlist("authors")
+            if name.strip()
+        ]
+
+        translator_names = [
+            name.strip()
+            for name in request.POST.getlist("translators")
+            if name.strip()
+        ]
+
+        form_data = request.POST
+
+        # -----------------------------------------
+        # عنوان
+        # -----------------------------------------
+
         if not title:
+
             messages.error(
                 request,
                 "عنوان کتاب را وارد کنید."
             )
 
-            context = {
-                "categories": categories,
-                "book": None,
-            }
-
             return render(
                 request,
                 "dashboard/book_form.html",
-                context
+                get_book_form_context(
+                    form_data=form_data
+                )
             )
 
-        if not author:
+        # -----------------------------------------
+        # شابک
+        # -----------------------------------------
+
+        if isbn:
+
+            isbn_exists = Book.objects.filter(
+                isbn=isbn
+            ).exists()
+
+            if isbn_exists:
+
+                messages.error(
+                    request,
+                    "این شابک قبلاً برای یک کتاب ثبت شده است."
+                )
+
+                return render(
+                    request,
+                    "dashboard/book_form.html",
+                    get_book_form_context(
+                        form_data=form_data
+                    )
+                )
+
+        # -----------------------------------------
+        # مؤلف
+        # -----------------------------------------
+
+        if not author_names:
+
             messages.error(
                 request,
-                "نام نویسنده را وارد کنید."
+                "حداقل یک مؤلف برای کتاب وارد کنید."
             )
-
-            context = {
-                "categories": categories,
-                "book": None,
-            }
 
             return render(
                 request,
                 "dashboard/book_form.html",
-                context
+                get_book_form_context(
+                    form_data=form_data
+                )
             )
 
+        # -----------------------------------------
+        # موضوع
+        # -----------------------------------------
+
+        if not subject_name:
+
+            messages.error(
+                request,
+                "موضوع کتاب را وارد کنید."
+            )
+
+            return render(
+                request,
+                "dashboard/book_form.html",
+                get_book_form_context(
+                    form_data=form_data
+                )
+            )
+
+        # -----------------------------------------
+        # محل قرارگیری
+        # -----------------------------------------
+
+        if not location_code:
+
+            messages.error(
+                request,
+                "کد محل قرارگیری کتاب را وارد کنید."
+            )
+
+            return render(
+                request,
+                "dashboard/book_form.html",
+                get_book_form_context(
+                    form_data=form_data
+                )
+            )
+
+        # -----------------------------------------
+        # ناشر
+        # -----------------------------------------
+
+        if not publisher_name:
+
+            messages.error(
+                request,
+                "نام ناشر را وارد کنید."
+            )
+
+            return render(
+                request,
+                "dashboard/book_form.html",
+                get_book_form_context(
+                    form_data=form_data
+                )
+            )
+
+        # -----------------------------------------
+        # تعداد نسخه
+        # -----------------------------------------
+
         try:
-            total_copies = int(total_copies)
+
+            total_copies = int(
+                normalize_digits(
+                    total_copies
+                )
+            )
+
         except (TypeError, ValueError):
+
             messages.error(
                 request,
                 "تعداد نسخه‌ها باید یک عدد باشد."
             )
 
-            context = {
-                "categories": categories,
-                "book": None,
-            }
-
             return render(
                 request,
                 "dashboard/book_form.html",
-                context
+                get_book_form_context(
+                    form_data=form_data
+                )
             )
 
         if total_copies < 1:
+
             messages.error(
                 request,
                 "تعداد نسخه‌ها باید حداقل ۱ باشد."
             )
 
-            context = {
-                "categories": categories,
-                "book": None,
-            }
-
             return render(
                 request,
                 "dashboard/book_form.html",
-                context
+                get_book_form_context(
+                    form_data=form_data
+                )
             )
 
-        category = None
+        # -----------------------------------------
+        # سال انتشار
+        # -----------------------------------------
 
-        if category_id:
-            category = get_object_or_404(
-                Category,
-                pk=category_id
+        if publication_year:
+
+            try:
+
+                publication_year = int(
+                    publication_year
+                )
+
+            except (TypeError, ValueError):
+
+                messages.error(
+                    request,
+                    "سال انتشار باید یک عدد باشد."
+                )
+
+                return render(
+                    request,
+                    "dashboard/book_form.html",
+                    get_book_form_context(
+                        form_data=form_data
+                    )
+                )
+
+            if not 1000 <= publication_year <= 1600:
+
+                messages.error(
+                    request,
+                    "سال انتشار شمسی واردشده معتبر نیست."
+                )
+
+                return render(
+                    request,
+                    "dashboard/book_form.html",
+                    get_book_form_context(
+                        form_data=form_data
+                    )
+                )
+
+        else:
+
+            publication_year = None
+
+        # -----------------------------------------
+        # ساخت / دریافت موضوع
+        # -----------------------------------------
+
+        subject, _ = Subject.objects.get_or_create(
+            name=subject_name
+        )
+
+        # -----------------------------------------
+        # ساخت / دریافت ناشر
+        # -----------------------------------------
+
+        publisher, _ = Publisher.objects.get_or_create(
+            name=publisher_name
+        )
+
+        # -----------------------------------------
+        # ساخت / دریافت محل قرارگیری
+        # -----------------------------------------
+
+        location, _ = BookLocation.objects.get_or_create(
+            code=location_code
+        )
+
+        # -----------------------------------------
+        # ایجاد کتاب
+        # -----------------------------------------
+
+        with transaction.atomic():
+
+            book = Book.objects.create(
+                title=title,
+                isbn=isbn or None,
+                subject=subject,
+                publisher=publisher,
+                publication_year=publication_year,
+                location=location,
+                description=description,
+                cover=cover,
+                total_copies=total_copies,
+                is_available=True,
             )
 
-        Book.objects.create(
-            title=title,
-            author=author,
-            category=category,
-            description=description,
-            cover=cover,
-            total_copies=total_copies,
-            is_available=True,
+            # -----------------------------------------
+            # مؤلفان
+            # -----------------------------------------
+
+            for name in author_names:
+
+                author, _ = Author.objects.get_or_create(
+                    name=name
+                )
+
+                book.authors.add(author)
+
+            # -----------------------------------------
+            # مترجمان
+            # -----------------------------------------
+
+            for name in translator_names:
+
+                translator, _ = Translator.objects.get_or_create(
+                    name=name
+                )
+
+                book.translators.add(translator)
+
+        log_activity(
+            request=request,
+            action=ActivityLog.ACTION_CREATE,
+            section="کتاب‌ها",
+            description=(
+                f"کتاب «{book.title}» با شماره ثبت "
+                f"{book.registration_number} اضافه شد."
+            ),
+            object_id=book.pk,
         )
 
         messages.success(
@@ -356,153 +896,360 @@ def add_book(request):
 
         return redirect("manage_books")
 
-    context = {
-        "categories": categories,
-        "book": None,
-    }
-
     return render(
         request,
         "dashboard/book_form.html",
-        context
+        get_book_form_context()
     )
 
 
 @permission_required("blog.manage_books")
 def edit_book(request, pk):
-    categories = Category.objects.all()
+
+    book = get_object_or_404(
+        Book.objects
+        .select_related(
+            "subject",
+            "publisher",
+            "location",
+        )
+        .prefetch_related(
+            "authors",
+            "translators",
+        ),
+        pk=pk
+    )
 
     if request.method == "POST":
-        with transaction.atomic():
 
-            book = get_object_or_404(
-                Book.objects.select_for_update(),
-                pk=pk
+        title = request.POST.get(
+            "title",
+            ""
+        ).strip()
+
+        subject_name = request.POST.get(
+            "subject",
+            ""
+        ).strip()
+
+        location_code = request.POST.get(
+            "category",
+            ""
+        ).strip()
+
+        publisher_name = request.POST.get(
+            "publisher",
+            ""
+        ).strip()
+
+        description = request.POST.get(
+            "description",
+            ""
+        ).strip()
+
+        cover = request.FILES.get("cover")
+
+        total_copies = request.POST.get(
+            "total_copies",
+            str(book.total_copies)
+        ).strip()
+
+        publication_year = normalize_digits(
+            request.POST.get(
+                "publication_year",
+                ""
+            ).strip()
+        )
+
+        author_names = [
+            name.strip()
+            for name in request.POST.getlist("authors")
+            if name.strip()
+        ]
+
+        translator_names = [
+            name.strip()
+            for name in request.POST.getlist("translators")
+            if name.strip()
+        ]
+
+        form_data = request.POST
+
+        # -----------------------------------------
+        # اعتبارسنجی
+        # -----------------------------------------
+
+        if not title:
+
+            messages.error(
+                request,
+                "عنوان کتاب را وارد کنید."
             )
 
-            title = request.POST.get("title", "").strip()
-            author = request.POST.get("author", "").strip()
-            category_id = request.POST.get("category", "").strip()
-            description = request.POST.get("description", "").strip()
-            cover = request.FILES.get("cover")
-
-            total_copies = request.POST.get(
-                "total_copies",
-                str(book.total_copies)
-            ).strip()
-
-            if not title:
-                messages.error(
-                    request,
-                    "عنوان کتاب را وارد کنید."
+            return render(
+                request,
+                "dashboard/book_form.html",
+                get_book_form_context(
+                    book,
+                    form_data
                 )
+            )
 
-                context = {
-                    "categories": categories,
-                    "book": book,
-                }
+        if not author_names:
 
-                return render(
-                    request,
-                    "dashboard/book_form.html",
-                    context
+            messages.error(
+                request,
+                "حداقل یک مؤلف برای کتاب وارد کنید."
+            )
+
+            return render(
+                request,
+                "dashboard/book_form.html",
+                get_book_form_context(
+                    book,
+                    form_data
                 )
+            )
 
-            if not author:
-                messages.error(
-                    request,
-                    "نام نویسنده را وارد کنید."
+        if not subject_name:
+
+            messages.error(
+                request,
+                "موضوع کتاب را وارد کنید."
+            )
+
+            return render(
+                request,
+                "dashboard/book_form.html",
+                get_book_form_context(
+                    book,
+                    form_data
                 )
+            )
 
-                context = {
-                    "categories": categories,
-                    "book": book,
-                }
+        if not location_code:
 
-                return render(
-                    request,
-                    "dashboard/book_form.html",
-                    context
+            messages.error(
+                request,
+                "دسته‌بندی یا محل قرارگیری کتاب را وارد کنید."
+            )
+
+            return render(
+                request,
+                "dashboard/book_form.html",
+                get_book_form_context(
+                    book,
+                    form_data
                 )
+            )
+
+        if not publisher_name:
+
+            messages.error(
+                request,
+                "نام ناشر را وارد کنید."
+            )
+
+            return render(
+                request,
+                "dashboard/book_form.html",
+                get_book_form_context(
+                    book,
+                    form_data
+                )
+            )
+
+        try:
+
+            total_copies = int(
+                normalize_digits(
+                    total_copies
+                )
+            )
+
+        except (TypeError, ValueError):
+
+            messages.error(
+                request,
+                "تعداد نسخه‌ها باید یک عدد باشد."
+            )
+
+            return render(
+                request,
+                "dashboard/book_form.html",
+                get_book_form_context(
+                    book,
+                    form_data
+                )
+            )
+
+        if total_copies < 1:
+
+            messages.error(
+                request,
+                "تعداد نسخه‌ها باید حداقل ۱ باشد."
+            )
+
+            return render(
+                request,
+                "dashboard/book_form.html",
+                get_book_form_context(
+                    book,
+                    form_data
+                )
+            )
+
+        # -----------------------------------------
+        # تعداد نسخه‌های امانت
+        # -----------------------------------------
+
+        borrowed_count = Loan.objects.filter(
+            book=book,
+            status=Loan.STATUS_BORROWED
+        ).count()
+
+        if total_copies < borrowed_count:
+
+            messages.error(
+                request,
+                f"تعداد نسخه‌ها نمی‌تواند کمتر از "
+                f"{borrowed_count} نسخه‌ای باشد که "
+                f"در حال حاضر امانت هستند."
+            )
+
+            return render(
+                request,
+                "dashboard/book_form.html",
+                get_book_form_context(
+                    book,
+                    form_data
+                )
+            )
+
+        # -----------------------------------------
+        # سال انتشار
+        # -----------------------------------------
+
+        if publication_year:
 
             try:
-                total_copies = int(total_copies)
+
+                publication_year = int(
+                    publication_year
+                )
+
             except (TypeError, ValueError):
+
                 messages.error(
                     request,
-                    "تعداد نسخه‌ها باید یک عدد باشد."
+                    "سال انتشار باید یک عدد باشد."
                 )
-
-                context = {
-                    "categories": categories,
-                    "book": book,
-                }
 
                 return render(
                     request,
                     "dashboard/book_form.html",
-                    context
+                    get_book_form_context(
+                        book,
+                        form_data
+                    )
                 )
 
-            if total_copies < 1:
+            if not 1000 <= publication_year <= 1600:
+
                 messages.error(
                     request,
-                    "تعداد نسخه‌ها باید حداقل ۱ باشد."
+                    "سال انتشار شمسی واردشده معتبر نیست."
                 )
-
-                context = {
-                    "categories": categories,
-                    "book": book,
-                }
 
                 return render(
                     request,
                     "dashboard/book_form.html",
-                    context
+                    get_book_form_context(
+                        book,
+                        form_data
+                    )
                 )
 
-            borrowed_count = Loan.objects.filter(
-                book=book,
-                status=Loan.STATUS_BORROWED
-            ).count()
+        else:
 
-            if total_copies < borrowed_count:
-                messages.error(
-                    request,
-                    f"تعداد نسخه‌ها نمی‌تواند کمتر از "
-                    f"{borrowed_count} نسخه‌ای باشد که در حال حاضر امانت هستند."
-                )
+            publication_year = None
 
-                context = {
-                    "categories": categories,
-                    "book": book,
-                }
+        # -----------------------------------------
+        # روابط
+        # -----------------------------------------
 
-                return render(
-                    request,
-                    "dashboard/book_form.html",
-                    context
-                )
+        subject, _ = Subject.objects.get_or_create(
+            name=subject_name
+        )
 
-            category = None
+        publisher, _ = Publisher.objects.get_or_create(
+            name=publisher_name
+        )
 
-            if category_id:
-                category = get_object_or_404(
-                    Category,
-                    pk=category_id
-                )
+        location, _ = BookLocation.objects.get_or_create(
+            code=location_code
+        )
+
+        # -----------------------------------------
+        # ذخیره کتاب
+        # -----------------------------------------
+
+        with transaction.atomic():
 
             book.title = title
-            book.author = author
-            book.category = category
+            book.subject = subject
+            book.publisher = publisher
+            book.publication_year = publication_year
+            book.location = location
             book.description = description
             book.total_copies = total_copies
-            book.is_available = borrowed_count < total_copies
+            book.is_available = (
+                borrowed_count < total_copies
+            )
 
             if cover:
                 book.cover = cover
 
             book.save()
+
+            # مؤلفان
+
+            authors = []
+
+            for name in author_names:
+
+                author, _ = Author.objects.get_or_create(
+                    name=name
+                )
+
+                authors.append(author)
+
+            book.authors.set(authors)
+
+            # مترجمان
+
+            translators = []
+
+            for name in translator_names:
+
+                translator, _ = Translator.objects.get_or_create(
+                    name=name
+                )
+
+                translators.append(translator)
+
+            book.translators.set(translators)
+
+        log_activity(
+            request=request,
+            action=ActivityLog.ACTION_UPDATE,
+            section="کتاب‌ها",
+            description=(
+                f"اطلاعات کتاب «{book.title}» با شماره ثبت "
+                f"{book.registration_number} ویرایش شد."
+            ),
+            object_id=book.pk,
+        )
 
         messages.success(
             request,
@@ -511,32 +1258,39 @@ def edit_book(request, pk):
 
         return redirect("manage_books")
 
-    book = get_object_or_404(
-        Book,
-        pk=pk
-    )
-
-    context = {
-        "categories": categories,
-        "book": book,
-    }
-
     return render(
         request,
         "dashboard/book_form.html",
-        context
+        get_book_form_context(book)
     )
 
 
 @permission_required("blog.manage_books")
 def delete_book(request, pk):
+
     book = get_object_or_404(
         Book,
         pk=pk
     )
 
     if request.method == "POST":
+
+        book_title = book.title
+        book_registration_number = book.registration_number
+        book_pk = book.pk
+
         book.delete()
+
+        log_activity(
+            request=request,
+            action=ActivityLog.ACTION_DELETE,
+            section="کتاب‌ها",
+            description=(
+                f"کتاب «{book_title}» با شماره ثبت "
+                f"{book_registration_number} حذف شد."
+            ),
+            object_id=book_pk,
+        )
 
         messages.success(
             request,
@@ -545,41 +1299,40 @@ def delete_book(request, pk):
 
         return redirect("manage_books")
 
-    context = {
-        "book": book,
-    }
-
     return render(
         request,
         "dashboard/book_delete.html",
-        context
+        {
+            "book": book,
+        }
     )
 
 
 # =========================================================
-# CATEGORIES
+# CATEGORIES / SUBJECTS
 # =========================================================
 
 @permission_required("blog.manage_categories")
 def manage_categories(request):
+
     query = request.GET.get(
         "q",
         ""
     ).strip()
 
-    categories = (
-        Category.objects
+    subjects = (
+        Subject.objects
         .all()
         .order_by("name")
     )
 
     if query:
-        categories = categories.filter(
+        subjects = subjects.filter(
             name__icontains=query
         )
 
     context = {
-        "categories": categories,
+        "categories": subjects,
         "query": query,
     }
 
@@ -592,16 +1345,19 @@ def manage_categories(request):
 
 @permission_required("blog.manage_categories")
 def add_category(request):
+
     if request.method == "POST":
+
         name = request.POST.get(
             "name",
             ""
         ).strip()
 
         if not name:
+
             messages.error(
                 request,
-                "نام دسته‌بندی را وارد کنید."
+                "نام موضوع را وارد کنید."
             )
 
             context = {
@@ -614,16 +1370,37 @@ def add_category(request):
                 context
             )
 
-        Category.objects.create(
+        subject, created = Subject.objects.get_or_create(
             name=name
         )
 
-        messages.success(
-            request,
-            "دسته‌بندی با موفقیت اضافه شد."
-        )
+        if not created:
 
-        return redirect("manage_categories")
+            messages.warning(
+                request,
+                "این موضوع قبلاً وجود دارد."
+            )
+
+        else:
+
+            log_activity(
+                request=request,
+                action=ActivityLog.ACTION_CREATE,
+                section="موضوعات",
+                description=(
+                    f"موضوع «{subject.name}» اضافه شد."
+                ),
+                object_id=subject.pk,
+            )
+
+            messages.success(
+                request,
+                "موضوع با موفقیت اضافه شد."
+            )
+
+        return redirect(
+            "manage_categories"
+        )
 
     context = {
         "category": None,
@@ -638,25 +1415,28 @@ def add_category(request):
 
 @permission_required("blog.manage_categories")
 def edit_category(request, pk):
-    category = get_object_or_404(
-        Category,
+
+    subject = get_object_or_404(
+        Subject,
         pk=pk
     )
 
     if request.method == "POST":
+
         name = request.POST.get(
             "name",
             ""
         ).strip()
 
         if not name:
+
             messages.error(
                 request,
-                "نام دسته‌بندی را وارد کنید."
+                "نام موضوع را وارد کنید."
             )
 
             context = {
-                "category": category,
+                "category": subject,
             }
 
             return render(
@@ -665,18 +1445,55 @@ def edit_category(request, pk):
                 context
             )
 
-        category.name = name
-        category.save()
+        duplicate_exists = (
+            Subject.objects
+            .filter(name=name)
+            .exclude(pk=subject.pk)
+            .exists()
+        )
+
+        if duplicate_exists:
+
+            messages.error(
+                request,
+                "موضوعی با این نام قبلاً وجود دارد."
+            )
+
+            context = {
+                "category": subject,
+            }
+
+            return render(
+                request,
+                "dashboard/category_form.html",
+                context
+            )
+
+        subject.name = name
+
+        subject.save()
+
+        log_activity(
+            request=request,
+            action=ActivityLog.ACTION_UPDATE,
+            section="موضوعات",
+            description=(
+                f"موضوع «{subject.name}» ویرایش شد."
+            ),
+            object_id=subject.pk,
+        )
 
         messages.success(
             request,
-            "دسته‌بندی با موفقیت ویرایش شد."
+            "موضوع با موفقیت ویرایش شد."
         )
 
-        return redirect("manage_categories")
+        return redirect(
+            "manage_categories"
+        )
 
     context = {
-        "category": category,
+        "category": subject,
     }
 
     return render(
@@ -688,23 +1505,54 @@ def edit_category(request, pk):
 
 @permission_required("blog.manage_categories")
 def delete_category(request, pk):
-    category = get_object_or_404(
-        Category,
+
+    subject = get_object_or_404(
+        Subject,
         pk=pk
     )
 
     if request.method == "POST":
-        category.delete()
+
+        # چون Book.subject از PROTECT استفاده می‌کند،
+        # موضوعی که به کتاب متصل باشد نباید حذف شود.
+
+        if subject.books.exists():
+
+            messages.error(
+                request,
+                "این موضوع به یک یا چند کتاب متصل است و نمی‌توان آن را حذف کرد."
+            )
+
+            return redirect(
+                "manage_categories"
+            )
+
+        subject_name = subject.name
+        subject_pk = subject.pk
+
+        subject.delete()
+
+        log_activity(
+            request=request,
+            action=ActivityLog.ACTION_DELETE,
+            section="موضوعات",
+            description=(
+                f"موضوع «{subject_name}» حذف شد."
+            ),
+            object_id=subject_pk,
+        )
 
         messages.success(
             request,
-            "دسته‌بندی با موفقیت حذف شد."
+            "موضوع با موفقیت حذف شد."
         )
 
-        return redirect("manage_categories")
+        return redirect(
+            "manage_categories"
+        )
 
     context = {
-        "category": category,
+        "category": subject,
     }
 
     return render(
@@ -715,11 +1563,183 @@ def delete_category(request, pk):
 
 
 # =========================================================
+# SUPPORT / ACTIVITY LOG HELPER
+# =========================================================
+
+def log_activity(
+    request,
+    action,
+    section,
+    description,
+    object_id="",
+):
+    """
+    ثبت یک رویداد در سیستم پشتیبانی.
+    """
+
+    actor = None
+
+    if request.user.is_authenticated:
+        actor = request.user
+
+    ip_address = request.META.get(
+        "REMOTE_ADDR"
+    )
+
+    ActivityLog.objects.create(
+        actor=actor,
+        action=action,
+        section=section,
+        description=description,
+        object_id=str(object_id) if object_id else "",
+        ip_address=ip_address,
+    )
+
+
+# =========================================================
 # LOANS
 # =========================================================
 
 @permission_required("blog.manage_loans")
+def export_loans_excel(request):
+    """
+    خروجی Excel از تمام سوابق امانت‌ها.
+    """
+    loans = (
+        Loan.objects
+        .select_related(
+            "user",
+            "book",
+            "book__subject",
+            "book__publisher",
+        )
+        .prefetch_related(
+            "book__authors",
+            "book__translators",
+        )
+        .order_by("-created_at")
+    )
+
+    workbook = Workbook()
+    worksheet = workbook.active
+    worksheet.title = "امانت‌ها"
+
+    headers = [
+        "شماره ثبت امانت",
+        "کتاب",
+        "کاربر",
+        "شماره موبایل",
+        "وضعیت",
+        "تاریخ دریافت",
+        "مهلت بازگشت",
+        "تاریخ برگشت",
+        "تعداد روز دیرکرد",
+        "جریمه هر روز",
+        "مبلغ جریمه",
+        "توضیحات مدیر",
+    ]
+
+    worksheet.append(headers)
+
+    def jalali_datetime(value):
+        if not value:
+            return ""
+        try:
+            if timezone.is_aware(value):
+                value = timezone.localtime(value)
+            return jdatetime.datetime.fromgregorian(
+                datetime=value
+            ).strftime("%Y/%m/%d - %H:%M")
+        except Exception:
+            return ""
+
+    for loan in loans:
+        if loan.status == Loan.STATUS_BORROWED:
+            late_days = loan.current_late_days
+            current_fine = loan.current_fine
+        else:
+            late_days = loan.late_days
+            current_fine = loan.total_fine
+
+        worksheet.append([
+            loan.registration_number,
+            loan.book.title if loan.book else "",
+            (
+                loan.user.get_full_name()
+                if loan.user and loan.user.get_full_name()
+                else loan.user.username
+                if loan.user
+                else ""
+            ),
+            loan.user.phone_number if loan.user else "",
+            loan.get_status_display(),
+            jalali_datetime(loan.borrowed_at),
+            jalali_datetime(loan.due_date),
+            jalali_datetime(loan.returned_at),
+            late_days,
+            loan.daily_fine,
+            current_fine,
+            loan.admin_note or "",
+        ])
+
+    for cell in worksheet[1]:
+        cell.alignment = Alignment(
+            horizontal="right",
+            vertical="center",
+            wrap_text=True,
+        )
+        cell.font = cell.font.copy(bold=True)
+
+    for row in worksheet.iter_rows(min_row=2):
+        for cell in row:
+            cell.alignment = Alignment(
+                horizontal="right",
+                vertical="center",
+                wrap_text=True,
+            )
+
+    column_widths = {
+        "A": 16,
+        "B": 35,
+        "C": 25,
+        "D": 18,
+        "E": 18,
+        "F": 22,
+        "G": 22,
+        "H": 22,
+        "I": 18,
+        "J": 18,
+        "K": 18,
+        "L": 40,
+    }
+
+    for column, width in column_widths.items():
+        worksheet.column_dimensions[column].width = width
+
+    worksheet.freeze_panes = "A2"
+    worksheet.auto_filter.ref = worksheet.dimensions
+    worksheet.sheet_view.rightToLeft = True
+    worksheet.row_dimensions[1].height = 30
+
+    response = HttpResponse(
+        content_type=(
+            "application/vnd.openxmlformats-officedocument."
+            "spreadsheetml.sheet"
+        )
+    )
+
+    response["Content-Disposition"] = (
+        'attachment; filename="loans_list.xlsx"'
+    )
+
+    workbook.save(response)
+
+    return response
+
+
+@permission_required("blog.manage_loans")
 def manage_loans(request):
+
     available_books = (
         Book.objects
         .annotate(
@@ -732,20 +1752,27 @@ def manage_loans(request):
         )
         .annotate(
             available_copies=ExpressionWrapper(
-                F("total_copies") - F("borrowed_count"),
-                output_field=IntegerField()
+                F("total_copies") -
+                F("borrowed_count"),
+                output_field=IntegerField(),
             )
         )
         .filter(
             available_copies__gt=0
         )
-        .select_related("category")
-        .order_by("title")
+        .select_related(
+            "category",
+        )
+        .order_by(
+            "title",
+        )
     )
 
     users = (
         User.objects
-        .filter(is_active=True)
+        .filter(
+            is_active=True,
+        )
         .order_by(
             "first_name",
             "last_name",
@@ -755,110 +1782,322 @@ def manage_loans(request):
 
     loans = (
         Loan.objects
-        .filter(
-            status=Loan.STATUS_BORROWED
-        )
         .select_related(
             "user",
             "book",
             "book__category",
         )
-        .order_by("-borrowed_at")
+        .prefetch_related(
+            "book__authors",
+        )
+        .order_by(
+            "-created_at",
+        )
+    )
+
+    # سال جاری شمسی و چند سال آینده
+    today_jalali = jdatetime.date.today()
+
+    current_jalali_year = today_jalali.year
+
+    due_years = range(
+        current_jalali_year,
+        current_jalali_year + 6,
     )
 
     context = {
         "available_books": available_books,
         "users": users,
         "loans": loans,
+        "due_years": due_years,
     }
 
     return render(
         request,
         "dashboard/loans.html",
-        context
+        context,
     )
 
 
 @permission_required("blog.manage_loans")
 def create_loan(request):
+
     if request.method != "POST":
         return redirect("manage_loans")
 
     book_id = request.POST.get(
         "book_id",
-        ""
+        "",
     ).strip()
 
     user_id = request.POST.get(
         "user_id",
-        ""
+        "",
     ).strip()
 
+    due_year = request.POST.get(
+        "due_year",
+        "",
+    ).strip()
+
+    due_month = request.POST.get(
+        "due_month",
+        "",
+    ).strip()
+
+    due_day = request.POST.get(
+        "due_day",
+        "",
+    ).strip()
+
+    due_hour = request.POST.get(
+        "due_hour",
+        "",
+    ).strip()
+
+    due_minute = request.POST.get(
+        "due_minute",
+        "",
+    ).strip()
+
+    daily_fine = request.POST.get(
+        "daily_fine",
+        "0",
+    ).strip()
+
+    admin_note = request.POST.get(
+        "admin_note",
+        "",
+    ).strip()
+
+    # -------------------------
+    # بررسی کتاب و کاربر
+    # -------------------------
+
     if not book_id or not user_id:
+
         messages.error(
             request,
-            "ابتدا کتاب و کاربر را انتخاب کنید."
+            "ابتدا کتاب و کاربر را انتخاب کنید.",
         )
 
         return redirect("manage_loans")
+
+    # -------------------------
+    # بررسی تاریخ
+    # -------------------------
+
+    if not all(
+        [
+            due_year,
+            due_month,
+            due_day,
+            due_hour,
+            due_minute,
+        ]
+    ):
+
+        messages.error(
+            request,
+            "تاریخ و ساعت مهلت بازگشت را کامل مشخص کنید.",
+        )
+
+        return redirect("manage_loans")
+
+    try:
+
+        due_year = int(due_year)
+        due_month = int(due_month)
+        due_day = int(due_day)
+        due_hour = int(due_hour)
+        due_minute = int(due_minute)
+
+    except (TypeError, ValueError):
+
+        messages.error(
+            request,
+            "تاریخ مهلت بازگشت معتبر نیست.",
+        )
+
+        return redirect("manage_loans")
+
+    # -------------------------
+    # اعتبارسنجی ساعت
+    # -------------------------
+
+    if not 0 <= due_hour <= 23:
+
+        messages.error(
+            request,
+            "ساعت انتخاب‌شده معتبر نیست.",
+        )
+
+        return redirect("manage_loans")
+
+    if not 0 <= due_minute <= 59:
+
+        messages.error(
+            request,
+            "دقیقه انتخاب‌شده معتبر نیست.",
+        )
+
+        return redirect("manage_loans")
+
+    # -------------------------
+    # تبدیل تاریخ شمسی به میلادی
+    # -------------------------
+
+    try:
+
+        jalali_due_date = jdatetime.datetime(
+            due_year,
+            due_month,
+            due_day,
+            due_hour,
+            due_minute,
+            0,
+        )
+
+        gregorian_due_date = (
+            jalali_due_date
+            .togregorian()
+        )
+
+        due_date_value = timezone.make_aware(
+            gregorian_due_date,
+            timezone.get_current_timezone(),
+        )
+
+    except (ValueError, TypeError):
+
+        messages.error(
+            request,
+            "تاریخ انتخاب‌شده معتبر نیست.",
+        )
+
+        return redirect("manage_loans")
+
+    # -------------------------
+    # مهلت نباید در گذشته باشد
+    # -------------------------
+
+    now = timezone.now()
+
+    if due_date_value <= now:
+
+        messages.error(
+            request,
+            "مهلت بازگشت باید بعد از زمان فعلی باشد.",
+        )
+
+        return redirect("manage_loans")
+
+    # -------------------------
+    # جریمه روزانه
+    # -------------------------
+
+    try:
+
+        daily_fine = int(daily_fine)
+
+    except (TypeError, ValueError):
+
+        messages.error(
+            request,
+            "مبلغ جریمه روزانه باید یک عدد باشد.",
+        )
+
+        return redirect("manage_loans")
+
+    if daily_fine < 0:
+
+        messages.error(
+            request,
+            "مبلغ جریمه روزانه نمی‌تواند منفی باشد.",
+        )
+
+        return redirect("manage_loans")
+
+    # -------------------------
+    # ثبت امانت
+    # -------------------------
 
     with transaction.atomic():
 
         book = get_object_or_404(
             Book.objects.select_for_update(),
-            pk=book_id
+            pk=book_id,
         )
 
         user = get_object_or_404(
             User,
-            pk=user_id
+            pk=user_id,
         )
 
-        borrowed_count = Loan.objects.filter(
-            book=book,
-            status=Loan.STATUS_BORROWED
-        ).count()
+        borrowed_count = (
+            Loan.objects
+            .filter(
+                book=book,
+                status=Loan.STATUS_BORROWED,
+            )
+            .count()
+        )
 
         available_copies = (
-            book.total_copies - borrowed_count
+            book.total_copies -
+            borrowed_count
         )
 
         if available_copies <= 0:
+
             messages.error(
                 request,
-                f"کتاب «{book.title}» در حال حاضر هیچ نسخه‌ای برای امانت ندارد."
+                (
+                    f"کتاب «{book.title}» "
+                    "در حال حاضر هیچ نسخه‌ای برای امانت ندارد."
+                ),
             )
 
             return redirect("manage_loans")
 
-        active_loan_exists = Loan.objects.filter(
-            user=user,
-            book=book,
-            status=Loan.STATUS_BORROWED
-        ).exists()
+        active_loan_exists = (
+            Loan.objects
+            .filter(
+                user=user,
+                book=book,
+                status=Loan.STATUS_BORROWED,
+            )
+            .exists()
+        )
 
         if active_loan_exists:
+
             messages.error(
                 request,
-                "این کاربر در حال حاضر همین کتاب را در اختیار دارد."
+                "این کاربر در حال حاضر همین کتاب را در اختیار دارد.",
             )
 
             return redirect("manage_loans")
 
-        now = timezone.now()
+        borrowed_at = timezone.now()
 
-        Loan.objects.create(
+        loan = Loan.objects.create(
             user=user,
             book=book,
             status=Loan.STATUS_BORROWED,
-            approved_at=now,
-            borrowed_at=now,
+            borrowed_at=borrowed_at,
+            due_date=due_date_value,
+            daily_fine=daily_fine,
+            admin_note=admin_note,
+            late_days=0,
+            total_fine=0,
         )
 
         borrowed_count += 1
 
         book.is_available = (
-            borrowed_count < book.total_copies
+            borrowed_count <
+            book.total_copies
         )
 
         book.save(
@@ -867,9 +2106,29 @@ def create_loan(request):
             ]
         )
 
+    # ثبت رویداد در پشتیبانی
+    log_activity(
+        request=request,
+        action=ActivityLog.ACTION_LOAN,
+        section="امانت‌ها",
+        description=(
+            f"کتاب «{book.title}» "
+            f"با شماره ثبت امانت "
+            f"{loan.registration_number} "
+            f"به کاربر "
+            f"«{user.get_full_name() or user.username}» "
+            "امانت داده شد."
+        ),
+        object_id=loan.pk,
+    )
+
     messages.success(
         request,
-        f"کتاب «{book.title}» با موفقیت به {user.username} امانت داده شد."
+        (
+            f"امانت کتاب «{book.title}» "
+            f"با شماره ثبت {loan.registration_number} "
+            "با موفقیت ثبت شد."
+        ),
     )
 
     return redirect("manage_loans")
@@ -877,6 +2136,7 @@ def create_loan(request):
 
 @permission_required("blog.manage_loans")
 def return_loan(request, pk):
+
     if request.method != "POST":
         return redirect("manage_loans")
 
@@ -889,40 +2149,76 @@ def return_loan(request, pk):
                 "book",
                 "user",
             ),
-            pk=pk
+            pk=pk,
         )
 
         if loan.status != Loan.STATUS_BORROWED:
+
             messages.error(
                 request,
-                "فقط کتاب‌های امانت‌داده‌شده را می‌توان بازگشت زد."
+                "این امانت قبلاً برگشت داده شده است.",
             )
 
             return redirect("manage_loans")
 
-        book = Book.objects.select_for_update().get(
-            pk=loan.book_id
+        book = (
+            Book.objects
+            .select_for_update()
+            .get(
+                pk=loan.book_id,
+            )
         )
 
         now = timezone.now()
 
-        loan.status = Loan.STATUS_RETURNED
+        late_days = 0
+
+        if (
+            loan.due_date
+            and now > loan.due_date
+        ):
+
+            difference = (
+                now -
+                loan.due_date
+            )
+
+            late_days = difference.days
+
+        total_fine = (
+            late_days *
+            loan.daily_fine
+        )
+
+        loan.status = (
+            Loan.STATUS_AVAILABLE
+        )
+
         loan.returned_at = now
+        loan.late_days = late_days
+        loan.total_fine = total_fine
 
         loan.save(
             update_fields=[
                 "status",
                 "returned_at",
+                "late_days",
+                "total_fine",
             ]
         )
 
-        borrowed_count = Loan.objects.filter(
-            book=book,
-            status=Loan.STATUS_BORROWED
-        ).count()
+        borrowed_count = (
+            Loan.objects
+            .filter(
+                book=book,
+                status=Loan.STATUS_BORROWED,
+            )
+            .count()
+        )
 
         book.is_available = (
-            borrowed_count < book.total_copies
+            borrowed_count <
+            book.total_copies
         )
 
         book.save(
@@ -931,10 +2227,44 @@ def return_loan(request, pk):
             ]
         )
 
-    messages.success(
-        request,
-        "بازگشت کتاب با موفقیت ثبت شد و موجودی کتاب به‌روزرسانی شد."
+    # ثبت رویداد در پشتیبانی
+    log_activity(
+        request=request,
+        action=ActivityLog.ACTION_RETURN,
+        section="امانت‌ها",
+        description=(
+            f"کتاب «{loan.book.title}» "
+            f"با شماره ثبت امانت "
+            f"{loan.registration_number} "
+            f"از کاربر "
+            f"«{loan.user.get_full_name() or loan.user.username}» "
+            f"برگشت داده شد. "
+            f"دیرکرد: {late_days} روز، "
+            f"مبلغ جریمه: {total_fine:,} تومان."
+        ),
+        object_id=loan.pk,
     )
+
+    if total_fine > 0:
+
+        messages.success(
+            request,
+            (
+                "بازگشت کتاب با موفقیت ثبت شد. "
+                f"تعداد روز دیرکرد: {late_days} روز "
+                f"و مبلغ جریمه: {total_fine:,} تومان."
+            ),
+        )
+
+    else:
+
+        messages.success(
+            request,
+            (
+                "بازگشت کتاب با موفقیت ثبت شد. "
+                "این امانت جریمه‌ای نداشت."
+            ),
+        )
 
     return redirect("manage_loans")
 
@@ -992,6 +2322,8 @@ def edit_user(request, pk):
     )
 
     if request.method == "POST":
+        roles_changed = False
+
         username = request.POST.get(
             "username",
             ""
@@ -1165,11 +2497,36 @@ def edit_user(request, pk):
                 selected_roles
             )
 
+            roles_changed = True
+
         # -----------------------------------------
         # ذخیره اطلاعات
         # -----------------------------------------
 
         user.save()
+
+        log_activity(
+            request=request,
+            action=ActivityLog.ACTION_UPDATE,
+            section="کاربران",
+            description=(
+                f"اطلاعات کاربر «{user.get_full_name() or user.username}» "
+                f"با نام کاربری «{user.username}» ویرایش شد."
+            ),
+            object_id=user.pk,
+        )
+
+        if roles_changed:
+            log_activity(
+                request=request,
+                action=ActivityLog.ACTION_ROLE,
+                section="نقش‌های کاربران",
+                description=(
+                    f"نقش‌های کاربر «{user.get_full_name() or user.username}» "
+                    f"توسط «{request.user.get_full_name() or request.user.username}» تغییر کرد."
+                ),
+                object_id=user.pk,
+            )
 
         messages.success(
             request,
@@ -1228,6 +2585,17 @@ def toggle_user_active(request, pk):
         ]
     )
 
+    log_activity(
+        request=request,
+        action=ActivityLog.ACTION_STATUS,
+        section="کاربران",
+        description=(
+            f"حساب کاربر «{user.get_full_name() or user.username}» "
+            f"{'فعال' if user.is_active else 'غیرفعال'} شد."
+        ),
+        object_id=user.pk,
+    )
+
     if user.is_active:
         messages.success(
             request,
@@ -1282,9 +2650,20 @@ def delete_user(request, pk):
         return redirect("manage_users")
 
     username = user.username
+    user_pk = user.pk
 
     with transaction.atomic():
         user.delete()
+
+    log_activity(
+        request=request,
+        action=ActivityLog.ACTION_DELETE,
+        section="کاربران",
+        description=(
+            f"کاربر «{username}» حذف شد."
+        ),
+        object_id=user_pk,
+    )
 
     messages.success(
         request,
@@ -1293,7 +2672,149 @@ def delete_user(request, pk):
 
     return redirect("manage_users")
 
+# =========================================================
+# SUPPORT / ACTIVITY LOG
+# =========================================================
 
+@permission_required("accounts.access_dashboard")
+def support_logs(request):
+
+    logs = (
+        ActivityLog.objects
+        .select_related("actor")
+        .all()
+    )
+
+    # -----------------------------------------
+    # فیلتر نوع عملیات
+    # -----------------------------------------
+
+    action = request.GET.get(
+        "action",
+        ""
+    ).strip()
+
+    if action:
+        logs = logs.filter(
+            action=action
+        )
+
+    # -----------------------------------------
+    # فیلتر کاربر
+    # -----------------------------------------
+
+    actor_id = request.GET.get(
+        "actor",
+        ""
+    ).strip()
+
+    if actor_id:
+        logs = logs.filter(
+            actor_id=actor_id
+        )
+
+    # -----------------------------------------
+    # جستجو
+    # -----------------------------------------
+
+    query = request.GET.get(
+        "q",
+        ""
+    ).strip()
+
+    if query:
+        logs = logs.filter(
+            description__icontains=query
+        )
+
+    # -----------------------------------------
+    # فیلتر زمانی
+    # -----------------------------------------
+
+    date_filter = request.GET.get(
+        "date",
+        "all"
+    ).strip()
+
+    now = timezone.localtime(
+        timezone.now()
+    )
+
+    today = now.date()
+
+    if date_filter == "today":
+
+        logs = logs.filter(
+            created_at__date=today
+        )
+
+    elif date_filter == "yesterday":
+
+        yesterday = today - timedelta(
+            days=1
+        )
+
+        logs = logs.filter(
+            created_at__date=yesterday
+        )
+
+    elif date_filter == "before_yesterday":
+
+        before_yesterday = today - timedelta(
+            days=2
+        )
+
+        logs = logs.filter(
+            created_at__date=before_yesterday
+        )
+
+    elif date_filter == "last_7":
+
+        start_date = today - timedelta(
+            days=6
+        )
+
+        logs = logs.filter(
+            created_at__date__gte=start_date
+        )
+
+    elif date_filter == "last_30":
+
+        start_date = today - timedelta(
+            days=29
+        )
+
+        logs = logs.filter(
+            created_at__date__gte=start_date
+        )
+
+    users = (
+        User.objects
+        .filter(
+            is_active=True
+        )
+        .order_by(
+            "first_name",
+            "last_name",
+            "username"
+        )
+    )
+
+    context = {
+        "logs": logs,
+        "users": users,
+        "action_choices": ActivityLog.ACTION_CHOICES,
+        "selected_action": action,
+        "selected_actor": actor_id,
+        "selected_date": date_filter,
+        "query": query,
+    }
+
+    return render(
+        request,
+        "dashboard/support.html",
+        context
+    )
 # =========================================================
 # DASHBOARD LOGIN
 # =========================================================
@@ -1346,9 +2867,260 @@ def dashboard_login(request):
 
         login(request, user)
 
+        log_activity(
+            request=request,
+            action=ActivityLog.ACTION_LOGIN,
+            section="ورود به پنل",
+            description=(
+                f"کاربر «{user.get_full_name() or user.username}» "
+                f"وارد پنل مدیریت شد."
+            ),
+            object_id=user.pk,
+        )
+
         return redirect("dashboard_home")
 
     return render(
         request,
         "dashboard/login.html"
     )
+
+
+
+
+
+@permission_required("accounts.access_dashboard")
+def export_support_excel(request):
+
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, Alignment
+    from django.http import HttpResponse
+    import jdatetime
+
+    logs = (
+        ActivityLog.objects
+        .select_related("actor")
+        .order_by("-created_at")
+    )
+
+    action = request.GET.get("action", "").strip()
+
+    if action:
+        logs = logs.filter(
+            action=action
+        )
+
+    actor_id = request.GET.get("actor", "").strip()
+
+    if actor_id:
+        logs = logs.filter(
+            actor_id=actor_id
+        )
+
+    query = request.GET.get("q", "").strip()
+
+    if query:
+        logs = logs.filter(
+            description__icontains=query
+        )
+
+    date_filter = request.GET.get(
+        "date",
+        "all"
+    ).strip()
+
+    now = timezone.localtime(
+        timezone.now()
+    )
+
+    today = now.date()
+
+    if date_filter == "today":
+
+        logs = logs.filter(
+            created_at__date=today
+        )
+
+    elif date_filter == "yesterday":
+
+        yesterday = (
+            today -
+            timedelta(days=1)
+        )
+
+        logs = logs.filter(
+            created_at__date=yesterday
+        )
+
+    elif date_filter == "before_yesterday":
+
+        before_yesterday = (
+            today -
+            timedelta(days=2)
+        )
+
+        logs = logs.filter(
+            created_at__date=before_yesterday
+        )
+
+    elif date_filter == "last_7":
+
+        start_date = (
+            today -
+            timedelta(days=6)
+        )
+
+        logs = logs.filter(
+            created_at__date__gte=start_date
+        )
+
+    elif date_filter == "last_30":
+
+        start_date = (
+            today -
+            timedelta(days=29)
+        )
+
+        logs = logs.filter(
+            created_at__date__gte=start_date
+        )
+
+
+    workbook = Workbook()
+
+    worksheet = workbook.active
+
+    worksheet.title = "گزارش فعالیت‌ها"
+
+    worksheet.sheet_view.rightToLeft = True
+
+
+    headers = [
+        "تاریخ و ساعت",
+        "انجام‌دهنده",
+        "عملیات",
+        "بخش",
+        "توضیحات",
+        "شناسه رکورد",
+        "آدرس IP",
+    ]
+
+
+    worksheet.append(headers)
+
+
+    for cell in worksheet[1]:
+
+        cell.font = Font(
+            bold=True
+        )
+
+        cell.alignment = Alignment(
+            horizontal="center",
+            vertical="center"
+        )
+
+
+    for log in logs:
+
+        actor_name = "سیستم"
+
+        if log.actor:
+
+            if log.actor.get_full_name():
+
+                actor_name = (
+                    log.actor.get_full_name()
+                )
+
+            else:
+
+                actor_name = (
+                    log.actor.username
+                )
+
+
+        if log.created_at:
+
+            created_at = (
+                timezone.localtime(
+                    log.created_at
+                )
+            )
+
+            jalali_datetime = (
+                jdatetime.datetime.fromgregorian(
+                    datetime=created_at
+                )
+            )
+
+            date_text = (
+                jalali_datetime.strftime(
+                    "%Y/%m/%d %H:%M:%S"
+                )
+            )
+
+        else:
+
+            date_text = ""
+
+
+        worksheet.append(
+            [
+                date_text,
+                actor_name,
+                log.get_action_display(),
+                log.section or "-",
+                log.description,
+                log.object_id or "",
+                log.ip_address or "",
+            ]
+        )
+
+
+    column_widths = {
+        "A": 22,
+        "B": 25,
+        "C": 18,
+        "D": 22,
+        "E": 60,
+        "F": 18,
+        "G": 20,
+    }
+
+
+    for column, width in column_widths.items():
+
+        worksheet.column_dimensions[
+            column
+        ].width = width
+
+
+    worksheet.freeze_panes = "A2"
+
+    worksheet.auto_filter.ref = (
+        worksheet.dimensions
+    )
+
+
+    response = HttpResponse(
+        content_type=(
+            "application/vnd.openxmlformats-officedocument."
+            "spreadsheetml.sheet"
+        )
+    )
+
+    response[
+        "Content-Disposition"
+    ] = (
+        'attachment; '
+        'filename="support_logs.xlsx"'
+    )
+
+
+    workbook.save(
+        response
+    )
+
+
+    return response

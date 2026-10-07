@@ -1,4 +1,5 @@
 {% extends "blog/base.html" %}
+{% load jalali %}
 
 {% block title %}
     پروفایل من | کتابخانه پارک علم و فناوری
@@ -10,8 +11,10 @@
     .profile-page {
         padding: 50px 0 80px;
     }
+
     .profile-heading {
-        margin-bottom: 28px;
+        max-width: 1180px;
+        margin: 0 auto 28px;
     }
 
     .profile-heading-label {
@@ -39,6 +42,8 @@
     ========================= */
 
     .profile-layout {
+        max-width: 1180px;
+        margin: 0 auto;
         display: grid;
         grid-template-columns: 260px minmax(0, 1fr);
         gap: 24px;
@@ -152,6 +157,18 @@
         transform: translateY(-1px);
     }
 
+    .profile-action.print {
+        background: rgba(232, 155, 61, .08);
+        border-color: rgba(232, 155, 61, .25);
+        color: var(--orange-dark);
+    }
+
+    .profile-action.print:hover {
+        background: rgba(232, 155, 61, .14);
+        border-color: var(--orange);
+        color: var(--orange-dark);
+    }
+
     .profile-action.danger {
         color: #b85a50;
     }
@@ -219,6 +236,21 @@
         font-size: 16px;
         font-weight: 700;
         word-break: break-word;
+        line-height: 1.9;
+    }
+
+    .info-value.ltr {
+        direction: ltr;
+        text-align: right;
+    }
+
+    .info-item.full-width {
+        grid-column: 1 / -1;
+        border-left: 0 !important;
+    }
+
+    .address-value {
+        white-space: pre-line;
     }
 
     /* =========================
@@ -227,7 +259,8 @@
 
     .loans-section,
     .favorites-section {
-        margin-top: 20px;
+        max-width: 1180px;
+        margin: 20px auto 0;
         padding: 22px 24px;
     }
 
@@ -412,6 +445,7 @@
         font-size: 16px;
         font-weight: 800;
         line-height: 1.7;
+        text-decoration: none;
         transition: color .2s ease;
     }
 
@@ -489,25 +523,6 @@
         font-size: 15px;
         line-height: 1.9;
     }
-    .profile-page {
-        padding: 50px 0 80px;
-    }
-
-    .profile-layout {
-        max-width: 1180px;
-        margin: 0 auto;
-        display: grid;
-        grid-template-columns: 260px minmax(0, 1fr);
-        gap: 24px;
-        align-items: start;
-    }
-
-    .loans-section,
-    .favorites-section {
-        max-width: 1180px;
-        margin: 20px auto 0;
-        padding: 22px 24px;
-    }
 
     /* =========================
        Responsive
@@ -518,9 +533,14 @@
             padding: 35px 0 60px;
         }
 
+        .profile-heading {
+            padding: 0 18px;
+        }
+
         .profile-layout {
             grid-template-columns: 1fr;
             gap: 18px;
+            padding: 0 18px;
         }
 
         .profile-card,
@@ -528,6 +548,13 @@
         .loans-section,
         .favorites-section {
             width: 100%;
+        }
+
+        .loans-section,
+        .favorites-section {
+            margin-left: 18px;
+            margin-right: 18px;
+            width: calc(100% - 36px);
         }
     }
 
@@ -558,6 +585,10 @@
         .info-item:nth-child(odd) {
             padding-left: 5px;
             border-left: 0;
+        }
+
+        .info-item.full-width {
+            grid-column: auto;
         }
 
         .info-header h2 {
@@ -641,348 +672,499 @@
 
 <section class="profile-page">
 
-
-        <!-- اطلاعات پروفایل -->
-        <div class="profile-layout">
-
-            <!-- کارت کاربر -->
-            <aside class="profile-card">
-
-                <div class="profile-image">
-                    {% if user.profile_image %}
-                        <img
-                            src="{{ user.profile_image.url }}"
-                            alt="{{ user.get_full_name }}"
-                        >
-                    {% else %}
-                        <div class="profile-placeholder">
-                            👤
-                        </div>
-                    {% endif %}
-                </div>
-
-                <h2>
-                    {{ user.get_full_name|default:user.username }}
-                </h2>
-
-                <p>
-                    @{{ user.username }}
-                </p>
-
-                <div class="profile-actions">
-
-                    <a
-                        href="{% url 'accounts:edit_profile' %}"
-                        class="profile-action primary"
-                    >
-                        ویرایش پروفایل
-                    </a>
-
-                    <a
-                        href="{% url 'accounts:change_password' %}"
-                        class="profile-action"
-                    >
-                        تغییر رمز عبور
-                    </a>
-
-                    <a
-                        href="{% url 'accounts:logout' %}"
-                        class="profile-action danger"
-                    >
-                        خروج از حساب
-                    </a>
-
-                </div>
-            </aside>
-
-            <!-- اطلاعات حساب -->
-            <div class="profile-info">
-
-                <div class="info-header">
-                    <h2>
-                        اطلاعات حساب
-                    </h2>
-
-                    <span>
-                        عضو کتابخانه
-                    </span>
-                </div>
-
-                <div class="info-grid">
-
-                    <div class="info-item">
-                        <div class="info-label">
-                            نام
-                        </div>
-
-                        <div class="info-value">
-                            {{ user.first_name|default:"ثبت نشده" }}
-                        </div>
-                    </div>
-
-                    <div class="info-item">
-                        <div class="info-label">
-                            نام خانوادگی
-                        </div>
-
-                        <div class="info-value">
-                            {{ user.last_name|default:"ثبت نشده" }}
-                        </div>
-                    </div>
-
-                    <div class="info-item">
-                        <div class="info-label">
-                            نام کاربری
-                        </div>
-
-                        <div class="info-value">
-                            {{ user.username }}
-                        </div>
-                    </div>
-
-                    <div class="info-item">
-                        <div class="info-label">
-                            شماره موبایل
-                        </div>
-
-                        <div class="info-value">
-                            {{ user.phone_number|default:"ثبت نشده" }}
-                        </div>
-                    </div>
-
-                    <div class="info-item">
-                        <div class="info-label">
-                            تاریخ عضویت
-                        </div>
-
-                        <div class="info-value">
-                            {{ user.date_joined|date:"Y/m/d" }}
-                        </div>
-                    </div>
-
-                </div>
-            </div>
+    <!-- عنوان صفحه -->
+    <div class="profile-heading">
+        <div class="profile-heading-label">
+            حساب کاربری
         </div>
 
-        <!-- کتاب‌های در اختیار کاربر -->
-        <section class="loans-section">
+        <h1>
+            پروفایل من
+        </h1>
 
-            <div class="loans-header">
-                <h2>
-                    کتاب‌های در اختیار من
-                </h2>
+        <p>
+            اطلاعات شخصی، وضعیت عضویت، کتاب‌های امانت‌گرفته‌شده و کتاب‌های ذخیره‌شده شما.
+        </p>
+    </div>
 
-                <span class="loans-count">
-                    {{ active_loans|length }}
-                </span>
+
+    <!-- اطلاعات پروفایل -->
+    <div class="profile-layout">
+
+        <!-- کارت کاربر -->
+        <aside class="profile-card">
+
+            <div class="profile-image">
+
+                {% if user.profile_image %}
+                    <img
+                        src="{{ user.profile_image.url }}"
+                        alt="{{ user.get_full_name }}"
+                    >
+                {% else %}
+                    <div class="profile-placeholder">
+                        👤
+                    </div>
+                {% endif %}
+
             </div>
 
-            {% if active_loans %}
+            <h2>
+                {{ user.get_full_name|default:user.username }}
+            </h2>
 
-                <div class="loan-list">
+            <p>
+                @{{ user.username }}
+            </p>
 
-                    {% for loan in active_loans %}
+            <div class="profile-actions">
 
-                        <article class="loan-card">
+                <a
+                    href="{% url 'accounts:edit_profile' %}"
+                    class="profile-action primary"
+                >
+                    ویرایش پروفایل
+                </a>
+
+                <a
+                    href="{% url 'accounts:membership_card' %}"
+                    class="profile-action print"
+                >
+                    چاپ کارت عضویت
+                </a>
+
+                <a
+                    href="{% url 'accounts:change_password' %}"
+                    class="profile-action"
+                >
+                    تغییر رمز عبور
+                </a>
+
+                <a
+                    href="{% url 'accounts:logout' %}"
+                    class="profile-action danger"
+                >
+                    خروج از حساب
+                </a>
+
+            </div>
+
+        </aside>
+
+
+        <!-- اطلاعات کامل حساب -->
+        <div class="profile-info">
+
+            <div class="info-header">
+
+                <h2>
+                    اطلاعات کامل حساب
+                </h2>
+
+                <span>
+                    عضو کتابخانه
+                </span>
+
+            </div>
+
+
+            <div class="info-grid">
+
+                <!-- نام -->
+                <div class="info-item">
+
+                    <div class="info-label">
+                        نام
+                    </div>
+
+                    <div class="info-value">
+                        {{ user.first_name|default:"ثبت نشده" }}
+                    </div>
+
+                </div>
+
+
+                <!-- نام خانوادگی -->
+                <div class="info-item">
+
+                    <div class="info-label">
+                        نام خانوادگی
+                    </div>
+
+                    <div class="info-value">
+                        {{ user.last_name|default:"ثبت نشده" }}
+                    </div>
+
+                </div>
+
+
+                <!-- نام پدر -->
+                <div class="info-item">
+
+                    <div class="info-label">
+                        نام پدر
+                    </div>
+
+                    <div class="info-value">
+                        {{ user.father_name|default:"ثبت نشده" }}
+                    </div>
+
+                </div>
+
+
+                <!-- کد ملی -->
+                <div class="info-item">
+
+                    <div class="info-label">
+                        کد ملی
+                    </div>
+
+                    <div class="info-value ltr">
+                        {{ user.national_code|default:"ثبت نشده" }}
+                    </div>
+
+                </div>
+
+
+                <!-- تاریخ تولد -->
+                <div class="info-item">
+
+                    <div class="info-label">
+                        تاریخ تولد
+                    </div>
+
+                    <div class="info-value">
+                        {% if user.birth_date %}
+                            {{ user.birth_date|jalali_date }}
+                        {% else %}
+                            ثبت نشده
+                        {% endif %}
+                    </div>
+
+                </div>
+
+
+                <!-- شماره موبایل -->
+                <div class="info-item">
+
+                    <div class="info-label">
+                        شماره موبایل
+                    </div>
+
+                    <div class="info-value ltr">
+                        {{ user.phone_number|default:"ثبت نشده" }}
+                    </div>
+
+                </div>
+
+
+                <!-- نام کاربری -->
+                <div class="info-item">
+
+                    <div class="info-label">
+                        نام کاربری
+                    </div>
+
+                    <div class="info-value ltr">
+                        {{ user.username }}
+                    </div>
+
+                </div>
+
+
+                <!-- تاریخ عضویت -->
+                <div class="info-item">
+
+                    <div class="info-label">
+                        تاریخ عضویت
+                    </div>
+
+                    <div class="info-value">
+                        {{ user.date_joined|jalali_date }}
+                    </div>
+
+                </div>
+
+
+                <!-- آدرس منزل -->
+                <div class="info-item full-width">
+
+                    <div class="info-label">
+                        آدرس منزل
+                    </div>
+
+                    <div class="info-value address-value">
+                        {{ user.home_address|default:"ثبت نشده" }}
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- کتاب‌های در اختیار کاربر -->
+    <section class="loans-section">
+
+        <div class="loans-header">
+
+            <h2>
+                کتاب‌های در اختیار من
+            </h2>
+
+            <span class="loans-count">
+                {{ active_loans|length }}
+            </span>
+
+        </div>
+
+
+        {% if active_loans %}
+
+            <div class="loan-list">
+
+                {% for loan in active_loans %}
+
+                    <article class="loan-card">
+
+                        <a
+                            href="{% url 'book_detail' loan.book.pk %}"
+                            class="loan-cover"
+                        >
+
+                            {% if loan.book.cover %}
+
+                                <img
+                                    src="{{ loan.book.cover.url }}"
+                                    alt="{{ loan.book.title }}"
+                                >
+
+                            {% else %}
+
+                                <div class="loan-cover-placeholder">
+                                    📖
+                                </div>
+
+                            {% endif %}
+
+                        </a>
+
+
+                        <div class="loan-info">
 
                             <a
                                 href="{% url 'book_detail' loan.book.pk %}"
-                                class="loan-cover"
+                                style="text-decoration: none;"
                             >
-                                {% if loan.book.cover %}
-                                    <img
-                                        src="{{ loan.book.cover.url }}"
-                                        alt="{{ loan.book.title }}"
-                                    >
-                                {% else %}
-                                    <div class="loan-cover-placeholder">
-                                        📖
-                                    </div>
-                                {% endif %}
+
+                                <h3>
+                                    {{ loan.book.title }}
+                                </h3>
+
                             </a>
 
-                            <div class="loan-info">
 
-                                <a
-                                    href="{% url 'book_detail' loan.book.pk %}"
-                                    style="text-decoration: none;"
-                                >
-                                    <h3>
-                                        {{ loan.book.title }}
-                                    </h3>
-                                </a>
-
-                                <div class="loan-author">
-                                    نویسنده:
-                                    {{ loan.book.author }}
-                                </div>
-
-                                <div class="loan-date">
-
-                                    {% if loan.borrowed_at %}
-                                        <span>
-                                            دریافت:
-                                            {{ loan.borrowed_at|date:"Y/m/d" }}
-                                        </span>
-                                    {% endif %}
-
-                                    {% if loan.due_date %}
-                                        <span>
-                                            مهلت:
-                                            {{ loan.due_date|date:"Y/m/d" }}
-                                        </span>
-                                    {% endif %}
-
-                                </div>
+                            <div class="loan-author">
+                                نویسنده:
+                                {{ loan.book.author }}
                             </div>
 
-                            <div>
-                                <div class="loan-status">
-                                    امانت داده شده
-                                </div>
+
+                            <div class="loan-date">
+
+                                {% if loan.borrowed_at %}
+
+                                    <span>
+                                        دریافت:
+                                        {{ loan.borrowed_at|jalali_date }}
+                                    </span>
+
+                                {% endif %}
+
+
+                                {% if loan.due_date %}
+
+                                    <span>
+                                        مهلت:
+                                        {{ loan.due_date|jalali_date }}
+                                    </span>
+
+                                {% endif %}
+
                             </div>
 
-                        </article>
+                        </div>
 
-                    {% endfor %}
 
-                </div>
+                        <div>
 
-            {% else %}
+                            <div class="loan-status">
+                                امانت داده شده
+                            </div>
 
-                <div class="empty-loans">
+                        </div>
 
-                    <div class="empty-loans-icon">
-                        📚
-                    </div>
+                    </article>
 
-                    <h3>
-                        در حال حاضر کتابی در اختیار شما نیست.
-                    </h3>
+                {% endfor %}
 
-                    <p>
-                        وقتی کتابی به شما امانت داده شود،
-                        در این بخش نمایش داده خواهد شد.
-                    </p>
-
-                </div>
-
-            {% endif %}
-
-        </section>
-
-        <!-- کتاب‌های ذخیره‌شده -->
-        <section class="favorites-section">
-
-            <div class="loans-header">
-                <h2>
-                    کتاب‌های ذخیره‌شده
-                </h2>
-
-                <span class="loans-count">
-                    {{ favorites|length }}
-                </span>
             </div>
 
-            {% if favorites %}
+        {% else %}
 
-                <div class="favorite-list">
+            <div class="empty-loans">
 
-                    {% for favorite in favorites %}
+                <div class="empty-loans-icon">
+                    📚
+                </div>
 
-                        <article class="favorite-card">
+                <h3>
+                    در حال حاضر کتابی در اختیار شما نیست.
+                </h3>
+
+                <p>
+                    وقتی کتابی به شما امانت داده شود،
+                    در این بخش نمایش داده خواهد شد.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- کتاب‌های ذخیره‌شده -->
+    <section class="favorites-section">
+
+        <div class="loans-header">
+
+            <h2>
+                کتاب‌های ذخیره‌شده
+            </h2>
+
+            <span class="loans-count">
+                {{ favorites|length }}
+            </span>
+
+        </div>
+
+
+        {% if favorites %}
+
+            <div class="favorite-list">
+
+                {% for favorite in favorites %}
+
+                    <article class="favorite-card">
+
+                        <a
+                            href="{% url 'book_detail' favorite.book.pk %}"
+                            class="favorite-cover"
+                        >
+
+                            {% if favorite.book.cover %}
+
+                                <img
+                                    src="{{ favorite.book.cover.url }}"
+                                    alt="{{ favorite.book.title }}"
+                                >
+
+                            {% else %}
+
+                                <div class="favorite-cover-placeholder">
+                                    📖
+                                </div>
+
+                            {% endif %}
+
+                        </a>
+
+
+                        <div class="favorite-info">
 
                             <a
                                 href="{% url 'book_detail' favorite.book.pk %}"
-                                class="favorite-cover"
+                                class="favorite-title"
                             >
-                                {% if favorite.book.cover %}
-                                    <img
-                                        src="{{ favorite.book.cover.url }}"
-                                        alt="{{ favorite.book.title }}"
-                                    >
-                                {% else %}
-                                    <div class="favorite-cover-placeholder">
-                                        📖
-                                    </div>
-                                {% endif %}
+                                {{ favorite.book.title }}
                             </a>
 
-                            <div class="favorite-info">
 
-                                <a
-                                    href="{% url 'book_detail' favorite.book.pk %}"
-                                    class="favorite-title"
-                                >
-                                    {{ favorite.book.title }}
-                                </a>
-
-                                <div class="favorite-author">
-                                    نویسنده:
-                                    {{ favorite.book.author }}
-                                </div>
-
-                                {% if favorite.book.category %}
-                                    <div class="favorite-category">
-                                        {{ favorite.book.category.name }}
-                                    </div>
-                                {% endif %}
-
+                            <div class="favorite-author">
+                                نویسنده:
+                                {{ favorite.book.author }}
                             </div>
 
-                            <form
-                                method="post"
-                                action="{% url 'toggle_favorite' favorite.book.pk %}"
-                                onsubmit="return confirm('آیا مطمئن هستید که می‌خواهید این کتاب را از کتاب‌های ذخیره‌شده حذف کنید؟');"
+
+                            {% if favorite.book.category %}
+
+                                <div class="favorite-category">
+                                    {{ favorite.book.category.name }}
+                                </div>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <form
+                            method="post"
+                            action="{% url 'toggle_favorite' favorite.book.pk %}"
+                            onsubmit="return confirm('آیا مطمئن هستید که می‌خواهید این کتاب را از کتاب‌های ذخیره‌شده حذف کنید؟');"
+                        >
+
+                            {% csrf_token %}
+
+                            <input
+                                type="hidden"
+                                name="next"
+                                value="{% url 'accounts:profile' %}"
                             >
-                                {% csrf_token %}
 
-                                <input
-                                    type="hidden"
-                                    name="next"
-                                    value="{% url 'accounts:profile' %}"
-                                >
+                            <button
+                                type="submit"
+                                class="favorite-remove"
+                                title="حذف از علاقه‌مندی‌ها"
+                                aria-label="حذف {{ favorite.book.title }} از علاقه‌مندی‌ها"
+                            >
+                                ×
+                            </button>
 
-                                <button
-                                    type="submit"
-                                    class="favorite-remove"
-                                    title="حذف از علاقه‌مندی‌ها"
-                                    aria-label="حذف {{ favorite.book.title }} از علاقه‌مندی‌ها"
-                                >
-                                    ×
-                                </button>
-                            </form>
+                        </form>
 
-                        </article>
+                    </article>
 
-                    {% endfor %}
+                {% endfor %}
 
+            </div>
+
+        {% else %}
+
+            <div class="empty-loans">
+
+                <div class="empty-loans-icon">
+                    ♡
                 </div>
 
-            {% else %}
+                <h3>
+                    هنوز کتابی ذخیره نکرده‌اید.
+                </h3>
 
-                <div class="empty-loans">
+                <p>
+                    کتاب‌هایی که به علاقه‌مندی‌های خود اضافه می‌کنید،
+                    در این بخش نمایش داده خواهند شد.
+                </p>
 
-                    <div class="empty-loans-icon">
-                        ♡
-                    </div>
+            </div>
 
-                    <h3>
-                        هنوز کتابی ذخیره نکرده‌اید.
-                    </h3>
+        {% endif %}
 
-                    <p>
-                        کتاب‌هایی که به علاقه‌مندی‌های خود اضافه می‌کنید،
-                        در این بخش نمایش داده خواهند شد.
-                    </p>
+    </section>
 
-                </div>
-
-            {% endif %}
-
-        </section>
-
-    </div>
 </section>
 
 {% endblock %}

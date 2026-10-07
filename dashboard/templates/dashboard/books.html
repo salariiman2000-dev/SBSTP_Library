@@ -4,630 +4,765 @@
     مدیریت کتاب‌ها
 {% endblock %}
 
-
 {% block page_title %}
     مدیریت کتاب‌ها
 {% endblock %}
 
-
 {% block content %}
 
 <style>
+    /* =========================================================
+       BOOKS PAGE
+       ========================================================= */
 
     .books-page {
         padding: 5px 0 30px;
     }
 
-
     .books-box {
-
         width: 100%;
-
         background: var(--surface);
-
-        border:
-            1px solid var(--border);
-
+        border: 1px solid var(--border);
         border-radius: var(--radius);
-
         overflow: hidden;
-
         box-shadow: var(--shadow);
     }
 
 
-    /* HEADER */
+    /* =========================================================
+       HEADER
+       ========================================================= */
 
     .books-header {
-
         padding: 22px 25px;
-
         display: flex;
-
         align-items: center;
-
         justify-content: space-between;
-
         gap: 20px;
-
         flex-wrap: wrap;
-
-        border-bottom:
-            1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+        background: var(--surface);
     }
-
 
     .books-header h2 {
-
+        margin: 0;
         color: var(--text);
-
         font-size: 23px;
-
         font-weight: 800;
+        line-height: 1.7;
     }
-
 
     .books-header p {
-
+        margin: 6px 0 0;
         color: var(--text-soft);
-
-        font-size: 16px;
-
-        margin-top: 6px;
+        font-size: 15px;
+        line-height: 1.8;
     }
 
-
     .add-btn {
-
         display: inline-flex;
-
         align-items: center;
         justify-content: center;
-
-        gap: 6px;
-
-        padding: 10px 17px;
-
+        gap: 7px;
+        min-height: 44px;
+        padding: 0 18px;
         border-radius: 9px;
-
         background: var(--primary);
-
-        color: white;
-
-        font-size: 16px;
-
+        color: #ffffff;
+        font-size: 15px;
         font-weight: 800;
-
         text-decoration: none;
-
         transition:
             background .2s ease,
             transform .2s ease,
             box-shadow .2s ease;
-    }
-
-
-    .add-btn:hover {
-
-        background: var(--primary-dark);
-
-        transform: translateY(-1px);
-
-        box-shadow:
-            0 7px 18px
-            rgba(232, 155, 61, .18);
-    }
-
-
-    /* SEARCH */
-
-    .search-box {
-
-        padding: 18px 25px;
-
-        display: flex;
-
-        align-items: center;
-
-        gap: 10px;
-
-        background: var(--surface-soft);
-
-        border-bottom:
-            1px solid var(--border);
-    }
-
-
-    .search-box input {
-
-        flex: 1;
-
-        min-width: 0;
-
-        height: 43px;
-
-        border:
-            1px solid var(--border);
-
-        border-radius: 9px;
-
-        padding: 0 14px;
-
-        background: var(--surface);
-
-        color: var(--text);
-
-        font-family: inherit;
-
-        font-size: 16px;
-
-        outline: none;
-
-        transition:
-            border-color .2s ease,
-            box-shadow .2s ease;
-    }
-
-
-    .search-box input::placeholder {
-        color: var(--text-soft);
-    }
-
-
-    .search-box input:focus {
-
-        border-color: var(--primary);
-
-        box-shadow:
-            0 0 0 3px
-            rgba(232, 155, 61, .10);
-    }
-
-
-    .search-box button {
-
-        height: 43px;
-
-        border: 0;
-
-        padding: 0 22px;
-
-        border-radius: 9px;
-
-        background: var(--sidebar);
-
-        color: white;
-
-        font-family: inherit;
-
-        font-size: 16px;
-
-        font-weight: 800;
-
-        cursor: pointer;
-
-        transition:
-            background .2s ease,
-            transform .2s ease;
-    }
-
-
-    .search-box button:hover {
-
-        background: var(--sidebar-soft);
-
-        transform: translateY(-1px);
-    }
-
-
-    /* TABLE */
-
-    .table-wrapper {
-
-        width: 100%;
-
-        overflow-x: auto;
-    }
-
-
-    table {
-
-        width: 100%;
-
-        min-width: 950px;
-
-        border-collapse: collapse;
-    }
-
-
-    th {
-
-        padding: 14px 15px;
-
-        background: var(--surface-soft);
-
-        color: var(--text-soft);
-
-        text-align: right;
-
-        font-size: 15px;
-
-        font-weight: 800;
-
         white-space: nowrap;
     }
 
-
-    td {
-
-        padding: 15px;
-
-        border-top:
-            1px solid var(--border);
-
-        color: var(--text);
-
-        font-size: 16px;
-
-        vertical-align: middle;
+    .add-btn:hover {
+        background: var(--primary-dark);
+        color: #ffffff;
+        transform: translateY(-1px);
+        box-shadow: 0 7px 18px rgba(232, 155, 61, .18);
     }
 
 
-    tbody tr {
+    /* =========================================================
+       SEARCH / FILTERS
+       ========================================================= */
 
+    .filters-wrapper {
+        padding: 20px 25px;
+        background: var(--surface-soft);
+        border-bottom: 1px solid var(--border);
+    }
+
+    .filters-form {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        margin: 0;
+    }
+
+    .search-group {
+        display: flex;
+        align-items: stretch;
+        gap: 10px;
+        width: 100%;
+    }
+
+    .search-select,
+    .search-input,
+    .filter-select {
+        height: 45px;
+        border: 1px solid var(--border);
+        border-radius: 9px;
+        background: var(--surface);
+        color: var(--text);
+        padding: 0 13px;
+        font-family: inherit;
+        font-size: 15px;
+        outline: none;
         transition:
+            border-color .2s ease,
+            box-shadow .2s ease,
             background .2s ease;
     }
 
 
-    tbody tr:hover {
+
+/* =========================================================
+   HEADER ACTIONS
+   ========================================================= */
+
+    .books-header-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 9px;
+        flex-wrap: wrap;
+    }
+
+    .header-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        padding: 0 17px;
+        border-radius: 9px;
+        text-decoration: none;
+        font-family: inherit;
+        font-size: 14px;
+        font-weight: 800;
+        white-space: nowrap;
+        transition:
+            background .2s ease,
+            color .2s ease,
+            border-color .2s ease,
+            transform .2s ease,
+            box-shadow .2s ease;
+    }
+
+    /* چاپ لیست */
+
+    .print-btn {
+        background: var(--sidebar);
+        color: #ffffff;
+        border: 1px solid var(--sidebar);
+    }
+
+    .print-btn:hover {
+        background: var(--sidebar-soft);
+        color: #ffffff;
+        transform: translateY(-1px);
+    }
+
+    /* تبدیل به اکسل */
+
+    .excel-btn {
+        background: var(--primary);
+        color: #ffffff;
+        border: 1px solid var(--primary);
+    }
+
+    .excel-btn:hover {
+        background: var(--primary-dark);
+        color: #ffffff;
+        transform: translateY(-1px);
+        box-shadow: 0 7px 18px rgba(232, 155, 61, .16);
+    }
+
+    .search-select option,
+    .filter-select option {
+        background: var(--surface);
+        color: var(--text);
+    }
+
+    .search-select {
+        width: 190px;
+        flex: 0 0 190px;
+        cursor: pointer;
+    }
+
+    .search-input {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .search-input::placeholder {
+        color: var(--text-soft);
+        opacity: .85;
+    }
+
+    .search-select:focus,
+    .search-input:focus,
+    .filter-select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(232, 155, 61, .10);
+    }
+
+    .search-btn {
+        height: 45px;
+        min-width: 105px;
+        border: 0;
+        border-radius: 9px;
+        padding: 0 20px;
+        background: var(--sidebar);
+        color: #ffffff;
+        font-family: inherit;
+        font-size: 15px;
+        font-weight: 800;
+        cursor: pointer;
+        transition:
+            background .2s ease,
+            transform .2s ease,
+            box-shadow .2s ease;
+        white-space: nowrap;
+    }
+
+    .search-btn:hover {
+        background: var(--sidebar-soft);
+        color: #ffffff;
+        transform: translateY(-1px);
+    }
+
+    .filter-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .filter-select {
+        min-width: 175px;
+        cursor: pointer;
+    }
+
+    .filter-btn {
+        height: 45px;
+        border: 0;
+        border-radius: 9px;
+        padding: 0 19px;
+        background: var(--primary);
+        color: #ffffff;
+        font-family: inherit;
+        font-size: 15px;
+        font-weight: 800;
+        cursor: pointer;
+        transition:
+            background .2s ease,
+            transform .2s ease;
+        white-space: nowrap;
+    }
+
+    .filter-btn:hover {
+        background: var(--primary-dark);
+        color: #ffffff;
+        transform: translateY(-1px);
+    }
+
+    .reset-btn {
+        height: 45px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 18px;
+        border-radius: 9px;
+        border: 1px solid var(--border);
+        color: var(--text-soft);
+        background: var(--surface);
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 700;
+        white-space: nowrap;
+        transition:
+            color .2s ease,
+            border-color .2s ease,
+            background .2s ease;
+    }
+
+    .reset-btn:hover {
+        color: var(--text);
+        border-color: var(--primary);
+        background: var(--surface);
+    }
+
+
+    /* =========================================================
+       TABLE
+       ========================================================= */
+
+    .table-wrapper {
+        width: 100%;
+        overflow-x: auto;
+        background: var(--surface);
+    }
+
+    table {
+        width: 100%;
+        min-width: 1320px;
+        border-collapse: collapse;
+    }
+
+    th {
+        padding: 14px 15px;
+        background: var(--surface-soft);
+        color: var(--text-soft);
+        text-align: right;
+        font-size: 14px;
+        font-weight: 800;
+        white-space: nowrap;
+        border-bottom: 1px solid var(--border);
+    }
+
+    td {
+        padding: 15px;
+        border-top: 1px solid var(--border);
+        color: var(--text);
+        font-size: 15px;
+        vertical-align: middle;
+        background: var(--surface);
+    }
+
+    tbody tr {
+        transition: background .2s ease;
+    }
+
+    tbody tr:hover td {
         background: var(--surface-soft);
     }
 
 
+    /* =========================================================
+       BOOK INFORMATION
+       ========================================================= */
+
     .book-title {
-
+        display: block;
+        max-width: 260px;
         color: var(--text);
-
         font-weight: 800;
-
         font-size: 16px;
-
-        line-height: 1.7;
+        line-height: 1.8;
     }
 
+    .registration-number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 68px;
+        padding: 5px 9px;
+        border-radius: 7px;
+        direction: ltr;
+        color: var(--text);
+        background: var(--surface-soft);
+        border: 1px solid var(--border);
+        font-size: 15px;
+        font-weight: 900;
+        letter-spacing: 1px;
+        white-space: nowrap;
+    }
+
+    .isbn {
+        display: inline-block;
+        direction: ltr;
+        color: var(--text-soft);
+        font-size: 14px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
 
     .author {
-
+        max-width: 230px;
         color: var(--text-soft);
-
-        font-size: 16px;
+        font-size: 14px;
+        line-height: 1.9;
     }
 
-
-    .category {
-
+    .subject {
         color: var(--text);
-
-        font-size: 16px;
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 1.8;
+        white-space: nowrap;
     }
 
-
-    /* COPIES */
-
-    .copies {
-
-        display: flex;
-
-        align-items: center;
-
-        gap: 7px;
-
-        flex-wrap: wrap;
-
+    .location {
+        display: inline-block;
+        direction: ltr;
+        color: var(--text);
+        background: var(--surface-soft);
+        border: 1px solid var(--border);
+        padding: 4px 8px;
+        border-radius: 7px;
+        font-size: 14px;
+        font-weight: 800;
         white-space: nowrap;
     }
 
 
-    .copy-item {
+    /* =========================================================
+       COPIES
+       ========================================================= */
 
-        display: inline-flex;
-
+    .copies {
+        display: flex;
         align-items: center;
-
-        gap: 4px;
-
-        padding: 5px 8px;
-
-        border-radius: 7px;
-
-        background: var(--surface-soft);
-
-        border:
-            1px solid var(--border);
-
-        font-size: 14px;
-
-        color: var(--text-soft);
+        gap: 6px;
+        flex-wrap: wrap;
+        min-width: 210px;
     }
 
+    .copy-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 5px 8px;
+        border-radius: 7px;
+        background: var(--surface-soft);
+        border: 1px solid var(--border);
+        font-size: 13px;
+        color: var(--text-soft);
+        white-space: nowrap;
+    }
 
     .copy-item strong {
-
         color: var(--text);
-
-        font-size: 15px;
-
+        font-size: 14px;
         font-weight: 800;
     }
 
-
     .copy-item.available-count {
-
-        border-color:
-            rgba(48, 150, 91, .18);
-
-        background:
-            rgba(48, 150, 91, .07);
+        border-color: rgba(48, 150, 91, .20);
+        background: rgba(48, 150, 91, .07);
     }
-
 
     .copy-item.available-count strong {
         color: #31965b;
     }
 
-
     .copy-item.borrowed-count {
-
-        border-color:
-            rgba(200, 92, 80, .18);
-
-        background:
-            rgba(200, 92, 80, .07);
+        border-color: rgba(200, 92, 80, .20);
+        background: rgba(200, 92, 80, .07);
     }
-
 
     .copy-item.borrowed-count strong {
         color: #c85c50;
     }
 
 
-    /* STATUS */
+    /* =========================================================
+       STATUS
+       ========================================================= */
 
     .status {
-
         display: inline-flex;
-
         align-items: center;
-
-        gap: 6px;
-
-        padding: 5px 10px;
-
+        gap: 7px;
+        padding: 6px 10px;
         border-radius: 20px;
-
-        font-size: 14px;
-
+        font-size: 13px;
         font-weight: 800;
-
         white-space: nowrap;
     }
 
-
     .status::before {
-
         content: "";
-
         width: 6px;
-
         height: 6px;
-
+        flex: 0 0 6px;
         border-radius: 50%;
-
         background: currentColor;
     }
 
-
     .available {
-
-        background:
-            rgba(48, 150, 91, .10);
-
+        background: rgba(48, 150, 91, .10);
         color: #31965b;
     }
 
-
     .unavailable {
-
-        background:
-            rgba(200, 92, 80, .10);
-
+        background: rgba(200, 92, 80, .10);
         color: #c85c50;
     }
+    .books-header-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 9px;
+        flex-wrap: wrap;
+    }
 
+    .header-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
 
-    /* ACTIONS */
+        min-height: 44px;
+        padding: 0 17px;
+
+        border-radius: 9px;
+
+        text-decoration: none;
+
+        font-family: inherit;
+        font-size: 14px;
+        font-weight: 800;
+
+        white-space: nowrap;
+
+        transition:
+            background .2s ease,
+            color .2s ease,
+            border-color .2s ease,
+            transform .2s ease,
+            box-shadow .2s ease;
+    }
+
+    /* چاپ */
+
+    .print-btn {
+        background: var(--sidebar);
+        color: #ffffff;
+        border: 1px solid var(--sidebar);
+    }
+
+    .print-btn:hover {
+        background: var(--sidebar-soft);
+        color: #ffffff;
+        transform: translateY(-1px);
+    }
+
+    /* Excel */
+
+    .excel-btn {
+        background: var(--primary);
+        color: #ffffff;
+        border: 1px solid var(--primary);
+    }
+
+    .excel-btn:hover {
+        background: var(--primary-dark);
+        color: #ffffff;
+        transform: translateY(-1px);
+        box-shadow: 0 7px 18px rgba(232, 155, 61, .16);
+    }
+
+    /* =========================================================
+       ACTIONS
+       ========================================================= */
 
     .actions {
         white-space: nowrap;
     }
 
-
     .action-link {
-
-        font-size: 15px;
-
+        font-size: 14px;
         font-weight: 800;
-
         text-decoration: none;
-
-        transition:
-            color .2s ease;
+        transition: color .2s ease;
     }
-
 
     .view {
         color: var(--text);
     }
 
-
     .view:hover {
         color: var(--primary-dark);
     }
-
 
     .edit {
         color: var(--primary);
     }
 
-
     .edit:hover {
         color: var(--primary-dark);
     }
-
 
     .delete {
         color: #c85c50;
     }
 
-
     .delete:hover {
         color: #a9433b;
     }
 
-
     .action-separator {
-
         color: var(--border);
-
-        margin: 0 8px;
+        margin: 0 7px;
     }
 
 
-    /* EMPTY */
+    /* =========================================================
+       EMPTY
+       ========================================================= */
 
     .empty {
-
-        padding: 55px 30px;
-
-        text-align: center;
-
-        color: var(--text-soft);
-
-        font-size: 16px;
+        padding: 60px 30px !important;
+        text-align: center !important;
+        color: var(--text-soft) !important;
+        font-size: 15px !important;
+        line-height: 2;
     }
-
 
     .empty-icon {
-
-        width: 55px;
-
-        height: 55px;
-
+        width: 58px;
+        height: 58px;
         margin: 0 auto 14px;
-
         display: flex;
-
         align-items: center;
-
         justify-content: center;
-
-        border-radius: 14px;
-
-        background: var(--primary-soft);
-
-        font-size: 27px;
+        border-radius: 15px;
+        background: var(--surface-soft);
+        border: 1px solid var(--border);
+        font-size: 26px;
     }
-
 
     .empty strong {
-
         display: block;
-
         margin-bottom: 5px;
-
         color: var(--text);
-
         font-size: 17px;
+        font-weight: 800;
     }
 
 
-    /* MOBILE */
+    /* =========================================================
+       RESPONSIVE
+       ========================================================= */
+
+    @media (max-width: 900px) {
+
+        .search-group {
+            flex-wrap: wrap;
+        }
+
+        .search-select {
+            width: 100%;
+            flex: 1 1 100%;
+        }
+
+        .search-input {
+            flex: 1 1 calc(100% - 115px);
+        }
+
+        .search-btn {
+            flex: 0 0 105px;
+        }
+
+        .filter-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .filter-select,
+        .filter-btn,
+        .reset-btn {
+            width: 100%;
+        }
+    }
+
 
     @media (max-width: 650px) {
 
-        .books-header {
-
-            padding: 20px 17px;
-
-            align-items: stretch;
+        .books-header-actions {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr;
         }
 
+        .header-action,
+        .books-header-actions .add-btn {
+            width: 100%;
+        }
+
+        .books-header {
+            padding: 20px 17px;
+            align-items: stretch;
+        }
 
         .books-header h2 {
             font-size: 20px;
         }
 
-
         .books-header p {
-            font-size: 15px;
+            font-size: 14px;
         }
-
 
         .add-btn {
             width: 100%;
         }
 
+        .filters-wrapper {
+            padding: 16px 17px;
+        }
 
-        .search-box {
-
-            padding: 15px 17px;
-
+        .search-group {
             flex-direction: column;
-
-            align-items: stretch;
         }
 
+        .search-select,
+        .search-input,
+        .search-btn {
+            width: 100%;
+            flex: none;
+        }
 
-        .search-box input {
+        .filter-group {
+            grid-template-columns: 1fr;
+        }
+
+        .filter-select,
+        .filter-btn,
+        .reset-btn {
             width: 100%;
         }
-
-
-        .search-box button {
-            width: 100%;
-        }
-
 
         th,
         td {
             padding: 13px 12px;
         }
 
-
         th {
-            font-size: 14px;
+            font-size: 13px;
         }
-
 
         td {
-            font-size: 15px;
-        }
-
-
-        .book-title,
-        .author,
-        .category {
-            font-size: 15px;
-        }
-
-
-        .action-link {
             font-size: 14px;
         }
 
-    }
+        .book-title {
+            font-size: 15px;
+        }
 
+        .author,
+        .subject {
+            font-size: 14px;
+        }
+
+        .action-link {
+            font-size: 13px;
+        }
+    }
 </style>
 
 
@@ -635,57 +770,235 @@
 
     <div class="books-box">
 
+        <!-- =====================================================
+             HEADER
+             ===================================================== -->
 
-        <!-- HEADER -->
+<div class="books-header">
+    <div>
+        <h2>کتاب‌های کتابخانه</h2>
+        <p>مدیریت، جستجو و ویرایش کتاب‌ها</p>
+    </div>
 
-        <div class="books-header">
+    <div class="books-header-actions">
 
-            <div>
+        <a
+            href="{% url 'print_books' %}?q={{ query|urlencode }}&search_by={{ search_by|urlencode }}&sort={{ sort|urlencode }}&availability={{ availability|urlencode }}"
+            target="_blank"
+            class="header-action print-btn"
+        >
+            چاپ لیست
+        </a>
 
-                <h2>
-                    کتاب‌های کتابخانه
-                </h2>
+        <a
+            href="{% url 'export_books_excel' %}?q={{ query|urlencode }}&search_by={{ search_by|urlencode }}&sort={{ sort|urlencode }}&availability={{ availability|urlencode }}"
+            class="header-action excel-btn"
+        >
+            تبدیل به اکسل
+        </a>
 
-                <p>
-                    مدیریت، جستجو و ویرایش کتاب‌ها
-                </p>
+        <a
+            href="{% url 'add_book' %}"
+            class="add-btn"
+        >
+            + افزودن کتاب
+        </a>
 
-            </div>
+    </div>
+</div>
 
 
-            <a
-                href="{% url 'add_book' %}"
-                class="add-btn"
-            >
-                + افزودن کتاب
-            </a>
+        <!-- =====================================================
+             SEARCH & FILTERS
+             ===================================================== -->
+
+        <div class="filters-wrapper">
+
+            <form method="get" class="filters-form">
+
+                <!-- SEARCH -->
+
+                <div class="search-group">
+
+                    <select
+                        name="search_by"
+                        class="search-select"
+                        aria-label="جستجو بر اساس"
+                    >
+
+                        <option
+                            value="title"
+                            {% if search_by == "title" %}selected{% endif %}
+                        >
+                            جستجو بر اساس: عنوان کتاب
+                        </option>
+
+                        <option
+                            value="isbn"
+                            {% if search_by == "isbn" %}selected{% endif %}
+                        >
+                            جستجو بر اساس: شابک
+                        </option>
+
+                        <option
+                            value="registration_number"
+                            {% if search_by == "registration_number" %}selected{% endif %}
+                        >
+                            جستجو بر اساس: شماره ثبت
+                        </option>
+
+                        <option
+                            value="author"
+                            {% if search_by == "author" %}selected{% endif %}
+                        >
+                            جستجو بر اساس: مؤلف
+                        </option>
+
+                        <option
+                            value="translator"
+                            {% if search_by == "translator" %}selected{% endif %}
+                        >
+                            جستجو بر اساس: مترجم
+                        </option>
+
+                        <option
+                            value="publisher"
+                            {% if search_by == "publisher" %}selected{% endif %}
+                        >
+                            جستجو بر اساس: ناشر
+                        </option>
+
+                        <option
+                            value="subject"
+                            {% if search_by == "subject" %}selected{% endif %}
+                        >
+                            جستجو بر اساس: موضوع
+                        </option>
+
+                        <option
+                            value="location"
+                            {% if search_by == "location" %}selected{% endif %}
+                        >
+                            جستجو بر اساس: محل قرارگیری
+                        </option>
+
+                    </select>
+
+
+                    <input
+                        type="text"
+                        name="q"
+                        value="{{ query }}"
+                        class="search-input"
+                        placeholder="عبارت مورد نظر را وارد کنید..."
+                        autocomplete="off"
+                    >
+
+
+                    <button
+                        type="submit"
+                        class="search-btn"
+                    >
+                        جستجو
+                    </button>
+
+                </div>
+
+
+                <!-- OTHER FILTERS -->
+
+                <div class="filter-group">
+
+                    <select
+                        name="sort"
+                        class="filter-select"
+                    >
+
+                        <option
+                            value="newest"
+                            {% if sort == "newest" %}selected{% endif %}
+                        >
+                            مرتب‌سازی: جدیدترین
+                        </option>
+
+                        <option
+                            value="oldest"
+                            {% if sort == "oldest" %}selected{% endif %}
+                        >
+                            مرتب‌سازی: قدیمی‌ترین
+                        </option>
+
+                        <option
+                            value="title_asc"
+                            {% if sort == "title_asc" %}selected{% endif %}
+                        >
+                            مرتب‌سازی: عنوان الف تا ی
+                        </option>
+
+                        <option
+                            value="title_desc"
+                            {% if sort == "title_desc" %}selected{% endif %}
+                        >
+                            مرتب‌سازی: عنوان ی تا الف
+                        </option>
+
+                    </select>
+
+
+                    <select
+                        name="availability"
+                        class="filter-select"
+                    >
+
+                        <option
+                            value=""
+                            {% if not availability %}selected{% endif %}
+                        >
+                            وضعیت: همه
+                        </option>
+
+                        <option
+                            value="available"
+                            {% if availability == "available" %}selected{% endif %}
+                        >
+                            وضعیت: موجود
+                        </option>
+
+                        <option
+                            value="unavailable"
+                            {% if availability == "unavailable" %}selected{% endif %}
+                        >
+                            وضعیت: ناموجود
+                        </option>
+
+                    </select>
+
+
+                    <button
+                        type="submit"
+                        class="filter-btn"
+                    >
+                        اعمال فیلتر
+                    </button>
+
+
+                    <a
+                        href="{% url 'manage_books' %}"
+                        class="reset-btn"
+                    >
+                        حذف فیلترها
+                    </a>
+
+                </div>
+
+            </form>
 
         </div>
 
 
-        <!-- SEARCH -->
-
-        <form
-            method="get"
-            class="search-box"
-        >
-
-            <input
-                type="text"
-                name="q"
-                value="{{ query }}"
-                placeholder="جستجوی نام کتاب، نویسنده یا دسته‌بندی..."
-            >
-
-
-            <button type="submit">
-                جستجو
-            </button>
-
-        </form>
-
-
-        <!-- TABLE -->
+        <!-- =====================================================
+             BOOKS TABLE
+             ===================================================== -->
 
         <div class="table-wrapper">
 
@@ -696,15 +1009,27 @@
                     <tr>
 
                         <th>
+                            شماره ثبت
+                        </th>
+
+                        <th>
                             کتاب
                         </th>
 
                         <th>
-                            نویسنده
+                            شابک
                         </th>
 
                         <th>
-                            دسته‌بندی
+                            مؤلف
+                        </th>
+
+                        <th>
+                            موضوع
+                        </th>
+
+                        <th>
+                            محل قرارگیری
                         </th>
 
                         <th>
@@ -730,6 +1055,16 @@
 
                         <tr>
 
+                            <!-- REGISTRATION NUMBER -->
+
+                            <td>
+
+                                <span class="registration-number">
+                                    {{ book.registration_number }}
+                                </span>
+
+                            </td>
+
 
                             <!-- BOOK -->
 
@@ -742,20 +1077,74 @@
                             </td>
 
 
-                            <!-- AUTHOR -->
+                            <!-- ISBN -->
 
-                            <td class="author">
-                                {{ book.author }}
+                            <td>
+
+                                {% if book.isbn %}
+
+                                    <span class="isbn">
+                                        {{ book.isbn }}
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="isbn">
+                                        —
+                                    </span>
+
+                                {% endif %}
+
                             </td>
 
 
-                            <!-- CATEGORY -->
+                            <!-- AUTHORS -->
 
-                            <td class="category">
+                            <td class="author">
 
-                                {% if book.category %}
+                                {% for author in book.authors.all %}
 
-                                    {{ book.category.name }}
+                                    {{ author.name }}
+
+                                    {% if not forloop.last %}
+                                        ،
+                                    {% endif %}
+
+                                {% empty %}
+
+                                    —
+
+                                {% endfor %}
+
+                            </td>
+
+
+                            <!-- SUBJECT -->
+
+                            <td class="subject">
+
+                                {% if book.subject %}
+
+                                    {{ book.subject.name }}
+
+                                {% else %}
+
+                                    —
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- LOCATION -->
+
+                            <td>
+
+                                {% if book.location %}
+
+                                    <span class="location">
+                                        {{ book.location.code }}
+                                    </span>
 
                                 {% else %}
 
@@ -772,39 +1161,28 @@
 
                                 <div class="copies">
 
-
                                     <span class="copy-item">
-
                                         کل:
-
                                         <strong>
                                             {{ book.total_copies }}
                                         </strong>
-
                                     </span>
 
 
                                     <span class="copy-item borrowed-count">
-
                                         امانت:
-
                                         <strong>
                                             {{ book.borrowed_count }}
                                         </strong>
-
                                     </span>
 
 
                                     <span class="copy-item available-count">
-
                                         موجود:
-
                                         <strong>
                                             {{ book.available_copies }}
                                         </strong>
-
                                     </span>
-
 
                                 </div>
 
@@ -835,7 +1213,6 @@
                             <!-- ACTIONS -->
 
                             <td class="actions">
-
 
                                 <a
                                     href="{% url 'book_detail' book.pk %}"
@@ -872,7 +1249,6 @@
 
                             </td>
 
-
                         </tr>
 
 
@@ -881,7 +1257,7 @@
                         <tr>
 
                             <td
-                                colspan="6"
+                                colspan="9"
                                 class="empty"
                             >
 
@@ -898,7 +1274,7 @@
 
                                     کتابی برای
                                     «{{ query }}»
-                                    پیدا نشد.
+                                    در معیار انتخاب‌شده پیدا نشد.
 
                                 {% else %}
 

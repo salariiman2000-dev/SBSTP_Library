@@ -1,955 +1,746 @@
 {% extends "dashboard/base.html" %}
-
+{% load jalali %}
 
 {% block title %}
-    مدیریت امانت‌ها | کتابخانه
+مدیریت امانت‌ها
 {% endblock %}
-
-
-{% block page_title %}
-    مدیریت امانت‌ها
-{% endblock %}
-
 
 {% block content %}
 
 <style>
 
-    .loan-page {
-        display: flex;
-        flex-direction: column;
-        gap: 22px;
+    /* =========================================================
+       پایه صفحه
+       ========================================================= */
+
+    .loans-page {
+        width: 100%;
+        color: #333;
     }
 
-
-    /* =========================
-       HEADER
-    ========================= */
-
-    .loan-header {
-
-        background: var(--surface);
-
-        border: 1px solid var(--border);
-
-        border-radius: var(--radius);
-
-        padding: 22px 24px;
-
-        box-shadow: var(--shadow);
+    .page-header {
+        margin-bottom: 24px;
     }
 
+    .page-header h1 {
+        margin: 0 0 8px;
+        font-size: 28px;
+        color: var(--sidebar);
+    }
 
-    .loan-header h2 {
-
+    .page-header p {
         margin: 0;
-
-        color: var(--text);
-
-        font-size: 23px;
-
-        font-weight: 800;
+        color: #777;
+        font-size: 14px;
     }
 
 
-    .loan-header p {
+    /* =========================================================
+       کارت‌ها
+       ========================================================= */
 
-        margin: 7px 0 0;
-
-        color: var(--text-soft);
-
-        font-size: 16px;
-
-        line-height: 1.9;
-    }
-
-
-    /* =========================
-       MESSAGES
-    ========================= */
-
-    .message-box {
-
-        padding: 13px 17px;
-
-        border-radius: 10px;
-
-        font-size: 16px;
-
+    .loan-card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
         border: 1px solid transparent;
     }
 
-
-    .message-box.success {
-
-        background: rgba(49, 150, 91, .10);
-
-        color: #31965b;
-
-        border-color:
-            rgba(49, 150, 91, .20);
-    }
-
-
-    .message-box.error {
-
-        background: rgba(200, 92, 80, .10);
-
-        color: #c85c50;
-
-        border-color:
-            rgba(200, 92, 80, .20);
-    }
-
-
-    .message-box.warning {
-
-        background: rgba(232, 155, 61, .10);
-
-        color: #c38420;
-
-        border-color:
-            rgba(232, 155, 61, .20);
-    }
-
-
-    /* =========================
-       CREATE LOAN
-    ========================= */
-
-    .loan-create {
-
-        background: var(--surface);
-
-        border: 1px solid var(--border);
-
-        border-radius: var(--radius);
-
-        padding: 24px;
-
-        box-shadow: var(--shadow);
-    }
-
-
-    .section-title {
-
-        margin: 0;
-
-        color: var(--text);
-
-        font-size: 21px;
-
-        font-weight: 800;
-    }
-
-
-    .section-description {
-
-        margin: 7px 0 22px;
-
-        color: var(--text-soft);
-
-        font-size: 16px;
-
-        line-height: 1.9;
-    }
-
-
-    /* =========================
-       SELECTION
-    ========================= */
-
-    .selection-grid {
-
-        display: grid;
-
-        grid-template-columns: 1fr 1fr;
-
-        gap: 17px;
-    }
-
-
-    .selection-card {
-
-        padding: 17px;
-
-        background: var(--surface-soft);
-
-        border: 1px solid var(--border);
-
-        border-radius: 13px;
-    }
-
-
-    .selection-card h3 {
-
-        margin: 0 0 13px;
-
-        color: var(--text);
-
-        font-size: 18px;
-
-        font-weight: 800;
-    }
-
-
-    /* =========================
-       SEARCH
-    ========================= */
-
-    .search-form {
-        margin-bottom: 12px;
-    }
-
-
-    .search-input {
-
-        width: 100%;
-
-        height: 42px;
-
-        box-sizing: border-box;
-
-        padding: 0 12px;
-
-        border: 1px solid var(--border);
-
-        border-radius: 9px;
-
-        background: var(--surface);
-
-        color: var(--text);
-
-        font-family: inherit;
-
-        font-size: 16px;
-
-        outline: none;
-
-        transition:
-            border-color .2s ease,
-            box-shadow .2s ease;
-    }
-
-
-    .search-input:focus {
-
-        border-color: var(--primary);
-
-        box-shadow:
-            0 0 0 3px var(--primary-soft);
-    }
-
-
-    .search-input::placeholder {
-        color: var(--text-soft);
-    }
-
-
-    .search-hint {
-
-        margin-top: 7px;
-
-        color: var(--text-soft);
-
-        font-size: 14px;
-    }
-
-
-    /* =========================
-       RESULTS
-    ========================= */
-
-    .results-box {
-
-        max-height: 260px;
-
+    .loan-card-title {
         display: flex;
-
-        flex-direction: column;
-
-        gap: 7px;
-
-        overflow-y: auto;
-
-        scrollbar-width: thin;
-    }
-
-
-    .result-item {
-
-        width: 100%;
-
-        display: flex;
-
         align-items: center;
-
         justify-content: space-between;
+        gap: 15px;
+        margin-bottom: 22px;
+    }
 
-        gap: 10px;
+    .loan-card-title h2 {
+        margin: 0;
+        color: var(--sidebar);
+        font-size: 19px;
+    }
 
-        padding: 11px 12px;
-
-        box-sizing: border-box;
-
-        border: 1px solid var(--border);
-
-        border-radius: 9px;
-
-        background: var(--surface);
-
-        color: var(--text);
-
-        cursor: pointer;
-
-        text-align: right;
-
-        font-family: inherit;
-
-        transition:
-            border-color .2s ease,
-            background .2s ease;
+    .loan-card-title span {
+        color: #777;
+        font-size: 13px;
     }
 
 
-    .result-item:hover {
+    /* =========================================================
+       فرم ثبت امانت
+       ========================================================= */
 
-        border-color: var(--primary);
-
-        background: var(--surface-soft);
+    .loan-form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
     }
 
-
-    .result-item.selected {
-
-        border-color: var(--primary);
-
-        background: var(--primary-soft);
-    }
-
-
-    .result-item.hidden-result {
-        display: none;
-    }
-
-
-    .result-main {
-
-        min-width: 0;
-
+    .form-group {
         display: flex;
-
         flex-direction: column;
-
-        gap: 4px;
+        gap: 8px;
+        position: relative;
     }
 
-
-    .result-title {
-
-        color: var(--text);
-
-        font-size: 16px;
-
-        font-weight: 800;
-
-        overflow: hidden;
-
-        text-overflow: ellipsis;
-
-        white-space: nowrap;
+    .form-group.full {
+        grid-column: 1 / -1;
     }
 
-
-    .result-subtitle {
-
-        color: var(--text-soft);
-
+    .form-group label {
         font-size: 14px;
-
-        overflow: hidden;
-
-        text-overflow: ellipsis;
-
-        white-space: nowrap;
+        font-weight: 600;
+        color: #333;
     }
 
-
-    .result-availability {
-
-        display: inline-flex;
-
-        align-items: center;
-
-        gap: 4px;
-
-        flex-shrink: 0;
-
-        padding: 4px 7px;
-
-        border-radius: 7px;
-
-        background: rgba(49, 150, 91, .08);
-
-        color: #31965b;
-
+    .form-group select,
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        box-sizing: border-box;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        padding: 11px 13px;
+        font-family: inherit;
         font-size: 14px;
-
-        font-weight: 800;
-
-        white-space: nowrap;
+        outline: none;
+        background: #fff;
+        color: #333;
+        transition: .2s;
     }
 
-
-    .result-availability strong {
-        font-size: 15px;
-    }
-
-
-    .result-check {
-
-        width: 21px;
-
-        height: 21px;
-
-        flex: 0 0 auto;
-
-        display: flex;
-
-        align-items: center;
-
-        justify-content: center;
-
-        border: 1px solid var(--border);
-
-        border-radius: 50%;
-
-        color: transparent;
-
-        font-size: 12px;
-
-        transition:
-            background .2s ease,
-            border-color .2s ease;
-    }
-
-
-    .result-item.selected .result-check {
-
-        background: var(--primary);
-
+    .form-group select:focus,
+    .form-group input:focus,
+    .form-group textarea:focus {
         border-color: var(--primary);
-
-        color: #fff;
+        box-shadow: 0 0 0 3px rgba(232, 155, 61, .12);
     }
 
-
-    /* =========================
-       NO RESULTS
-    ========================= */
-
-    .no-results {
-
-        display: none;
-
-        padding: 18px 12px;
-
-        border: 1px dashed var(--border);
-
-        border-radius: 9px;
-
-        background: var(--surface);
-
-        color: var(--text-soft);
-
-        font-size: 15px;
-
-        text-align: center;
+    .form-group textarea {
+        min-height: 95px;
+        resize: vertical;
     }
 
+    .date-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 10px;
+    }
 
-    .no-results.show {
+    .time-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .date-title {
+        font-size: 12px;
+        color: #777;
+        margin-bottom: 7px;
         display: block;
     }
 
-
-    /* =========================
-       SELECTED
-    ========================= */
-
-    .selected-box {
-
-        margin-top: 12px;
-
-        padding: 10px 12px;
-
-        border: 1px dashed var(--border);
-
-        border-radius: 9px;
-
-        background: var(--surface);
-
-        color: var(--text-soft);
-
-        font-size: 15px;
+    .submit-row {
+        margin-top: 20px;
+        display: flex;
+        justify-content: flex-start;
     }
 
-
-    .selected-box strong {
-
-        color: var(--text);
-
-        font-weight: 800;
-    }
-
-
-    /* =========================
-       CREATE BUTTON
-    ========================= */
-
-    .create-loan-form {
-        margin-top: 18px;
-    }
-
-
-    .create-button {
-
-        width: 100%;
-
-        height: 45px;
-
+    .btn-primary {
         border: none;
-
-        border-radius: 10px;
-
         background: var(--primary);
-
         color: #fff;
-
+        padding: 11px 22px;
+        border-radius: 10px;
         font-family: inherit;
-
-        font-size: 16px;
-
-        font-weight: 800;
-
+        font-size: 14px;
         cursor: pointer;
-
-        transition:
-            background .2s ease,
-            transform .2s ease,
-            box-shadow .2s ease;
+        transition: .2s;
     }
 
-
-    .create-button:hover:not(:disabled) {
-
-        background: var(--primary-dark);
-
+    .btn-primary:hover {
+        opacity: .9;
         transform: translateY(-1px);
-
-        box-shadow:
-            0 7px 18px
-            rgba(232, 155, 61, .16);
     }
 
 
-    .create-button:disabled {
+    /* =========================================================
+       جستجوی انتخاب کاربر و کتاب
+       ========================================================= */
 
-        opacity: .45;
+    .search-select {
+        position: relative;
+    }
 
-        cursor: not-allowed;
+    .search-select-input {
+        width: 100%;
+        box-sizing: border-box;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        padding: 11px 13px;
+        font-family: inherit;
+        font-size: 14px;
+        outline: none;
+        background: #fff;
+        color: #333;
+        transition: .2s;
+    }
 
-        transform: none;
+    .search-select-input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(232, 155, 61, .12);
+    }
 
-        box-shadow: none;
+    .search-select-input::placeholder {
+        color: #999;
+    }
+
+    .search-results {
+        display: none;
+        position: absolute;
+        z-index: 100;
+        top: calc(100% + 5px);
+        right: 0;
+        left: 0;
+        max-height: 260px;
+        overflow-y: auto;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, .12);
+    }
+
+    .search-results.show {
+        display: block;
+    }
+
+    .search-result-item {
+        width: 100%;
+        border: none;
+        border-bottom: 1px solid #eee;
+        background: transparent;
+        padding: 11px 13px;
+        text-align: right;
+        font-family: inherit;
+        cursor: pointer;
+        color: #333;
+        transition: .15s;
+    }
+
+    .search-result-item:last-child {
+        border-bottom: none;
+    }
+
+    .search-result-item:hover {
+        background: #f8f4ec;
+    }
+
+    .search-result-title {
+        display: block;
+        font-weight: 700;
+        font-size: 13px;
+        color: var(--sidebar);
+        line-height: 1.7;
+    }
+
+    .search-result-meta {
+        display: block;
+        color: #888;
+        font-size: 11px;
+        margin-top: 2px;
+        line-height: 1.7;
+    }
+
+    .search-empty {
+        padding: 15px;
+        text-align: center;
+        color: #888;
+        font-size: 12px;
+    }
+
+    .selected-item {
+        display: none;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-top: 8px;
+        padding: 9px 11px;
+        border-radius: 9px;
+        background: #f5f5f5;
+        border: 1px solid #e5e5e5;
+    }
+
+    .selected-item.show {
+        display: flex;
+    }
+
+    .selected-item-info {
+        min-width: 0;
+    }
+
+    .selected-item-title {
+        display: block;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--sidebar);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .selected-item-meta {
+        display: block;
+        color: #888;
+        font-size: 11px;
+        margin-top: 2px;
+    }
+
+    .clear-selection {
+        flex-shrink: 0;
+        border: none;
+        background: #e9e9e9;
+        color: #555;
+        width: 28px;
+        height: 28px;
+        border-radius: 7px;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 16px;
+        line-height: 1;
+    }
+
+    .clear-selection:hover {
+        background: #ddd;
+    }
+
+    .selection-help {
+        margin-top: 5px;
+        color: #888;
+        font-size: 11px;
     }
 
 
-    /* =========================
-       TABLE
-    ========================= */
+    /* =========================================================
+       جستجوی تاریخچه
+       ========================================================= */
+
+    .search-box {
+        margin-bottom: 18px;
+    }
+
+    .search-box input {
+        width: 100%;
+        box-sizing: border-box;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        padding: 12px 14px;
+        font-family: inherit;
+        font-size: 14px;
+        outline: none;
+        background: #fff;
+        color: #333;
+    }
+
+    .search-box input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(232, 155, 61, .12);
+    }
+
+
+    /* =========================================================
+       جدول
+       ========================================================= */
 
     .table-wrapper {
-
-        background: var(--surface);
-
-        border: 1px solid var(--border);
-
-        border-radius: var(--radius);
-
-        overflow: hidden;
-
-        box-shadow: var(--shadow);
-    }
-
-
-    .table-top {
-
-        padding: 20px 22px;
-
-        display: flex;
-
-        align-items: center;
-
-        justify-content: space-between;
-
-        gap: 15px;
-
-        border-bottom:
-            1px solid var(--border);
-    }
-
-
-    .table-top h3 {
-
-        margin: 0;
-
-        color: var(--text);
-
-        font-size: 20px;
-
-        font-weight: 800;
-    }
-
-
-    .table-top span {
-
-        padding: 5px 9px;
-
-        border-radius: 20px;
-
-        background: var(--surface-soft);
-
-        color: var(--text-soft);
-
-        font-size: 14px;
-
-        font-weight: 700;
-    }
-
-
-    .table-search {
-
-        padding: 14px 20px;
-
-        border-bottom:
-            1px solid var(--border);
-    }
-
-
-    .table-scroll {
+        width: 100%;
         overflow-x: auto;
     }
 
-
-    .loan-table {
-
+    .loans-table {
         width: 100%;
-
-        min-width: 1050px;
-
         border-collapse: collapse;
+        min-width: 1250px;
     }
 
-
-    .loan-table th {
-
-        padding: 14px 16px;
-
-        background: var(--surface-soft);
-
-        color: var(--text-soft);
-
-        font-size: 15px;
-
-        font-weight: 800;
-
+    .loans-table th {
+        background: #f7f5f1;
+        color: #555;
+        font-size: 13px;
+        font-weight: 700;
+        padding: 13px 12px;
         text-align: right;
-
         white-space: nowrap;
     }
 
-
-    .loan-table td {
-
-        padding: 15px 16px;
-
-        border-top:
-            1px solid var(--border);
-
-        color: var(--text);
-
-        font-size: 16px;
-
+    .loans-table td {
+        padding: 14px 12px;
+        border-bottom: 1px solid #eee;
+        font-size: 13px;
+        color: #333;
         vertical-align: middle;
     }
 
-
-    .loan-table tbody tr {
-
-        transition:
-            background .15s ease;
+    .loans-table tbody tr:hover {
+        background: #fcfbf8;
     }
 
-
-    .loan-table tbody tr:hover {
-        background: var(--surface-soft);
+    .book-title {
+        font-weight: 700;
+        color: var(--sidebar);
     }
 
-
-    /* =========================
-       INFO
-    ========================= */
-
-    .info {
-
-        display: flex;
-
-        flex-direction: column;
-
-        gap: 4px;
+    .user-name {
+        font-weight: 600;
     }
 
-
-    .info-main {
-
-        color: var(--text);
-
-        font-size: 16px;
-
-        font-weight: 800;
+    .muted {
+        color: #888;
+        font-size: 12px;
+        margin-top: 3px;
     }
 
-
-    .info-soft {
-
-        color: var(--text-soft);
-
-        font-size: 14px;
-    }
-
-
-    /* =========================
-       STATUS
-    ========================= */
-
-    .status {
-
+    .status-badge {
         display: inline-flex;
-
         align-items: center;
-
         justify-content: center;
-
-        padding: 5px 10px;
-
+        padding: 6px 10px;
         border-radius: 20px;
-
-        font-size: 14px;
-
-        font-weight: 800;
-
+        font-size: 12px;
         white-space: nowrap;
     }
 
-
-    .status.borrowed {
-
-        background:
-            rgba(200, 92, 80, .10);
-
-        color: #c85c50;
+    .status-borrowed {
+        background: #fff1dc;
+        color: #a76000;
     }
 
-
-    .status.returned {
-
-        background:
-            rgba(49, 150, 91, .10);
-
-        color: #31965b;
+    .status-available {
+        background: #e8f7ed;
+        color: #21733a;
     }
 
+    .late {
+        color: #c62828;
+        font-weight: 700;
+    }
 
-    /* =========================
-       TIMER
-    ========================= */
+    .no-late {
+        color: #258044;
+    }
 
-    .approval-timer {
-
-        display: inline-flex;
-
-        align-items: center;
-
-        gap: 6px;
-
-        margin-top: 8px;
-
-        padding: 6px 9px;
-
-        border:
-            1px solid var(--border);
-
-        border-radius: 8px;
-
-        background: var(--surface-soft);
-
-        color: var(--text-soft);
-
-        font-size: 13px;
-
+    .fine {
+        font-weight: 700;
         white-space: nowrap;
     }
 
-
-    .timer-value {
-
-        min-width: 75px;
-
-        display: inline-block;
-
-        color: var(--primary);
-
-        direction: ltr;
-
-        text-align: center;
-
-        font-size: 13px;
-
-        font-weight: 800;
-
-        font-variant-numeric:
-            tabular-nums;
+    .note-cell {
+        max-width: 220px;
+        white-space: normal;
+        line-height: 1.8;
     }
-
-
-    /* =========================
-       DATE
-    ========================= */
-
-    .date-text {
-
-        color: var(--text-soft);
-
-        font-size: 14px;
-
-        white-space: nowrap;
-    }
-
-
-    /* =========================
-       RETURN
-    ========================= */
 
     .return-form {
         margin: 0;
     }
 
-
-    .return-button {
-
-        padding: 8px 12px;
-
+    .btn-return {
         border: none;
-
+        background: #c62828;
+        color: #fff;
+        padding: 8px 13px;
         border-radius: 8px;
-
-        background:
-            rgba(232, 155, 61, .12);
-
-        color: #c38420;
-
         font-family: inherit;
-
-        font-size: 14px;
-
-        font-weight: 800;
-
+        font-size: 12px;
         cursor: pointer;
-
         white-space: nowrap;
+    }
 
-        transition:
-            background .2s ease,
-            transform .2s ease;
+    .btn-return:hover {
+        opacity: .9;
+    }
+
+    .returned-text {
+        color: #258044;
+        font-size: 12px;
+        white-space: nowrap;
     }
 
 
-    .return-button:hover {
+    /* =========================================================
+       پیام‌ها
+       ========================================================= */
 
-        background:
-            rgba(232, 155, 61, .18);
+    .messages {
+        margin-bottom: 20px;
+    }
 
+    .message {
+        padding: 12px 15px;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        font-size: 13px;
+    }
+
+    .message.success {
+        background: #e8f7ed;
+        color: #21733a;
+    }
+
+    .message.error {
+        background: #fdecec;
+        color: #b3261e;
+    }
+
+
+    /* =========================================================
+       حالت خالی
+       ========================================================= */
+
+    .empty-state {
+        text-align: center;
+        padding: 35px 15px;
+        color: #888;
+    }
+
+
+    /* =========================================================
+       دکمه چاپ و Excel
+       ========================================================= */
+
+    .history-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .table-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        border: none;
+        padding: 9px 15px;
+        border-radius: 9px;
+        font-family: inherit;
+        font-size: 13px;
+        cursor: pointer;
+        transition: .2s;
+        white-space: nowrap;
+    }
+
+    .print-action {
+        background: #17233c;
+        color: #fff;
+    }
+
+    .print-action:hover {
+        opacity: .9;
+        transform: translateY(-1px);
+    }
+
+    .excel-action {
+        background: #21733a;
+        color: #fff;
+    }
+
+    .excel-action:hover {
+        opacity: .9;
         transform: translateY(-1px);
     }
 
 
-    /* =========================
-       EMPTY
-    ========================= */
+    /* =========================================================
+       دارک مود
+       ========================================================= */
 
-    .empty-state {
+    body.dark-mode .loans-page {
+        color: #e7e7e7;
+    }
 
-        padding: 55px 20px;
+    body.dark-mode .page-header h1 {
+        color: #f1f1f1;
+    }
 
-        text-align: center;
+    body.dark-mode .page-header p {
+        color: #aaa;
+    }
+
+    body.dark-mode .loan-card {
+        background: #202938;
+        border-color: #303a4d;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, .18);
+    }
+
+    body.dark-mode .loan-card-title h2 {
+        color: #f1f1f1;
+    }
+
+    body.dark-mode .loan-card-title span {
+        color: #aaa;
+    }
+
+    body.dark-mode .form-group label {
+        color: #e5e5e5;
+    }
+
+    body.dark-mode .form-group select,
+    body.dark-mode .form-group input,
+    body.dark-mode .form-group textarea,
+    body.dark-mode .search-select-input,
+    body.dark-mode .search-box input {
+        background: #18202d;
+        color: #e7e7e7;
+        border-color: #3b4659;
+    }
+
+    body.dark-mode .form-group select:focus,
+    body.dark-mode .form-group input:focus,
+    body.dark-mode .form-group textarea:focus,
+    body.dark-mode .search-select-input:focus,
+    body.dark-mode .search-box input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(232, 155, 61, .15);
+    }
+
+    body.dark-mode .form-group select option {
+        background: #18202d;
+        color: #e7e7e7;
+    }
+
+    body.dark-mode .date-title {
+        color: #999;
+    }
+
+    body.dark-mode .muted {
+        color: #999;
+    }
+
+    body.dark-mode .selection-help {
+        color: #999;
+    }
+
+    body.dark-mode .search-select-input::placeholder,
+    body.dark-mode .search-box input::placeholder {
+        color: #777;
+    }
+
+    body.dark-mode .search-results {
+        background: #202938;
+        border-color: #3b4659;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
+    }
+
+    body.dark-mode .search-result-item {
+        color: #e7e7e7;
+        border-bottom-color: #303a4d;
+    }
+
+    body.dark-mode .search-result-item:hover {
+        background: #293447;
+    }
+
+    body.dark-mode .search-result-title {
+        color: #f1f1f1;
+    }
+
+    body.dark-mode .search-result-meta {
+        color: #999;
+    }
+
+    body.dark-mode .search-empty {
+        color: #999;
+    }
+
+    body.dark-mode .selected-item {
+        background: #18202d;
+        border-color: #3b4659;
+    }
+
+    body.dark-mode .selected-item-title {
+        color: #f1f1f1;
+    }
+
+    body.dark-mode .selected-item-meta {
+        color: #999;
+    }
+
+    body.dark-mode .clear-selection {
+        background: #303a4d;
+        color: #ddd;
+    }
+
+    body.dark-mode .clear-selection:hover {
+        background: #3b4659;
+    }
+
+    body.dark-mode .loans-table th {
+        background: #18202d;
+        color: #ccc;
+        border-bottom-color: #303a4d;
+    }
+
+    body.dark-mode .loans-table td {
+        color: #ddd;
+        border-bottom-color: #303a4d;
+    }
+
+    body.dark-mode .loans-table tbody tr:hover {
+        background: #293447;
+    }
+
+    body.dark-mode .book-title {
+        color: #f1f1f1;
+    }
+
+    body.dark-mode .status-borrowed {
+        background: #4a351d;
+        color: #f4b45f;
+    }
+
+    body.dark-mode .status-available {
+        background: #1d3b29;
+        color: #71cf91;
+    }
+
+    body.dark-mode .no-late {
+        color: #71cf91;
+    }
+
+    body.dark-mode .returned-text {
+        color: #71cf91;
+    }
+
+    body.dark-mode .message.success {
+        background: #1d3b29;
+        color: #71cf91;
+    }
+
+    body.dark-mode .message.error {
+        background: #482528;
+        color: #ff9b9b;
+    }
+
+    body.dark-mode .empty-state {
+        color: #999;
     }
 
 
-    .empty-icon {
-
-        width: 58px;
-
-        height: 58px;
-
-        margin: 0 auto 14px;
-
-        display: flex;
-
-        align-items: center;
-
-        justify-content: center;
-
-        border-radius: 15px;
-
-        background: var(--surface-soft);
-
-        font-size: 25px;
-    }
-
-
-    .empty-state h3 {
-
-        margin: 0;
-
-        color: var(--text);
-
-        font-size: 19px;
-
-        font-weight: 800;
-    }
-
-
-    .empty-state p {
-
-        margin: 8px 0 0;
-
-        color: var(--text-soft);
-
-        font-size: 15px;
-
-        line-height: 1.8;
-    }
-
-
-    /* =========================
-       RESPONSIVE
-    ========================= */
+    /* =========================================================
+       ریسپانسیو
+       ========================================================= */
 
     @media (max-width: 900px) {
 
-        .selection-grid {
+        .loan-form-grid {
             grid-template-columns: 1fr;
+        }
+
+        .form-group.full {
+            grid-column: auto;
         }
 
     }
@@ -957,74 +748,151 @@
 
     @media (max-width: 600px) {
 
-        .loan-create,
-        .loan-header {
+        .loan-card {
             padding: 16px;
         }
 
-
-        .section-title {
-            font-size: 20px;
+        .date-grid,
+        .time-grid {
+            grid-template-columns: 1fr;
         }
 
-
-        .section-description {
-            font-size: 15px;
-        }
-
-
-        .selection-card h3 {
-            font-size: 17px;
-        }
-
-
-        .table-top {
-
-            padding: 17px;
-
+        .loan-card-title {
             align-items: flex-start;
-
             flex-direction: column;
         }
 
-
-        .table-top h3 {
-            font-size: 19px;
+        .history-actions {
+            width: 100%;
         }
 
-
-        .table-search {
-            padding: 12px 15px;
+        .table-action {
+            flex: 1;
         }
 
+    }
 
-        .search-input {
-            font-size: 15px;
+
+    /* =========================================================
+       چاپ
+       ========================================================= */
+
+    @media print {
+
+        @page {
+            size: A4 landscape;
+            margin: 10mm;
         }
 
-
-        .result-title {
-            font-size: 15px;
+        body {
+            background: #fff !important;
+            color: #000 !important;
         }
 
-
-        .result-subtitle {
-            font-size: 13px;
+        .sidebar,
+        .topbar,
+        .loan-card:first-of-type,
+        .search-box,
+        .history-actions,
+        .return-form,
+        .returned-text,
+        .messages {
+            display: none !important;
         }
 
-
-        .result-availability {
-            font-size: 13px;
+        .loans-page {
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
         }
 
-
-        .selected-box {
-            font-size: 14px;
+        .page-header {
+            margin-bottom: 15px !important;
         }
 
+        .page-header h1 {
+            font-size: 22px !important;
+            color: #000 !important;
+        }
 
-        .message-box {
-            font-size: 15px;
+        .page-header p {
+            font-size: 12px !important;
+            color: #555 !important;
+        }
+
+        .loan-card {
+            box-shadow: none !important;
+            border: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            background: #fff !important;
+        }
+
+        .loan-card-title {
+            margin-bottom: 12px !important;
+        }
+
+        .loan-card-title h2 {
+            color: #000 !important;
+            font-size: 17px !important;
+        }
+
+        .table-wrapper {
+            overflow: visible !important;
+            width: 100% !important;
+        }
+
+        .loans-table {
+            min-width: 0 !important;
+            width: 100% !important;
+            font-size: 9px !important;
+        }
+
+        .loans-table th {
+            background: #eee !important;
+            color: #000 !important;
+            font-size: 8px !important;
+            padding: 5px !important;
+            border: 1px solid #999 !important;
+        }
+
+        .loans-table td {
+            color: #000 !important;
+            font-size: 8px !important;
+            padding: 5px !important;
+            border: 1px solid #bbb !important;
+        }
+
+        .book-title,
+        .user-name,
+        .fine,
+        .late,
+        .no-late {
+            color: #000 !important;
+        }
+
+        .muted {
+            color: #444 !important;
+            font-size: 7px !important;
+        }
+
+        .status-badge {
+            background: none !important;
+            color: #000 !important;
+            padding: 0 !important;
+        }
+
+        .note-cell {
+            max-width: none !important;
+        }
+
+        .loans-table th:last-child,
+        .loans-table td:last-child {
+            display: none !important;
+        }
+
+        .loan-row {
+            page-break-inside: avoid;
         }
 
     }
@@ -1032,374 +900,687 @@
 </style>
 
 
-<div class="loan-page">
+<div class="loans-page">
 
 
-    {% if messages %}
+    <!-- =====================================================
+         عنوان صفحه
+         ===================================================== -->
 
-        {% for message in messages %}
+    <div class="page-header">
 
-            <div class="message-box {{ message.tags }}">
-                {{ message }}
-            </div>
+        <h1>
+            مدیریت امانت‌ها
+        </h1>
 
-        {% endfor %}
-
-    {% endif %}
-
-
-    <!-- =========================
-         CREATE LOAN
-    ========================= -->
-
-    <div class="loan-create">
-
-
-        <h3 class="section-title">
-            ثبت امانت جدید
-        </h3>
-
-
-        <p class="section-description">
-
-            کاربر باید به صورت حضوری به کتابخانه مراجعه کرده باشد.
-            کتاب و کاربر را انتخاب کنید و سپس امانت را ثبت کنید.
-
+        <p>
+            ثبت امانت، ثبت بازگشت و مشاهده تاریخچه کامل امانت‌های کتابخانه
         </p>
-
-
-        <div class="selection-grid">
-
-
-            <!-- BOOK -->
-
-            <div class="selection-card">
-
-
-                <h3>
-                    ۱. انتخاب کتاب
-                </h3>
-
-
-                <div class="search-form">
-
-
-                    <input
-                        type="text"
-                        id="book-search"
-                        class="search-input"
-                        placeholder="عنوان یا نویسنده کتاب را بنویسید..."
-                        autocomplete="off"
-                    >
-
-
-                    <div class="search-hint">
-                        نتایج همزمان با تایپ نمایش داده می‌شوند.
-                    </div>
-
-
-                </div>
-
-
-                <div
-                    class="results-box"
-                    id="book-results"
-                >
-
-
-                    {% for book in available_books %}
-
-
-                        <button
-                            type="button"
-                            class="result-item"
-                            data-book-id="{{ book.pk }}"
-                            data-book-title="{{ book.title }}"
-                            data-search="{{ book.title }} {{ book.author }} {% if book.category %}{{ book.category.name }}{% endif %}"
-                            onclick="selectBook(this)"
-                        >
-
-
-                            <span class="result-main">
-
-
-                                <span class="result-title">
-                                    {{ book.title }}
-                                </span>
-
-
-                                <span class="result-subtitle">
-
-                                    {{ book.author }}
-
-                                    {% if book.category %}
-                                        · {{ book.category.name }}
-                                    {% endif %}
-
-                                </span>
-
-
-                            </span>
-
-
-                            <span class="result-availability">
-
-                                موجود:
-
-                                <strong>
-                                    {{ book.available_copies }}
-                                </strong>
-
-                                نسخه
-
-                            </span>
-
-
-                            <span class="result-check">
-                                ✓
-                            </span>
-
-
-                        </button>
-
-
-                    {% endfor %}
-
-
-                    <div
-                        class="no-results"
-                        id="book-no-results"
-                    >
-                        کتابی با این مشخصات پیدا نشد.
-                    </div>
-
-
-                </div>
-
-
-                <div class="selected-box">
-
-                    کتاب انتخاب‌شده:
-
-                    <strong id="selected-book-text">
-                        انتخاب نشده
-                    </strong>
-
-                </div>
-
-
-            </div>
-
-
-            <!-- USER -->
-
-            <div class="selection-card">
-
-
-                <h3>
-                    ۲. انتخاب کاربر
-                </h3>
-
-
-                <div class="search-form">
-
-
-                    <input
-                        type="text"
-                        id="user-search"
-                        class="search-input"
-                        placeholder="نام، نام کاربری یا شماره موبایل..."
-                        autocomplete="off"
-                    >
-
-
-                    <div class="search-hint">
-                        نتایج همزمان با تایپ نمایش داده می‌شوند.
-                    </div>
-
-
-                </div>
-
-
-                <div
-                    class="results-box"
-                    id="user-results"
-                >
-
-
-                    {% for user in users %}
-
-
-                        <button
-                            type="button"
-                            class="result-item"
-                            data-user-id="{{ user.pk }}"
-                            data-user-name="{% if user.get_full_name %}{{ user.get_full_name }}{% else %}{{ user.username }}{% endif %}"
-                            data-search="{% if user.get_full_name %}{{ user.get_full_name }}{% endif %} {{ user.username }} {{ user.phone_number }}"
-                            onclick="selectUser(this)"
-                        >
-
-
-                            <span class="result-main">
-
-
-                                <span class="result-title">
-
-                                    {% if user.get_full_name %}
-
-                                        {{ user.get_full_name }}
-
-                                    {% else %}
-
-                                        {{ user.username }}
-
-                                    {% endif %}
-
-                                </span>
-
-
-                                <span class="result-subtitle">
-
-                                    {{ user.phone_number }}
-
-                                    ·
-
-                                    نام کاربری:
-
-                                    {{ user.username }}
-
-                                </span>
-
-
-                            </span>
-
-
-                            <span class="result-check">
-                                ✓
-                            </span>
-
-
-                        </button>
-
-
-                    {% endfor %}
-
-
-                    <div
-                        class="no-results"
-                        id="user-no-results"
-                    >
-                        کاربری با این مشخصات پیدا نشد.
-                    </div>
-
-
-                </div>
-
-
-                <div class="selected-box">
-
-                    کاربر انتخاب‌شده:
-
-                    <strong id="selected-user-text">
-                        انتخاب نشده
-                    </strong>
-
-                </div>
-
-
-            </div>
-
-
-        </div>
-
-
-        <!-- CREATE FORM -->
-
-        <form
-            method="post"
-            action="{% url 'create_loan' %}"
-            class="create-loan-form"
-            id="create-loan-form"
-        >
-
-            {% csrf_token %}
-
-
-            <input
-                type="hidden"
-                name="book_id"
-                id="selected-book-id"
-            >
-
-
-            <input
-                type="hidden"
-                name="user_id"
-                id="selected-user-id"
-            >
-
-
-            <button
-                type="submit"
-                class="create-button"
-                id="create-button"
-                disabled
-            >
-                ثبت امانت
-            </button>
-
-
-        </form>
-
 
     </div>
 
 
-    <!-- =========================
-         ACTIVE LOANS
-    ========================= -->
+    <!-- =====================================================
+         پیام‌ها
+         ===================================================== -->
 
-    <div class="table-wrapper">
+    {% if messages %}
+
+        <div class="messages">
+
+            {% for message in messages %}
+
+                <div class="message {{ message.tags }}">
+                    {{ message }}
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% endif %}
 
 
-        <div class="table-top">
+    <!-- =====================================================
+         ثبت امانت
+         ===================================================== -->
 
-            <h3>
-                امانت‌های فعال
-            </h3>
+    <div class="loan-card">
 
+        <div class="loan-card-title">
+
+            <h2>
+                ثبت امانت جدید
+            </h2>
 
             <span>
-                {{ loans|length }} رکورد
+                ثبت توسط مدیر کتابخانه
             </span>
 
         </div>
 
 
-        <!-- LIVE SEARCH -->
+        <form
+            method="post"
+            action="{% url 'create_loan' %}"
+            id="loanCreateForm"
+        >
 
-        <div class="table-search">
+            {% csrf_token %}
+
+
+            <div class="loan-form-grid">
+
+
+                <!-- =================================================
+                     انتخاب کتاب
+                     ================================================= -->
+
+                <div class="form-group">
+
+                    <label>
+                        کتاب
+                    </label>
+
+
+                    <div class="search-select">
+
+                        <input
+                            type="text"
+                            id="bookSearchInput"
+                            class="search-select-input"
+                            placeholder="نام کتاب را جستجو کنید..."
+                            autocomplete="off"
+                        >
+
+
+                        <div
+                            id="bookSearchResults"
+                            class="search-results"
+                        >
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        id="selectedBook"
+                        class="selected-item"
+                    >
+
+                        <div class="selected-item-info">
+
+                            <span
+                                id="selectedBookTitle"
+                                class="selected-item-title"
+                            >
+                            </span>
+
+                            <span
+                                id="selectedBookMeta"
+                                class="selected-item-meta"
+                            >
+                            </span>
+
+                        </div>
+
+
+                        <button
+                            type="button"
+                            class="clear-selection"
+                            id="clearBook"
+                            title="حذف انتخاب"
+                        >
+                            ×
+                        </button>
+
+                    </div>
+
+
+                    <input
+                        type="hidden"
+                        name="book_id"
+                        id="book_id"
+                        required
+                    >
+
+
+                    <div class="selection-help">
+                        برای انتخاب کتاب، نام یا بخشی از نام آن را وارد کنید.
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     انتخاب کاربر
+                     ================================================= -->
+
+                <div class="form-group">
+
+                    <label>
+                        کاربر
+                    </label>
+
+
+                    <div class="search-select">
+
+                        <input
+                            type="text"
+                            id="userSearchInput"
+                            class="search-select-input"
+                            placeholder="نام، نام خانوادگی یا نام کاربری..."
+                            autocomplete="off"
+                        >
+
+
+                        <div
+                            id="userSearchResults"
+                            class="search-results"
+                        >
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        id="selectedUser"
+                        class="selected-item"
+                    >
+
+                        <div class="selected-item-info">
+
+                            <span
+                                id="selectedUserTitle"
+                                class="selected-item-title"
+                            >
+                            </span>
+
+                            <span
+                                id="selectedUserMeta"
+                                class="selected-item-meta"
+                            >
+                            </span>
+
+                        </div>
+
+
+                        <button
+                            type="button"
+                            class="clear-selection"
+                            id="clearUser"
+                            title="حذف انتخاب"
+                        >
+                            ×
+                        </button>
+
+                    </div>
+
+
+                    <input
+                        type="hidden"
+                        name="user_id"
+                        id="user_id"
+                        required
+                    >
+
+
+                    <div class="selection-help">
+                        برای انتخاب کاربر، نام یا نام کاربری او را جستجو کنید.
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     تاریخ مهلت بازگشت
+                     ================================================= -->
+
+                <div class="form-group">
+
+                    <label>
+                        مهلت بازگشت
+                    </label>
+
+
+                    <div class="date-grid">
+
+
+                        <!-- سال -->
+
+                        <div>
+
+                            <span class="date-title">
+                                سال
+                            </span>
+
+
+                            <select
+                                name="due_year"
+                                id="due_year"
+                                required
+                            >
+
+                                <option value="">
+                                    سال
+                                </option>
+
+
+                                {% for year in due_years %}
+
+                                    <option value="{{ year }}">
+                                        {{ year }}
+                                    </option>
+
+                                {% endfor %}
+
+                            </select>
+
+                        </div>
+
+
+                        <!-- ماه -->
+
+                        <div>
+
+                            <span class="date-title">
+                                ماه
+                            </span>
+
+
+                            <select
+                                name="due_month"
+                                id="due_month"
+                                required
+                            >
+
+                                <option value="">
+                                    ماه
+                                </option>
+
+                                <option value="1">
+                                    ۱ - فروردین
+                                </option>
+
+                                <option value="2">
+                                    ۲ - اردیبهشت
+                                </option>
+
+                                <option value="3">
+                                    ۳ - خرداد
+                                </option>
+
+                                <option value="4">
+                                    ۴ - تیر
+                                </option>
+
+                                <option value="5">
+                                    ۵ - مرداد
+                                </option>
+
+                                <option value="6">
+                                    ۶ - شهریور
+                                </option>
+
+                                <option value="7">
+                                    ۷ - مهر
+                                </option>
+
+                                <option value="8">
+                                    ۸ - آبان
+                                </option>
+
+                                <option value="9">
+                                    ۹ - آذر
+                                </option>
+
+                                <option value="10">
+                                    ۱۰ - دی
+                                </option>
+
+                                <option value="11">
+                                    ۱۱ - بهمن
+                                </option>
+
+                                <option value="12">
+                                    ۱۲ - اسفند
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <!-- روز -->
+
+                        <div>
+
+                            <span class="date-title">
+                                روز
+                            </span>
+
+
+                            <select
+                                name="due_day"
+                                id="due_day"
+                                required
+                            >
+
+                                <option value="">
+                                    روز
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ساعت و دقیقه -->
+
+                    <div class="time-grid">
+
+
+                        <div>
+
+                            <span class="date-title">
+                                ساعت
+                            </span>
+
+
+                            <select
+                                name="due_hour"
+                                required
+                            >
+
+                                <option value="00">
+                                    ۰۰
+                                </option>
+
+                                <option value="01">
+                                    ۰۱
+                                </option>
+
+                                <option value="02">
+                                    ۰۲
+                                </option>
+
+                                <option value="03">
+                                    ۰۳
+                                </option>
+
+                                <option value="04">
+                                    ۰۴
+                                </option>
+
+                                <option value="05">
+                                    ۰۵
+                                </option>
+
+                                <option value="06">
+                                    ۰۶
+                                </option>
+
+                                <option value="07">
+                                    ۰۷
+                                </option>
+
+                                <option value="08">
+                                    ۰۸
+                                </option>
+
+                                <option value="09">
+                                    ۰۹
+                                </option>
+
+                                <option value="10">
+                                    ۱۰
+                                </option>
+
+                                <option value="11">
+                                    ۱۱
+                                </option>
+
+                                <option value="12">
+                                    ۱۲
+                                </option>
+
+                                <option value="13">
+                                    ۱۳
+                                </option>
+
+                                <option value="14">
+                                    ۱۴
+                                </option>
+
+                                <option value="15">
+                                    ۱۵
+                                </option>
+
+                                <option value="16">
+                                    ۱۶
+                                </option>
+
+                                <option value="17">
+                                    ۱۷
+                                </option>
+
+                                <option value="18">
+                                    ۱۸
+                                </option>
+
+                                <option value="19">
+                                    ۱۹
+                                </option>
+
+                                <option value="20">
+                                    ۲۰
+                                </option>
+
+                                <option value="21">
+                                    ۲۱
+                                </option>
+
+                                <option value="22">
+                                    ۲۲
+                                </option>
+
+                                <option value="23">
+                                    ۲۳
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div>
+
+                            <span class="date-title">
+                                دقیقه
+                            </span>
+
+
+                            <select
+                                name="due_minute"
+                                required
+                            >
+
+                                <option value="00">
+                                    ۰۰
+                                </option>
+
+                                <option value="15">
+                                    ۱۵
+                                </option>
+
+                                <option value="30">
+                                    ۳۰
+                                </option>
+
+                                <option value="45">
+                                    ۴۵
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     جریمه
+                     ================================================= -->
+
+                <div class="form-group">
+
+                    <label for="daily_fine">
+                        جریمه هر روز دیرکرد
+                    </label>
+
+
+                    <input
+                        type="number"
+                        name="daily_fine"
+                        id="daily_fine"
+                        min="0"
+                        step="1000"
+                        value="0"
+                        placeholder="مثلاً 200000"
+                        required
+                    >
+
+
+                    <div class="muted">
+                        مبلغ به تومان وارد شود.
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     توضیحات
+                     ================================================= -->
+
+                <div class="form-group full">
+
+                    <label for="admin_note">
+                        توضیحات مدیر
+                    </label>
+
+
+                    <textarea
+                        name="admin_note"
+                        id="admin_note"
+                        placeholder="مثلاً: کتاب صحیح و سالم تحویل داده شد."
+                    ></textarea>
+
+                </div>
+
+            </div>
+
+
+            <div class="submit-row">
+
+                <button
+                    type="submit"
+                    class="btn-primary"
+                >
+                    ثبت امانت
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <!-- =====================================================
+         تاریخچه امانت‌ها
+         ===================================================== -->
+
+    <div
+        class="loan-card"
+        id="loanHistoryCard"
+    >
+
+
+        <div class="loan-card-title">
+
+            <div>
+
+                <h2>
+                    تاریخچه امانت‌ها
+                </h2>
+
+                <span>
+                    تمام امانت‌های ثبت‌شده
+                </span>
+
+            </div>
+
+
+            <!-- دکمه‌های چاپ و Excel -->
+
+            <div class="history-actions">
+
+                <button
+                    type="button"
+                    class="table-action print-action"
+                    onclick="printLoans()"
+                >
+                    چاپ
+                </button>
+
+
+                <a
+                    href="{% url 'export_loans_excel' %}"
+                    class="table-action excel-action"
+                >
+                    خروجی Excel
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             جستجوی تاریخچه
+             ================================================= -->
+
+        <div class="search-box">
 
             <input
                 type="text"
-                id="loan-search"
-                class="search-input"
-                placeholder="جستجوی امانت بر اساس کتاب، کاربر یا شماره موبایل..."
+                id="loanSearch"
+                placeholder="جستجو بر اساس کتاب، کاربر یا شماره ثبت..."
                 autocomplete="off"
             >
 
         </div>
 
 
-        <div class="table-scroll">
+        <!-- =================================================
+             جدول
+             ================================================= -->
 
+        <div class="table-wrapper">
 
-            <table class="loan-table">
-
+            <table class="loans-table">
 
                 <thead>
 
                     <tr>
+
+                        <th>
+                            شماره ثبت
+                        </th>
 
                         <th>
                             کتاب
@@ -1410,11 +1591,35 @@
                         </th>
 
                         <th>
-                            زمان امانت
+                            تاریخ دریافت
+                        </th>
+
+                        <th>
+                            مهلت بازگشت
+                        </th>
+
+                        <th>
+                            تاریخ برگشت
                         </th>
 
                         <th>
                             وضعیت
+                        </th>
+
+                        <th>
+                            دیرکرد
+                        </th>
+
+                        <th>
+                            جریمه روزانه
+                        </th>
+
+                        <th>
+                            جریمه نهایی / فعلی
+                        </th>
+
+                        <th>
+                            توضیحات
                         </th>
 
                         <th>
@@ -1426,157 +1631,321 @@
                 </thead>
 
 
-                <tbody id="loan-table-body">
+                <tbody id="loansTableBody">
 
 
                     {% for loan in loans %}
 
-
-                        <tr
-                            class="loan-row"
-                            data-search="
-                                {{ loan.book.title }}
-                                {{ loan.book.author }}
-                                {{ loan.user.username }}
-                                {{ loan.user.first_name }}
-                                {{ loan.user.last_name }}
-                                {{ loan.user.phone_number }}
-                            "
-                        >
+                        <tr class="loan-row">
 
 
-                            <td>
+                            <!-- شماره ثبت -->
 
-                                <div class="info">
+                            <td
+                                data-search="{{ loan.registration_number }}"
+                            >
 
-                                    <span class="info-main">
-                                        {{ loan.book.title }}
-                                    </span>
-
-                                    <span class="info-soft">
-                                        {{ loan.book.author }}
-                                    </span>
-
-                                </div>
+                                <strong>
+                                    {{ loan.registration_number }}
+                                </strong>
 
                             </td>
 
 
-                            <td>
+                            <!-- کتاب -->
 
-                                <div class="info">
+                            <td
+                                data-search="{{ loan.book.title }}"
+                            >
 
-                                    <span class="info-main">
+                                <div class="book-title">
+                                    {{ loan.book.title }}
+                                </div>
 
-                                        {% if loan.user.get_full_name %}
 
-                                            {{ loan.user.get_full_name }}
+                                <div class="muted">
 
-                                        {% else %}
+                                    {% for author in loan.book.authors.all %}
 
-                                            {{ loan.user.username }}
+                                        {{ author.name }}
 
+                                        {% if not forloop.last %}
+                                            ،
                                         {% endif %}
 
-                                    </span>
-
-
-                                    <span class="info-soft">
-                                        {{ loan.user.phone_number }}
-                                    </span>
+                                    {% endfor %}
 
                                 </div>
 
                             </td>
 
 
-                            <td>
+                            <!-- کاربر -->
 
+                            <td
+                                data-search="{{ loan.user.username }} {{ loan.user.first_name }} {{ loan.user.last_name }}"
+                            >
+
+                                <div class="user-name">
+
+                                    {% if loan.user.get_full_name %}
+
+                                        {{ loan.user.get_full_name }}
+
+                                    {% else %}
+
+                                        {{ loan.user.username }}
+
+                                    {% endif %}
+
+                                </div>
+
+
+                                <div class="muted">
+                                    {{ loan.user.username }}
+                                </div>
+
+                            </td>
+
+
+                            <!-- تاریخ دریافت -->
+
+                            <td>
 
                                 {% if loan.borrowed_at %}
 
-                                    <span class="date-text">
+                                    {{ loan.borrowed_at|jalali_date:"%Y/%m/%d" }}
 
-                                        {{ loan.borrowed_at|date:"Y/m/d - H:i" }}
+                                    <div class="muted">
 
+                                        {{ loan.borrowed_at|jalali_date:"%H:%M" }}
+
+                                    </div>
+
+                                {% else %}
+
+                                    —
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- مهلت بازگشت -->
+
+                            <td>
+
+                                {% if loan.due_date %}
+
+                                    {{ loan.due_date|jalali_date:"%Y/%m/%d" }}
+
+                                    <div class="muted">
+
+                                        {{ loan.due_date|jalali_date:"%H:%M" }}
+
+                                    </div>
+
+                                {% else %}
+
+                                    —
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- تاریخ برگشت -->
+
+                            <td>
+
+                                {% if loan.returned_at %}
+
+                                    {{ loan.returned_at|jalali_date:"%Y/%m/%d" }}
+
+                                    <div class="muted">
+
+                                        {{ loan.returned_at|jalali_date:"%H:%M" }}
+
+                                    </div>
+
+                                {% else %}
+
+                                    —
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- وضعیت -->
+
+                            <td>
+
+                                {% if loan.status == "borrowed" %}
+
+                                    <span
+                                        class="status-badge status-borrowed"
+                                    >
+                                        امانت داده شده
                                     </span>
 
                                 {% else %}
 
-                                    <span class="date-text">
-                                        —
+                                    <span
+                                        class="status-badge status-available"
+                                    >
+                                        موجود
                                     </span>
 
                                 {% endif %}
 
-
-                                {% if loan.status == "borrowed" and loan.approved_at %}
-
-
-                                    <div
-                                        class="approval-timer"
-                                        data-approved-at="{{ loan.approved_at|date:'c' }}"
-                                    >
+                            </td>
 
 
-                                        <span>
-                                            ⏱
+                            <!-- دیرکرد -->
+
+                            <td>
+
+                                {% if loan.status == "borrowed" %}
+
+                                    {% if loan.current_late_days > 0 %}
+
+                                        <span class="late">
+
+                                            {{ loan.current_late_days }}
+
+                                            روز
+
                                         </span>
 
+                                    {% else %}
 
-                                        <span>
-                                            مدت:
+                                        <span class="no-late">
+                                            بدون دیرکرد
                                         </span>
 
+                                    {% endif %}
 
-                                        <span
-                                            class="timer-value"
-                                            data-timer
-                                        >
-                                            00:00:00
+                                {% else %}
+
+                                    {% if loan.late_days > 0 %}
+
+                                        <span class="late">
+
+                                            {{ loan.late_days }}
+
+                                            روز
+
                                         </span>
 
+                                    {% else %}
 
-                                    </div>
+                                        <span class="no-late">
+                                            بدون دیرکرد
+                                        </span>
 
+                                    {% endif %}
 
                                 {% endif %}
-
 
                             </td>
 
 
+                            <!-- جریمه روزانه -->
+
                             <td>
 
-                                <span class="status borrowed">
-                                    امانت داده شده
+                                <span class="fine">
+
+                                    {{ loan.daily_fine|default:0|floatformat:0 }}
+
+                                    تومان
+
                                 </span>
 
                             </td>
 
 
+                            <!-- جریمه -->
+
                             <td>
 
+                                {% if loan.status == "borrowed" %}
 
-                                <form
-                                    method="post"
-                                    action="{% url 'return_loan' loan.pk %}"
-                                    class="return-form"
-                                >
+                                    <span class="fine">
 
-                                    {% csrf_token %}
+                                        {{ loan.current_fine|default:0|floatformat:0 }}
+
+                                        تومان
+
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="fine">
+
+                                        {{ loan.total_fine|default:0|floatformat:0 }}
+
+                                        تومان
+
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
 
 
-                                    <button
-                                        type="submit"
-                                        class="return-button"
+                            <!-- توضیحات -->
+
+                            <td class="note-cell">
+
+                                {% if loan.admin_note %}
+
+                                    {{ loan.admin_note }}
+
+                                {% else %}
+
+                                    <span class="muted">
+                                        بدون توضیح
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- عملیات -->
+
+                            <td>
+
+                                {% if loan.status == "borrowed" %}
+
+                                    <form
+                                        method="post"
+                                        action="{% url 'return_loan' loan.pk %}"
+                                        class="return-form"
+                                        onsubmit="return confirmReturn();"
                                     >
-                                        ثبت بازگشت
-                                    </button>
+
+                                        {% csrf_token %}
 
 
-                                </form>
+                                        <button
+                                            type="submit"
+                                            class="btn-return"
+                                        >
+                                            ثبت برگشت
+                                        </button>
 
+                                    </form>
+
+                                {% else %}
+
+                                    <span class="returned-text">
+                                        برگشت داده شده
+                                    </span>
+
+                                {% endif %}
 
                             </td>
 
@@ -1586,629 +1955,1155 @@
 
                     {% empty %}
 
-
                         <tr>
 
-                            <td colspan="5">
-
-
-                                <div class="empty-state">
-
-
-                                    <div class="empty-icon">
-                                        📋
-                                    </div>
-
-
-                                    <h3>
-                                        هنوز امانتی ثبت نشده است
-                                    </h3>
-
-
-                                    <p>
-
-                                        برای شروع، از بخش «ثبت امانت جدید»
-                                        کتاب و کاربر را انتخاب کنید.
-
-                                    </p>
-
-
-                                </div>
-
-
+                            <td
+                                colspan="12"
+                                class="empty-state"
+                            >
+                                هنوز هیچ امانتی ثبت نشده است.
                             </td>
 
                         </tr>
 
-
                     {% endfor %}
-
-
-                    <tr
-                        id="loan-no-results"
-                        style="display: none;"
-                    >
-
-                        <td colspan="5">
-
-
-                            <div class="empty-state">
-
-
-                                <div class="empty-icon">
-                                    🔎
-                                </div>
-
-
-                                <h3>
-                                    نتیجه‌ای پیدا نشد
-                                </h3>
-
-
-                                <p>
-                                    برای عبارت واردشده امانتی پیدا نشد.
-                                </p>
-
-
-                            </div>
-
-
-                        </td>
-
-                    </tr>
 
 
                 </tbody>
 
-
             </table>
-
 
         </div>
 
-
     </div>
-
 
 </div>
 
 
 <script>
 
-    let selectedBookId = "";
+    /* =========================================================
+       تبدیل اعداد انگلیسی به فارسی
+       ========================================================= */
 
-    let selectedUserId = "";
+    function toPersianDigits(value) {
+
+        return String(value)
+            .replace(
+                /0/g,
+                "۰"
+            )
+            .replace(
+                /1/g,
+                "۱"
+            )
+            .replace(
+                /2/g,
+                "۲"
+            )
+            .replace(
+                /3/g,
+                "۳"
+            )
+            .replace(
+                /4/g,
+                "۴"
+            )
+            .replace(
+                /5/g,
+                "۵"
+            )
+            .replace(
+                /6/g,
+                "۶"
+            )
+            .replace(
+                /7/g,
+                "۷"
+            )
+            .replace(
+                /8/g,
+                "۸"
+            )
+            .replace(
+                /9/g,
+                "۹"
+            );
+
+    }
 
 
-    /* =========================
-       SELECT BOOK
-    ========================= */
+    /* =========================================================
+       انتخاب کتاب
+       ========================================================= */
 
-    function selectBook(element) {
+    const bookData = [
 
-        document
-            .querySelectorAll("[data-book-id]")
-            .forEach(function (item) {
+        {% for book in available_books %}
 
-                item.classList.remove("selected");
+            {
+                id: "{{ book.id }}",
+                title: "{{ book.title|escapejs }}",
+                available: "{{ book.available_copies }}",
+                authors: "{% for author in book.authors.all %}{{ author.name|escapejs }}{% if not forloop.last %}، {% endif %}{% endfor %}"
+            },
 
-            });
+        {% endfor %}
 
-
-        element.classList.add("selected");
-
-
-        selectedBookId =
-            element.dataset.bookId;
+    ];
 
 
+    const bookSearchInput =
         document.getElementById(
-            "selected-book-id"
-        ).value = selectedBookId;
+            "bookSearchInput"
+        );
 
 
+    const bookSearchResults =
         document.getElementById(
-            "selected-book-text"
-        ).textContent =
-            element.dataset.bookTitle;
+            "bookSearchResults"
+        );
 
 
-        updateCreateButton();
-
-    }
-
-
-    /* =========================
-       SELECT USER
-    ========================= */
-
-    function selectUser(element) {
-
-        document
-            .querySelectorAll("[data-user-id]")
-            .forEach(function (item) {
-
-                item.classList.remove("selected");
-
-            });
-
-
-        element.classList.add("selected");
-
-
-        selectedUserId =
-            element.dataset.userId;
-
-
+    const bookIdInput =
         document.getElementById(
-            "selected-user-id"
-        ).value = selectedUserId;
+            "book_id"
+        );
 
 
+    const selectedBook =
         document.getElementById(
-            "selected-user-text"
-        ).textContent =
-            element.dataset.userName;
-
-
-        updateCreateButton();
-
-    }
-
-
-    /* =========================
-       CREATE BUTTON
-    ========================= */
-
-    function updateCreateButton() {
-
-        const button =
-            document.getElementById(
-                "create-button"
-            );
-
-
-        button.disabled = !(
-            selectedBookId &&
-            selectedUserId
-        );
-
-    }
-
-
-    /* =========================
-       NORMALIZE PERSIAN TEXT
-    ========================= */
-
-    function normalizeText(text) {
-
-        return text
-            .toString()
-            .trim()
-            .toLowerCase()
-            .replace(/ي/g, "ی")
-            .replace(/ى/g, "ی")
-            .replace(/ك/g, "ک")
-            .replace(/ۀ/g, "ه")
-            .replace(/ة/g, "ه")
-            .replace(/\u200c/g, " ")
-            .replace(/\s+/g, " ");
-
-    }
-
-
-    /* =========================
-       FILTER BOOKS
-    ========================= */
-
-    function filterBooks() {
-
-        const input =
-            document.getElementById(
-                "book-search"
-            );
-
-
-        const query =
-            normalizeText(input.value);
-
-
-        const items =
-            document.querySelectorAll(
-                "#book-results [data-book-id]"
-            );
-
-
-        const noResults =
-            document.getElementById(
-                "book-no-results"
-            );
-
-
-        let visibleCount = 0;
-
-
-        items.forEach(function (item) {
-
-            const searchableText =
-                normalizeText(
-                    item.dataset.search
-                );
-
-
-            const matches =
-                !query ||
-                searchableText.includes(query);
-
-
-            if (matches) {
-
-                item.classList.remove(
-                    "hidden-result"
-                );
-
-                visibleCount++;
-
-            } else {
-
-                item.classList.add(
-                    "hidden-result"
-                );
-
-            }
-
-        });
-
-
-        noResults.classList.toggle(
-            "show",
-            visibleCount === 0
-        );
-
-    }
-
-
-    /* =========================
-       FILTER USERS
-    ========================= */
-
-    function filterUsers() {
-
-        const input =
-            document.getElementById(
-                "user-search"
-            );
-
-
-        const query =
-            normalizeText(input.value);
-
-
-        const items =
-            document.querySelectorAll(
-                "#user-results [data-user-id]"
-            );
-
-
-        const noResults =
-            document.getElementById(
-                "user-no-results"
-            );
-
-
-        let visibleCount = 0;
-
-
-        items.forEach(function (item) {
-
-            const searchableText =
-                normalizeText(
-                    item.dataset.search
-                );
-
-
-            const matches =
-                !query ||
-                searchableText.includes(query);
-
-
-            if (matches) {
-
-                item.classList.remove(
-                    "hidden-result"
-                );
-
-                visibleCount++;
-
-            } else {
-
-                item.classList.add(
-                    "hidden-result"
-                );
-
-            }
-
-        });
-
-
-        noResults.classList.toggle(
-            "show",
-            visibleCount === 0
-        );
-
-    }
-
-
-    /* =========================
-       FILTER LOANS
-    ========================= */
-
-    function filterLoans() {
-
-        const input =
-            document.getElementById(
-                "loan-search"
-            );
-
-
-        const query =
-            normalizeText(input.value);
-
-
-        const rows =
-            document.querySelectorAll(
-                "#loan-table-body .loan-row"
-            );
-
-
-        const noResults =
-            document.getElementById(
-                "loan-no-results"
-            );
-
-
-        let visibleCount = 0;
-
-
-        rows.forEach(function (row) {
-
-            const searchableText =
-                normalizeText(
-                    row.dataset.search
-                );
-
-
-            const matches =
-                !query ||
-                searchableText.includes(query);
-
-
-            if (matches) {
-
-                row.style.display = "";
-
-                visibleCount++;
-
-            } else {
-
-                row.style.display = "none";
-
-            }
-
-        });
-
-
-        noResults.style.display =
-            visibleCount === 0
-                ? ""
-                : "none";
-
-    }
-
-
-    /* =========================
-       SEARCH EVENTS
-    ========================= */
-
-    document
-        .getElementById("book-search")
-        .addEventListener(
-            "input",
-            filterBooks
+            "selectedBook"
         );
 
 
-    document
-        .getElementById("user-search")
-        .addEventListener(
-            "input",
-            filterUsers
+    const selectedBookTitle =
+        document.getElementById(
+            "selectedBookTitle"
         );
 
 
-    document
-        .getElementById("loan-search")
-        .addEventListener(
-            "input",
-            filterLoans
+    const selectedBookMeta =
+        document.getElementById(
+            "selectedBookMeta"
         );
 
 
-    /* =========================
-       RETURN CONFIRMATION
-    ========================= */
+    const clearBook =
+        document.getElementById(
+            "clearBook"
+        );
 
-    document
-        .querySelectorAll(".return-form")
-        .forEach(function (form) {
 
-            form.addEventListener(
-                "submit",
-                function (event) {
+    function renderBookResults(query) {
 
-                    const confirmed =
-                        window.confirm(
-                            "آیا مطمئن هستید که می‌خواهید این کتاب را برگشت بزنید؟"
+        bookSearchResults.innerHTML = "";
+
+
+        const normalizedQuery =
+            query
+                .trim()
+                .toLowerCase();
+
+
+        let results = bookData;
+
+
+        if (normalizedQuery) {
+
+            results =
+                bookData.filter(
+                    function (book) {
+
+                        const text =
+                            (
+                                book.title +
+                                " " +
+                                book.authors
+                            )
+                            .toLowerCase();
+
+
+                        return text.includes(
+                            normalizedQuery
+                        );
+
+                    }
+                );
+
+        }
+
+
+        if (!results.length) {
+
+            bookSearchResults.innerHTML =
+                '<div class="search-empty">کتابی پیدا نشد.</div>';
+
+            bookSearchResults.classList.add(
+                "show"
+            );
+
+            return;
+
+        }
+
+
+        /*
+         * حداکثر 30 نتیجه اول
+         */
+
+        results
+            .slice(0, 30)
+            .forEach(
+                function (book) {
+
+                    const button =
+                        document.createElement(
+                            "button"
                         );
 
 
-                    if (!confirmed) {
+                    button.type =
+                        "button";
 
-                        event.preventDefault();
+
+                    button.className =
+                        "search-result-item";
+
+
+                    const title =
+                        document.createElement(
+                            "span"
+                        );
+
+
+                    title.className =
+                        "search-result-title";
+
+
+                    title.textContent =
+                        book.title;
+
+
+                    const meta =
+                        document.createElement(
+                            "span"
+                        );
+
+
+                    meta.className =
+                        "search-result-meta";
+
+
+                    let metaText =
+                        "";
+
+
+                    if (book.authors) {
+
+                        metaText +=
+                            book.authors;
 
                     }
+
+
+                    if (book.available) {
+
+                        if (metaText) {
+
+                            metaText +=
+                                " — ";
+
+                        }
+
+                        metaText +=
+                            toPersianDigits(
+                                book.available
+                            ) +
+                            " نسخه موجود";
+
+                    }
+
+
+                    meta.textContent =
+                        metaText;
+
+
+                    button.appendChild(
+                        title
+                    );
+
+
+                    button.appendChild(
+                        meta
+                    );
+
+
+                    button.addEventListener(
+                        "click",
+                        function () {
+
+                            selectBook(
+                                book
+                            );
+
+                        }
+                    );
+
+
+                    bookSearchResults.appendChild(
+                        button
+                    );
 
                 }
             );
 
-        });
 
-
-    /* =========================
-       LOAN TIMER
-    ========================= */
-
-    function updateLoanTimers() {
-
-        const timers =
-            document.querySelectorAll(
-                ".approval-timer"
-            );
-
-
-        const now = Date.now();
-
-
-        timers.forEach(function (timer) {
-
-            const approvedAt =
-                timer.dataset.approvedAt;
-
-
-            const timerValue =
-                timer.querySelector(
-                    "[data-timer]"
-                );
-
-
-            if (
-                !approvedAt ||
-                !timerValue
-            ) {
-
-                return;
-
-            }
-
-
-            const approvedTime =
-                new Date(
-                    approvedAt
-                ).getTime();
-
-
-            if (
-                Number.isNaN(
-                    approvedTime
-                )
-            ) {
-
-                timerValue.textContent =
-                    "00:00:00";
-
-                return;
-
-            }
-
-
-            let difference =
-                Math.floor(
-                    (now - approvedTime) / 1000
-                );
-
-
-            if (difference < 0) {
-                difference = 0;
-            }
-
-
-            const days =
-                Math.floor(
-                    difference / 86400
-                );
-
-
-            const hours =
-                Math.floor(
-                    (difference % 86400) / 3600
-                );
-
-
-            const minutes =
-                Math.floor(
-                    (difference % 3600) / 60
-                );
-
-
-            const seconds =
-                difference % 60;
-
-
-            const formattedHours =
-                String(hours).padStart(
-                    2,
-                    "0"
-                );
-
-
-            const formattedMinutes =
-                String(minutes).padStart(
-                    2,
-                    "0"
-                );
-
-
-            const formattedSeconds =
-                String(seconds).padStart(
-                    2,
-                    "0"
-                );
-
-
-            if (days > 0) {
-
-                timerValue.textContent =
-                    days +
-                    " روز " +
-                    formattedHours +
-                    ":" +
-                    formattedMinutes +
-                    ":" +
-                    formattedSeconds;
-
-            } else {
-
-                timerValue.textContent =
-                    formattedHours +
-                    ":" +
-                    formattedMinutes +
-                    ":" +
-                    formattedSeconds;
-
-            }
-
-        });
+        bookSearchResults.classList.add(
+            "show"
+        );
 
     }
 
 
-    updateLoanTimers();
+    function selectBook(book) {
+
+        bookIdInput.value =
+            book.id;
 
 
-    setInterval(
-        updateLoanTimers,
-        1000
+        selectedBookTitle.textContent =
+            book.title;
+
+
+        let meta =
+            "";
+
+
+        if (book.authors) {
+
+            meta +=
+                book.authors;
+
+        }
+
+
+        if (book.available) {
+
+            if (meta) {
+
+                meta +=
+                    " — ";
+
+            }
+
+            meta +=
+                toPersianDigits(
+                    book.available
+                ) +
+                " نسخه موجود";
+
+        }
+
+
+        selectedBookMeta.textContent =
+            meta;
+
+
+        selectedBook.classList.add(
+            "show"
+        );
+
+
+        bookSearchInput.value =
+            "";
+
+
+        bookSearchInput.placeholder =
+            "کتاب انتخاب شد";
+
+
+        bookSearchResults.classList.remove(
+            "show"
+        );
+
+    }
+
+
+    function clearSelectedBook() {
+
+        bookIdInput.value =
+            "";
+
+
+        selectedBook.classList.remove(
+            "show"
+        );
+
+
+        bookSearchInput.value =
+            "";
+
+
+        bookSearchInput.placeholder =
+            "نام کتاب را جستجو کنید...";
+
+
+        bookSearchInput.focus();
+
+    }
+
+
+    if (bookSearchInput) {
+
+        bookSearchInput.addEventListener(
+            "focus",
+            function () {
+
+                renderBookResults(
+                    this.value
+                );
+
+            }
+        );
+
+
+        bookSearchInput.addEventListener(
+            "input",
+            function () {
+
+                renderBookResults(
+                    this.value
+                );
+
+            }
+        );
+
+    }
+
+
+    if (clearBook) {
+
+        clearBook.addEventListener(
+            "click",
+            clearSelectedBook
+        );
+
+    }
+
+
+    /* =========================================================
+       انتخاب کاربر
+       ========================================================= */
+
+    const userData = [
+
+        {% for user_item in users %}
+
+            {
+                id: "{{ user_item.id }}",
+                username: "{{ user_item.username|escapejs }}",
+                fullName: "{{ user_item.get_full_name|escapejs }}",
+                phone: "{{ user_item.phone_number|default:''|escapejs }}"
+            },
+
+        {% endfor %}
+
+    ];
+
+
+    const userSearchInput =
+        document.getElementById(
+            "userSearchInput"
+        );
+
+
+    const userSearchResults =
+        document.getElementById(
+            "userSearchResults"
+        );
+
+
+    const userIdInput =
+        document.getElementById(
+            "user_id"
+        );
+
+
+    const selectedUser =
+        document.getElementById(
+            "selectedUser"
+        );
+
+
+    const selectedUserTitle =
+        document.getElementById(
+            "selectedUserTitle"
+        );
+
+
+    const selectedUserMeta =
+        document.getElementById(
+            "selectedUserMeta"
+        );
+
+
+    const clearUser =
+        document.getElementById(
+            "clearUser"
+        );
+
+
+    function renderUserResults(query) {
+
+        userSearchResults.innerHTML = "";
+
+
+        const normalizedQuery =
+            query
+                .trim()
+                .toLowerCase();
+
+
+        let results = userData;
+
+
+        if (normalizedQuery) {
+
+            results =
+                userData.filter(
+                    function (user) {
+
+                        const text =
+                            (
+                                user.username +
+                                " " +
+                                user.fullName +
+                                " " +
+                                user.phone
+                            )
+                            .toLowerCase();
+
+
+                        return text.includes(
+                            normalizedQuery
+                        );
+
+                    }
+                );
+
+        }
+
+
+        if (!results.length) {
+
+            userSearchResults.innerHTML =
+                '<div class="search-empty">کاربری پیدا نشد.</div>';
+
+            userSearchResults.classList.add(
+                "show"
+            );
+
+            return;
+
+        }
+
+
+        /*
+         * حداکثر 30 نتیجه اول
+         */
+
+        results
+            .slice(0, 30)
+            .forEach(
+                function (user) {
+
+                    const button =
+                        document.createElement(
+                            "button"
+                        );
+
+
+                    button.type =
+                        "button";
+
+
+                    button.className =
+                        "search-result-item";
+
+
+                    const title =
+                        document.createElement(
+                            "span"
+                        );
+
+
+                    title.className =
+                        "search-result-title";
+
+
+                    title.textContent =
+                        user.fullName ||
+                        user.username;
+
+
+                    const meta =
+                        document.createElement(
+                            "span"
+                        );
+
+
+                    meta.className =
+                        "search-result-meta";
+
+
+                    let metaText =
+                        user.username;
+
+
+                    if (user.phone) {
+
+                        metaText +=
+                            " — " +
+                            user.phone;
+
+                    }
+
+
+                    meta.textContent =
+                        metaText;
+
+
+                    button.appendChild(
+                        title
+                    );
+
+
+                    button.appendChild(
+                        meta
+                    );
+
+
+                    button.addEventListener(
+                        "click",
+                        function () {
+
+                            selectUser(
+                                user
+                            );
+
+                        }
+                    );
+
+
+                    userSearchResults.appendChild(
+                        button
+                    );
+
+                }
+            );
+
+
+        userSearchResults.classList.add(
+            "show"
+        );
+
+    }
+
+
+    function selectUser(user) {
+
+        userIdInput.value =
+            user.id;
+
+
+        selectedUserTitle.textContent =
+            user.fullName ||
+            user.username;
+
+
+        let meta =
+            user.username;
+
+
+        if (user.phone) {
+
+            meta +=
+                " — " +
+                user.phone;
+
+        }
+
+
+        selectedUserMeta.textContent =
+            meta;
+
+
+        selectedUser.classList.add(
+            "show"
+        );
+
+
+        userSearchInput.value =
+            "";
+
+
+        userSearchInput.placeholder =
+            "کاربر انتخاب شد";
+
+
+        userSearchResults.classList.remove(
+            "show"
+        );
+
+    }
+
+
+    function clearSelectedUser() {
+
+        userIdInput.value =
+            "";
+
+
+        selectedUser.classList.remove(
+            "show"
+        );
+
+
+        userSearchInput.value =
+            "";
+
+
+        userSearchInput.placeholder =
+            "نام، نام خانوادگی یا نام کاربری...";
+
+
+        userSearchInput.focus();
+
+    }
+
+
+    if (userSearchInput) {
+
+        userSearchInput.addEventListener(
+            "focus",
+            function () {
+
+                renderUserResults(
+                    this.value
+                );
+
+            }
+        );
+
+
+        userSearchInput.addEventListener(
+            "input",
+            function () {
+
+                renderUserResults(
+                    this.value
+                );
+
+            }
+        );
+
+    }
+
+
+    if (clearUser) {
+
+        clearUser.addEventListener(
+            "click",
+            clearSelectedUser
+        );
+
+    }
+
+
+    /* =========================================================
+       بستن نتایج با کلیک خارج از فیلد
+       ========================================================= */
+
+    document.addEventListener(
+        "click",
+        function (event) {
+
+            if (
+                !event.target.closest(
+                    ".search-select"
+                )
+            ) {
+
+                if (bookSearchResults) {
+
+                    bookSearchResults.classList.remove(
+                        "show"
+                    );
+
+                }
+
+
+                if (userSearchResults) {
+
+                    userSearchResults.classList.remove(
+                        "show"
+                    );
+
+                }
+
+            }
+
+        }
     );
+
+
+    /* =========================================================
+       جلوگیری از ثبت امانت بدون انتخاب کتاب و کاربر
+       ========================================================= */
+
+    const loanCreateForm =
+        document.getElementById(
+            "loanCreateForm"
+        );
+
+
+    if (loanCreateForm) {
+
+        loanCreateForm.addEventListener(
+            "submit",
+            function (event) {
+
+                if (!bookIdInput.value) {
+
+                    event.preventDefault();
+
+                    alert(
+                        "لطفاً ابتدا یک کتاب انتخاب کنید."
+                    );
+
+                    bookSearchInput.focus();
+
+                    return;
+
+                }
+
+
+                if (!userIdInput.value) {
+
+                    event.preventDefault();
+
+                    alert(
+                        "لطفاً ابتدا یک کاربر انتخاب کنید."
+                    );
+
+                    userSearchInput.focus();
+
+                    return;
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /* =========================================================
+       تاریخ جلالی مهلت بازگشت
+       ========================================================= */
+
+    const dueYear =
+        document.getElementById(
+            "due_year"
+        );
+
+
+    const dueMonth =
+        document.getElementById(
+            "due_month"
+        );
+
+
+    const dueDay =
+        document.getElementById(
+            "due_day"
+        );
+
+
+    function updateDueDays() {
+
+        if (!dueMonth || !dueDay) {
+            return;
+        }
+
+
+        const month =
+            Number(
+                dueMonth.value
+            );
+
+
+        let maxDay =
+            31;
+
+
+        if (
+            month >= 1 &&
+            month <= 6
+        ) {
+
+            maxDay =
+                31;
+
+        }
+
+
+        else if (
+            month >= 7 &&
+            month <= 11
+        ) {
+
+            maxDay =
+                30;
+
+        }
+
+
+        else if (
+            month === 12
+        ) {
+
+            maxDay =
+                30;
+
+        }
+
+
+        const oldValue =
+            dueDay.value;
+
+
+        dueDay.innerHTML =
+            "";
+
+
+        const firstOption =
+            document.createElement(
+                "option"
+            );
+
+
+        firstOption.value =
+            "";
+
+
+        firstOption.textContent =
+            "روز";
+
+
+        dueDay.appendChild(
+            firstOption
+        );
+
+
+        for (
+            let day = 1;
+            day <= maxDay;
+            day++
+        ) {
+
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+
+            option.value =
+                day;
+
+
+            option.textContent =
+                toPersianDigits(
+                    day
+                );
+
+
+            dueDay.appendChild(
+                option
+            );
+
+        }
+
+
+        if (
+            oldValue &&
+            Number(oldValue) <= maxDay
+        ) {
+
+            dueDay.value =
+                oldValue;
+
+        }
+
+    }
+
+
+    if (dueMonth) {
+
+        dueMonth.addEventListener(
+            "change",
+            updateDueDays
+        );
+
+    }
+
+
+    if (dueYear) {
+
+        dueYear.addEventListener(
+            "change",
+            updateDueDays
+        );
+
+    }
+
+
+    updateDueDays();
+
+
+    /* =========================================================
+       جستجوی تاریخچه
+       ========================================================= */
+
+    const searchInput =
+        document.getElementById(
+            "loanSearch"
+        );
+
+
+    const rows =
+        document.querySelectorAll(
+            ".loan-row"
+        );
+
+
+    if (searchInput) {
+
+        searchInput.addEventListener(
+            "input",
+            function () {
+
+                const query =
+                    this.value
+                    .trim()
+                    .toLowerCase();
+
+
+                rows.forEach(
+                    function (row) {
+
+                        const text =
+                            row.innerText
+                            .toLowerCase();
+
+
+                        if (
+                            text.includes(
+                                query
+                            )
+                        ) {
+
+                            row.style.display =
+                                "";
+
+                        }
+
+                        else {
+
+                            row.style.display =
+                                "none";
+
+                        }
+
+                    }
+                );
+
+            }
+        );
+
+    }
+
+
+    /* =========================================================
+       تأیید برگشت کتاب
+       ========================================================= */
+
+    function confirmReturn() {
+
+        return confirm(
+            "آیا مطمئن هستید که می‌خواهید بازگشت این کتاب را ثبت کنید؟"
+        );
+
+    }
+
+
+    /* =========================================================
+       چاپ سوابق امانت
+       ========================================================= */
+
+    function printLoans() {
+
+        const hiddenRows = [];
+
+
+        rows.forEach(
+            function (row) {
+
+                if (
+                    row.style.display === "none"
+                ) {
+
+                    hiddenRows.push(
+                        row
+                    );
+
+                    row.style.display =
+                        "";
+
+                }
+
+            }
+        );
+
+
+        setTimeout(
+            function () {
+
+                window.print();
+
+
+                setTimeout(
+                    function () {
+
+                        hiddenRows.forEach(
+                            function (row) {
+
+                                row.style.display =
+                                    "none";
+
+                            }
+                        );
+
+                    },
+                    500
+                );
+
+            },
+            100
+        );
+
+    }
 
 </script>
 

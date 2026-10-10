@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>کارت عضویت کتابخانه</title>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap');
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 30px;
+            background: #f1f3f6;
+            color: #17243b;
+            font-family: 'Vazirmatn', Tahoma, sans-serif;
+        }
+
+        .page {
+            max-width: 780px;
+            margin: 0 auto;
+        }
+
+        .membership-card {
+            overflow: hidden;
+            background: #fff;
+            border: 1px solid #e0e5ed;
+            border-radius: 18px;
+            box-shadow: 0 12px 35px rgba(20, 35, 60, .12);
+        }
+
+        .card-header {
+            padding: 24px 28px;
+            background: #172b4d;
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .library-name {
+            font-size: 21px;
+            font-weight: 800;
+        }
+
+        .card-subtitle {
+            margin-top: 6px;
+            font-size: 12px;
+            color: #d6deeb;
+        }
+
+        .header-label {
+            padding: 8px 12px;
+            border: 1px solid rgba(255,255,255,.4);
+            border-radius: 8px;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .card-body {
+            padding: 28px;
+        }
+
+        .member-section {
+            display: flex;
+            align-items: flex-start;
+            gap: 24px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid #e8ecf2;
+        }
+
+        .profile-image,
+        .profile-placeholder {
+            width: 125px;
+            height: 150px;
+            flex-shrink: 0;
+            border-radius: 12px;
+            border: 2px solid #e0e5ed;
+        }
+
+        .profile-image {
+            object-fit: cover;
+            background: #f3f5f8;
+        }
+
+        .profile-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f3f5f8;
+            color: #758198;
+            font-size: 13px;
+        }
+
+        .member-details {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .member-name {
+            margin: 0 0 18px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f0a43a;
+            font-size: 23px;
+            font-weight: 800;
+            overflow-wrap: anywhere;
+        }
+
+        .section-title {
+            margin: 24px 0 15px;
+            font-size: 16px;
+            font-weight: 800;
+            color: #172b4d;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .detail-item {
+            min-width: 0;
+            padding: 13px 14px;
+            background: #f7f8fa;
+            border: 1px solid #edf0f4;
+            border-radius: 10px;
+        }
+
+        .detail-label {
+            display: block;
+            margin-bottom: 6px;
+            color: #6b7587;
+            font-size: 12px;
+        }
+
+        .detail-value {
+            display: block;
+            color: #17243b;
+            font-size: 14px;
+            font-weight: 600;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+
+        .member-number {
+            margin-top: 24px;
+            padding: 16px;
+            background: #f5f7fa;
+            border: 1px dashed #b8c3d3;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .number-label {
+            color: #6b7587;
+            font-size: 13px;
+        }
+
+        .number-value {
+            color: #172b4d;
+            font-size: 21px;
+            font-weight: 800;
+            direction: ltr;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+        }
+
+        .status-active {
+            background: #e1f5e8;
+            color: #17683a;
+        }
+
+        .status-inactive {
+            background: #fde8e7;
+            color: #a52722;
+        }
+
+        .card-footer {
+            padding: 15px 28px;
+            background: #f8f9fb;
+            border-top: 1px solid #e8ecf2;
+            color: #758198;
+            font-size: 11px;
+            line-height: 2;
+            text-align: center;
+        }
+
+        .actions {
+            margin-top: 22px;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 11px 22px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .btn-print {
+            background: #172b4d;
+            color: #fff;
+        }
+
+        .btn-back {
+            background: #e3e8ef;
+            color: #17243b;
+        }
+
+        @media (max-width: 560px) {
+            body {
+                padding: 12px;
+            }
+
+            .card-header,
+            .card-body {
+                padding: 18px;
+            }
+
+            .member-section {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .member-details {
+                width: 100%;
+            }
+
+            .member-name {
+                font-size: 20px;
+            }
+
+            .details-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media print {
+            @page {
+                size: A5 portrait;
+                margin: 8mm;
+            }
+
+            body {
+                padding: 0;
+                background: #fff;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .page {
+                max-width: none;
+            }
+
+            .membership-card {
+                box-shadow: none;
+                break-inside: avoid;
+            }
+
+            .actions {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<main class="page">
+    <section class="membership-card">
+
+        <header class="card-header">
+            <div>
+                <div class="library-name">کتابخانه پارک علم و فناوری</div>
+                <div class="card-subtitle">کارت شناسایی و عضویت کتابخانه</div>
+            </div>
+            <div class="header-label">کارت عضویت</div>
+        </header>
+
+        <div class="card-body">
+
+            <section class="member-section">
+                <div>
+                    {% if card_user.profile_image %}
+                        <img
+                            class="profile-image"
+                            src="{{ card_user.profile_image.url }}"
+                            alt="تصویر عضو"
+                        >
+                    {% else %}
+                        <div class="profile-placeholder">بدون تصویر</div>
+                    {% endif %}
+                </div>
+
+                <div class="member-details">
+                    <h1 class="member-name">
+                        {% if card_user.get_full_name %}
+                            {{ card_user.get_full_name }}
+                        {% else %}
+                            {{ card_user.username }}
+                        {% endif %}
+                    </h1>
+
+                    <div class="detail-item">
+                        <span class="detail-label">نام کاربری</span>
+                        <span class="detail-value">
+                            {{ card_user.username|default:"ثبت نشده" }}
+                        </span>
+                    </div>
+                </div>
+            </section>
+
+            <h2 class="section-title">اطلاعات عمومی عضو</h2>
+
+            <div class="details-grid">
+
+                {% if card_user.first_name %}
+                    <div class="detail-item">
+                        <span class="detail-label">نام</span>
+                        <span class="detail-value">{{ card_user.first_name }}</span>
+                    </div>
+                {% endif %}
+
+                {% if card_user.last_name %}
+                    <div class="detail-item">
+                        <span class="detail-label">نام خانوادگی</span>
+                        <span class="detail-value">{{ card_user.last_name }}</span>
+                    </div>
+                {% endif %}
+
+                {% if card_user.email %}
+                    <div class="detail-item">
+                        <span class="detail-label">ایمیل</span>
+                        <span class="detail-value">{{ card_user.email }}</span>
+                    </div>
+                {% endif %}
+
+                {% if card_user.date_joined %}
+                    <div class="detail-item">
+                        <span class="detail-label">تاریخ ثبت‌نام در سامانه</span>
+                        <span class="detail-value">
+                            {{ card_user.date_joined|date:"Y/m/d" }}
+                        </span>
+                    </div>
+                {% endif %}
+
+                <div class="detail-item">
+                    <span class="detail-label">وضعیت حساب</span>
+                    <span class="detail-value">
+                        {% if card_user.is_active %}
+                            <span class="status status-active">فعال</span>
+                        {% else %}
+                            <span class="status status-inactive">غیرفعال</span>
+                        {% endif %}
+                    </span>
+                </div>
+
+                {% if card_user.is_staff %}
+                    <div class="detail-item">
+                        <span class="detail-label">نوع دسترسی</span>
+                        <span class="detail-value">کارمند سامانه</span>
+                    </div>
+                {% endif %}
+
+            </div>
+
+            <h2 class="section-title">اطلاعات کارت عضویت</h2>
+
+            <div class="member-number">
+                <span class="number-label">شماره عضویت</span>
+                <span class="number-value">{{ card_user.pk }}</span>
+            </div>
+
+        </div>
+
+        <footer class="card-footer">
+            این کارت برای شناسایی عضو در سامانه کتابخانه صادر شده است.
+            <br>
+            اطلاعات نمایش‌داده‌شده متعلق به حساب انتخاب‌شده در پنل مدیریت است.
+        </footer>
+
+    </section>
+
+    <div class="actions">
+        <button class="btn btn-print" onclick="window.print()">
+            چاپ کارت
+        </button>
+        <button class="btn btn-back" onclick="window.close()">
+            بستن صفحه
+        </button>
+    </div>
+</main>
+</body>
+</html>

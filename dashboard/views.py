@@ -18,6 +18,10 @@ from accounts.forms import (
 from openpyxl import Workbook
 from django.http import HttpResponse
 from datetime import timedelta
+
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
+from django.template.loader import get_template
 User = get_user_model()
 
 
@@ -571,12 +575,14 @@ def print_books(request):
     )
 
 
+
 @permission_required("blog.manage_books")
 def add_book(request):
     if request.method == "POST":
         title = request.POST.get("title", "").strip()
         isbn = request.POST.get("isbn", "").strip()
         subject_name = request.POST.get("subject", "").strip()
+        category_id = request.POST.get("category", "").strip()
         location_id = request.POST.get("location", "").strip()
         publisher_name = request.POST.get("publisher", "").strip()
         description = request.POST.get("description", "").strip()
@@ -627,9 +633,20 @@ def add_book(request):
         if not subject_name:
             return render_form_error("موضوع کتاب را وارد کنید.")
 
+        category = None
+        if category_id:
+            category = Category.objects.filter(
+                pk=category_id
+            ).first()
+
+            if category is None:
+                return render_form_error(
+                    "دسته‌بندی انتخاب‌شده معتبر نیست. دوباره انتخاب کنید."
+                )
+
         if not location_id:
             return render_form_error(
-                "دسته‌بندی یا محل قفسه کتاب را انتخاب کنید."
+                "محل قفسه کتاب را انتخاب کنید."
             )
 
         if not publisher_name:
@@ -688,6 +705,7 @@ def add_book(request):
                 subject=subject,
                 publisher=publisher,
                 publication_year=publication_year,
+                category=category,
                 location=location,
                 description=description,
                 cover=cover,
@@ -734,6 +752,8 @@ def add_book(request):
 
 
 
+
+
 @permission_required("blog.manage_books")
 def edit_book(request, pk):
     book = get_object_or_404(
@@ -753,6 +773,7 @@ def edit_book(request, pk):
         title = request.POST.get("title", "").strip()
         isbn = request.POST.get("isbn", "").strip()
         subject_name = request.POST.get("subject", "").strip()
+        category_id = request.POST.get("category", "").strip()
         location_id = request.POST.get("location", "").strip()
         publisher_name = request.POST.get("publisher", "").strip()
         description = request.POST.get("description", "").strip()
@@ -809,9 +830,20 @@ def edit_book(request, pk):
         if not subject_name:
             return render_form_error("موضوع کتاب را وارد کنید.")
 
+        category = None
+        if category_id:
+            category = Category.objects.filter(
+                pk=category_id
+            ).first()
+
+            if category is None:
+                return render_form_error(
+                    "دسته‌بندی انتخاب‌شده معتبر نیست. دوباره انتخاب کنید."
+                )
+
         if not location_id:
             return render_form_error(
-                "دسته‌بندی یا محل قفسه کتاب را انتخاب کنید."
+                "محل قفسه کتاب را انتخاب کنید."
             )
 
         if not publisher_name:
@@ -881,6 +913,7 @@ def edit_book(request, pk):
             book.subject = subject
             book.publisher = publisher
             book.publication_year = publication_year
+            book.category = category
             book.location = location
             book.description = description
             book.total_copies = total_copies
@@ -1110,34 +1143,45 @@ def edit_category(request, pk):
     )
 
 
+
 @permission_required("blog.manage_categories")
 def delete_category(request, pk):
     category = get_object_or_404(Category, pk=pk)
 
-    if request.method != "POST":
+    if request.method == "POST":
+        category_name = category.name
+        category_id = category.pk
+
+        try:
+            category.delete()
+        except Exception:
+            messages.error(
+                request,
+                "حذف دسته‌بندی انجام نشد. ممکن است این دسته‌بندی "
+                "به اطلاعات دیگری وابسته باشد."
+            )
+            return redirect("manage_categories")
+
+        log_activity(
+            request=request,
+            action=ActivityLog.ACTION_DELETE,
+            section="دسته‌بندی‌ها",
+            description=f"دسته‌بندی «{category_name}» حذف شد.",
+            object_id=category_id,
+        )
+
+        messages.success(
+            request,
+            "دسته‌بندی با موفقیت حذف شد."
+        )
         return redirect("manage_categories")
 
-    category_name = category.name
-    category_id = category.pk
-
-    category.delete()
-
-    log_activity(
-        request=request,
-        action=ActivityLog.ACTION_DELETE,
-        section="دسته‌بندی‌ها",
-        description=(
-            f"دسته‌بندی «{category_name}» حذف شد."
-        ),
-        object_id=category_id,
-    )
-
-    messages.success(
+    return render(
         request,
-        "دسته‌بندی با موفقیت حذف شد."
+        "dashboard/category_delete.html",
+        {"category": category},
     )
 
-    return redirect("manage_categories")
 
 
 # =========================================================
@@ -1880,21 +1924,31 @@ def manage_users(request):
     )
 
 
-@permission_required("accounts.change_user")
-def edit_user(request, pk):
-    user = get_object_or_404(
-        User,
-        pk=pk
+
+@login_required
+def print_user_card(request, pk):
+    if not request.user.is_staff and not request.user.is_superuser:
+        raise PermissionDenied
+
+    card_user = get_object_or_404(User, pk=pk)
+
+    return render(
+        request,
+        "accounts/membership_card_selected.html",
+        {
+            "card_user": card_user,
+        },
     )
 
-    # مدیر کاربران اجازه دستکاری مدیر سیستم را ندارد.
+@permission_required("accounts.change_user")
+def edit_user(request, pk):
+    user = get_object_or_404(User, pk=pk)
 
     if user.is_superuser and not request.user.is_superuser:
         messages.error(
             request,
             "شما اجازه ویرایش مدیر سیستم را ندارید."
         )
-
         return redirect("manage_users")
 
     can_manage_roles = request.user.has_perm(
@@ -1902,186 +1956,108 @@ def edit_user(request, pk):
     )
 
     if request.method == "POST":
-        roles_changed = False
-
-        username = request.POST.get(
-            "username",
-            ""
-        ).strip()
-
-        phone_number = request.POST.get(
-            "phone_number",
-            ""
-        ).strip()
-
-        first_name = request.POST.get(
-            "first_name",
-            ""
-        ).strip()
-
-        last_name = request.POST.get(
-            "last_name",
-            ""
-        ).strip()
-
-        password = request.POST.get(
-            "password",
-            ""
+        username = request.POST.get("username", "").strip()
+        phone_number = normalize_digits(
+            request.POST.get("phone_number", "").strip()
         )
-
-        is_active = (
-            request.POST.get("is_active") == "on"
+        first_name = request.POST.get("first_name", "").strip()
+        last_name = request.POST.get("last_name", "").strip()
+        father_name = request.POST.get("father_name", "").strip()
+        national_code = normalize_digits(
+            request.POST.get("national_code", "").strip()
         )
+        birth_date = request.POST.get("birth_date", "").strip()
+        home_address = request.POST.get("home_address", "").strip()
+        password = request.POST.get("password", "")
+        is_active = request.POST.get("is_active") == "on"
 
-        # -----------------------------------------
+        def form_error(message):
+            messages.error(request, message)
+            return redirect("edit_user", pk=user.pk)
+
         # اعتبارسنجی نام کاربری
-        # -----------------------------------------
-
         if not username:
-            messages.error(
-                request,
-                "نام کاربری نمی‌تواند خالی باشد."
-            )
+            return form_error("نام کاربری نمی‌تواند خالی باشد.")
 
-            return redirect(
-                "edit_user",
-                pk=user.pk
-            )
+        if User.objects.filter(username=username).exclude(pk=user.pk).exists():
+            return form_error("این نام کاربری قبلاً استفاده شده است.")
 
-        username_exists = (
-            User.objects
-            .filter(username=username)
-            .exclude(pk=user.pk)
-            .exists()
-        )
-
-        if username_exists:
-            messages.error(
-                request,
-                "این نام کاربری قبلاً استفاده شده است."
-            )
-
-            return redirect(
-                "edit_user",
-                pk=user.pk
-            )
-
-        # -----------------------------------------
         # اعتبارسنجی شماره موبایل
-        # -----------------------------------------
+        if phone_number:
+            if len(phone_number) != 11 or not phone_number.isdigit():
+                return form_error("شماره موبایل باید ۱۱ رقم باشد.")
 
-        if not phone_number:
-            messages.error(
-                request,
-                "شماره موبایل نمی‌تواند خالی باشد."
-            )
+            if User.objects.filter(
+                phone_number=phone_number
+            ).exclude(pk=user.pk).exists():
+                return form_error(
+                    "این شماره موبایل قبلاً ثبت شده است."
+                )
 
-            return redirect(
-                "edit_user",
-                pk=user.pk
-            )
+        # اعتبارسنجی کد ملی
+        if national_code:
+            if len(national_code) != 10 or not national_code.isdigit():
+                return form_error("کد ملی باید ۱۰ رقم باشد.")
 
-        if len(phone_number) != 11 or not phone_number.isdigit():
-            messages.error(
-                request,
-                "شماره موبایل باید ۱۱ رقم باشد."
-            )
+            if User.objects.filter(
+                national_code=national_code
+            ).exclude(pk=user.pk).exists():
+                return form_error(
+                    "این کد ملی قبلاً برای کاربر دیگری ثبت شده است."
+                )
 
-            return redirect(
-                "edit_user",
-                pk=user.pk
-            )
+        # اعتبارسنجی تاریخ تولد
+        if birth_date:
+            try:
+                from datetime import date
+                birth_date_value = date.fromisoformat(birth_date)
+            except ValueError:
+                return form_error(
+                    "تاریخ تولد معتبر نیست."
+                )
+        else:
+            birth_date_value = None
 
-        phone_exists = (
-            User.objects
-            .filter(phone_number=phone_number)
-            .exclude(pk=user.pk)
-            .exists()
-        )
-
-        if phone_exists:
-            messages.error(
-                request,
-                "این شماره موبایل قبلاً برای کاربر دیگری ثبت شده است."
-            )
-
-            return redirect(
-                "edit_user",
-                pk=user.pk
-            )
-
-        # -----------------------------------------
-        # اطلاعات عمومی
-        # -----------------------------------------
-
+        # ذخیره اطلاعات کاربر
         user.username = username
-        user.phone_number = phone_number
+        user.phone_number = phone_number or None
         user.first_name = first_name
         user.last_name = last_name
+        user.father_name = father_name or None
+        user.national_code = national_code or None
+        user.birth_date = birth_date_value
+        user.home_address = home_address or None
 
-        # -----------------------------------------
-        # وضعیت فعال بودن
-        # -----------------------------------------
-
-        if user.pk == request.user.pk:
+        if user.pk == request.user.pk or user.is_superuser:
             user.is_active = True
-
-        elif user.is_superuser:
-            user.is_active = True
-
         else:
             user.is_active = is_active
 
-        # -----------------------------------------
-        # تصویر پروفایل
-        # -----------------------------------------
-
-        profile_image = request.FILES.get(
-            "profile_image"
-        )
-
+        profile_image = request.FILES.get("profile_image")
         if profile_image:
             user.profile_image = profile_image
-
-        # -----------------------------------------
-        # رمز عبور
-        # -----------------------------------------
 
         if password:
             user.set_password(password)
 
-        # -----------------------------------------
-        # نقش‌ها
-        # -----------------------------------------
+        # حفظ نقش‌ها با همان منطق قبلی
+        roles_changed = False
 
         if can_manage_roles and user.pk != request.user.pk:
-            selected_roles = request.POST.getlist(
-                "roles"
-            )
-
-            # فقط Superuser اجازه اختصاص نقش مدیر سیستم را دارد.
+            selected_roles = request.POST.getlist("roles")
 
             if (
                 "system" in selected_roles
                 and not request.user.is_superuser
             ):
                 selected_roles.remove("system")
-
                 messages.warning(
                     request,
-                    "نقش «مدیر سیستم» فقط توسط مدیر اصلی قابل اختصاص است."
+                    "نقش مدیر سیستم فقط توسط مدیر اصلی قابل اختصاص است."
                 )
 
-            set_user_roles(
-                user,
-                selected_roles
-            )
-
+            set_user_roles(user, selected_roles)
             roles_changed = True
-
-        # -----------------------------------------
-        # ذخیره اطلاعات
-        # -----------------------------------------
 
         user.save()
 
@@ -2091,7 +2067,7 @@ def edit_user(request, pk):
             section="کاربران",
             description=(
                 f"اطلاعات کاربر «{user.get_full_name() or user.username}» "
-                f"با نام کاربری «{user.username}» ویرایش شد."
+                "ویرایش شد."
             ),
             object_id=user.pk,
         )
@@ -2103,7 +2079,7 @@ def edit_user(request, pk):
                 section="نقش‌های کاربران",
                 description=(
                     f"نقش‌های کاربر «{user.get_full_name() or user.username}» "
-                    f"توسط «{request.user.get_full_name() or request.user.username}» تغییر کرد."
+                    "تغییر کرد."
                 ),
                 object_id=user.pk,
             )
@@ -2112,14 +2088,11 @@ def edit_user(request, pk):
             request,
             "اطلاعات کاربر با موفقیت ویرایش شد."
         )
-
         return redirect("manage_users")
-
-    current_roles = get_user_roles(user)
 
     context = {
         "user_obj": user,
-        "current_roles": current_roles,
+        "current_roles": get_user_roles(user),
         "role_choices": ROLE_CHOICES,
         "can_manage_roles": can_manage_roles,
     }
@@ -2127,7 +2100,7 @@ def edit_user(request, pk):
     return render(
         request,
         "dashboard/user_form.html",
-        context
+        context,
     )
 
 

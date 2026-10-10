@@ -52,4 +52,11 @@ urlpatterns = [
         views.export_support_excel,
         name="export_support_excel",
     ),
+
+    path(
+        "users/<int:pk>/membership-card/",
+        views.print_user_card,
+        name="print_user_card",
+    ),
+
 ]

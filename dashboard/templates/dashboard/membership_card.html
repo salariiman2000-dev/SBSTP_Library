@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>کارت عضویت کتابخانه</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 30px;
+            background: #f1f2f4;
+            color: #17243d;
+            font-family: Tahoma, Arial, sans-serif;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .print-button {
+            border: 0;
+            border-radius: 8px;
+            padding: 12px 24px;
+            background: #17243d;
+            color: #fff;
+            font-family: inherit;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .print-button:hover {
+            background: #263b5e;
+        }
+
+        .card {
+            position: relative;
+            width: 85.6mm;
+            height: 54mm;
+            margin: 0 auto;
+            padding: 5mm;
+            overflow: hidden;
+            border: 1px solid #d9a441;
+            border-radius: 3mm;
+            background: #fff;
+            box-shadow: 0 8px 28px rgba(0, 0, 0, .12);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-bottom: 3mm;
+            border-bottom: 1px solid #e7d6b4;
+        }
+
+        .logo {
+            width: 12mm;
+            height: 12mm;
+            flex-shrink: 0;
+            object-fit: contain;
+        }
+
+        .logo-placeholder {
+            width: 12mm;
+            height: 12mm;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #e7d6b4;
+            border-radius: 50%;
+            color: #b78020;
+            font-size: 7px;
+            text-align: center;
+        }
+
+        .library-name {
+            font-size: 10px;
+            font-weight: bold;
+            line-height: 1.8;
+        }
+
+        .card-subtitle {
+            margin-top: 1px;
+            color: #9b742e;
+            font-size: 8px;
+        }
+
+        .card-body {
+            display: flex;
+            gap: 4mm;
+            padding-top: 4mm;
+        }
+
+        .profile {
+            width: 22mm;
+            height: 27mm;
+            flex-shrink: 0;
+            overflow: hidden;
+            border: 1px solid #d9a441;
+            border-radius: 2mm;
+            background: #f7f4ed;
+        }
+
+        .profile img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #8d8d8d;
+            font-size: 9px;
+        }
+
+        .details {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .card-title {
+            margin-bottom: 3mm;
+            color: #a87925;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .detail-row {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 2.1mm;
+            font-size: 8px;
+            line-height: 1.5;
+        }
+
+        .detail-label {
+            flex-shrink: 0;
+            color: #6c7480;
+        }
+
+        .detail-value {
+            min-width: 0;
+            overflow-wrap: anywhere;
+            font-weight: bold;
+        }
+
+        .card-footer {
+            position: absolute;
+            right: 5mm;
+            bottom: 2.5mm;
+            left: 5mm;
+            display: flex;
+            justify-content: space-between;
+            padding-top: 1.5mm;
+            border-top: 1px solid #e7d6b4;
+            color: #777;
+            font-size: 7px;
+        }
+
+        @page {
+            size: 90mm 60mm;
+            margin: 2mm;
+        }
+
+        @media print {
+            html, body {
+                width: 90mm;
+                height: 60mm;
+                margin: 0;
+                padding: 0;
+                background: #fff;
+            }
+
+            .toolbar {
+                display: none !important;
+            }
+
+            .card {
+                margin: 1mm auto;
+                box-shadow: none;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <p style="display:none">
+        DEBUG: {{ card_user.pk }} - {{ card_user.username }}
+    </p>
+
+    <div class="toolbar">
+        <button class="print-button" type="button" onclick="window.print()">
+            چاپ کارت
+        </button>
+    </div>
+
+    <main class="card">
+        <header class="card-header">
+            {% if library_logo_url %}
+                <img class="logo" src="{{ library_logo_url }}" alt="لوگوی کتابخانه">
+            {% else %}
+                <div class="logo-placeholder">کتابخانه</div>
+            {% endif %}
+
+            <div>
+                <div class="library-name">کتابخانه پارک علم و فناوری</div>
+                <div class="card-subtitle">کارت شناسایی و عضویت کتابخانه</div>
+            </div>
+        </header>
+
+        <section class="card-body">
+            <div class="profile">
+                {% if card_user.profile_image %}
+                    <img src="{{ card_user.profile_image.url }}" alt="تصویر عضو">
+                {% else %}
+                    <div class="profile-placeholder">بدون تصویر</div>
+                {% endif %}
+            </div>
+
+            <div class="details">
+                <div class="card-title">کارت عضویت</div>
+
+                <div class="detail-row">
+                    <span class="detail-label">نام و نام خانوادگی:</span>
+                    <span class="detail-value">
+                        {{ card_user.get_full_name|default:card_user.username }}
+                    </span>
+                </div>
+
+                <div class="detail-row">
+                    <span class="detail-label">شماره عضویت:</span>
+                    <span class="detail-value">{{ card_user.pk }}</span>
+                </div>
+
+                <div class="detail-row">
+                    <span class="detail-label">شماره همراه:</span>
+                    <span class="detail-value">{{ card_user.phone_number|default:"—" }}</span>
+                </div>
+
+                <div class="detail-row">
+                    <span class="detail-label">نام پدر:</span>
+                    <span class="detail-value">{{ card_user.father_name|default:"—" }}</span>
+                </div>
+            </div>
+        </section>
+
+        <footer class="card-footer">
+            <span>کارت عضویت کتابخانه</span>
+            <span>شماره: {{ card_user.pk }}</span>
+        </footer>
+    </main>
+</body>
+</html>

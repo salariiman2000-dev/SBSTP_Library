@@ -1247,6 +1247,11 @@
 
                                     </form>
 
+                                    <a href="{% url 'print_user_card' user.pk %}" target="_blank">
+                                        چاپ کارت عضویت
+                                    </a>
+
+
                                     <form
                                         method="post"
                                         action="{% url 'delete_user' user.pk %}"

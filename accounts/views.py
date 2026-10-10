@@ -8,20 +8,12 @@ from django.contrib.auth import (
 from django.contrib.auth.decorators import (
     login_required,
 )
-from django.contrib.auth.views import (
-    PasswordChangeView,
-)
-from django.shortcuts import (
-    redirect,
-    render,
-)
+from django.contrib.auth.views import *
+from django.shortcuts import *
 from django.urls import reverse_lazy
 
-from blog.models import (
-    Loan,
-    Favorite,
-)
-
+from blog.models import *
+from accounts.forms import AdminUserCreateForm
 from .forms import (
     PhoneRegisterForm,
     OTPForm,
@@ -407,14 +399,3 @@ def verify_otp_view(request):
         },
     )
 
-
-
-@login_required
-def membership_card_view(request):
-    return render(
-        request,
-        "accounts/membership_card.html",
-        {
-            "user": request.user,
-        },
-    )

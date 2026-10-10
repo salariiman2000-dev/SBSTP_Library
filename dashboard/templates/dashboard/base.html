@@ -1,11 +1,9 @@
 {% load static %}
 
 <!DOCTYPE html>
-
 <html lang="fa" dir="rtl">
 
 <head>
-
     <meta charset="UTF-8">
 
     <meta
@@ -19,8 +17,11 @@
         {% endblock %}
     </title>
 
-
     <style>
+
+        /* =====================================================
+           FONTS
+        ===================================================== */
 
         @font-face {
             font-family: "B Nazanin";
@@ -39,8 +40,11 @@
         }
 
 
-        :root {
+        /* =====================================================
+           VARIABLES
+        ===================================================== */
 
+        :root {
             --bg: #f6f4ef;
             --surface: #ffffff;
             --surface-soft: #faf8f3;
@@ -64,12 +68,16 @@
                 0 8px 30px rgba(23, 35, 60, 0.06);
 
             --radius: 16px;
+
             --sidebar-width: 268px;
         }
 
 
-        body.dark-mode {
+        /* =====================================================
+           DARK MODE
+        ===================================================== */
 
+        body.dark-mode {
             --bg: #101722;
             --surface: #172131;
             --surface-soft: #1d293b;
@@ -94,20 +102,21 @@
         }
 
 
+        /* =====================================================
+           RESET
+        ===================================================== */
+
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
 
-
         html {
             scroll-behavior: smooth;
         }
 
-
         body {
-
             font-family:
                 "B Nazanin",
                 Tahoma,
@@ -122,32 +131,29 @@
             line-height: 1.9;
 
             transition:
-                background .2s ease,
-                color .2s ease;
-
+                background 0.2s ease,
+                color 0.2s ease;
+        }
 
         a {
             color: inherit;
             text-decoration: none;
         }
 
-
         button,
         input,
         select,
         textarea {
-
             font-family: inherit;
             font-size: inherit;
         }
 
 
-        /* =========================
+        /* =====================================================
            SIDEBAR
-        ========================= */
+        ===================================================== */
 
         .sidebar {
-
             position: fixed;
 
             top: 0;
@@ -168,13 +174,16 @@
             scrollbar-width: thin;
 
             scrollbar-color:
-                rgba(255, 255, 255, .15)
+                rgba(255, 255, 255, 0.15)
                 transparent;
         }
 
 
-        .sidebar-brand {
+        /* =====================================================
+           BRAND
+        ===================================================== */
 
+        .sidebar-brand {
             display: flex;
             align-items: center;
 
@@ -187,12 +196,10 @@
 
             border-bottom:
                 1px solid
-                rgba(255, 255, 255, .08);
+                rgba(255, 255, 255, 0.08);
         }
 
-
         .sidebar-brand img {
-
             width: 45px;
             height: 45px;
 
@@ -207,9 +214,7 @@
             padding: 4px;
         }
 
-
         .sidebar-brand-text {
-
             display: flex;
             flex-direction: column;
 
@@ -218,26 +223,25 @@
             min-width: 0;
         }
 
-
         .sidebar-brand-text strong {
-
             color: white;
 
             font-size: 18px;
             font-weight: 800;
         }
 
-
         .sidebar-brand-text span {
-
             color: #aeb8c8;
 
             font-size: 14px;
         }
 
 
-        .sidebar-menu {
+        /* =====================================================
+           SIDEBAR MENU
+        ===================================================== */
 
+        .sidebar-menu {
             display: flex;
             flex-direction: column;
 
@@ -245,8 +249,11 @@
         }
 
 
-        .sidebar-link {
+        /* =====================================================
+           NORMAL SIDEBAR LINK
+        ===================================================== */
 
+        .sidebar-link {
             position: relative;
 
             display: flex;
@@ -266,14 +273,12 @@
             font-weight: 600;
 
             transition:
-                background .2s ease,
-                color .2s ease,
-                transform .2s ease;
+                background 0.2s ease,
+                color 0.2s ease,
+                transform 0.2s ease;
         }
 
-
         .sidebar-link > span:first-child {
-
             width: 22px;
 
             flex-shrink: 0;
@@ -285,9 +290,7 @@
             line-height: 1;
         }
 
-
         .sidebar-link:hover {
-
             background: var(--sidebar-soft);
 
             color: white;
@@ -295,16 +298,18 @@
             transform: translateX(-1px);
         }
 
-
         .sidebar-link.active {
             background: var(--sidebar-soft);
+
             color: #ffffff;
 
-            border-right: 4px solid var(--primary);
+            border-right:
+                4px solid
+                var(--primary);
 
             box-shadow:
-                inset 0 0 0 1px rgba(255, 255, 255, .05),
-                0 8px 20px rgba(0, 0, 0, .10);
+                inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+                0 8px 20px rgba(0, 0, 0, 0.10);
 
             font-weight: 800;
         }
@@ -313,13 +318,198 @@
             color: var(--primary);
         }
 
-        .sidebar-link.active:hover {
-            background: var(--sidebar-soft);
-            color: #ffffff;
+
+        /* =====================================================
+           TREE
+        ===================================================== */
+
+        .sidebar-tree {
+            display: flex;
+            flex-direction: column;
+
+            gap: 3px;
         }
 
-        .loan-badge {
+        .sidebar-tree.open .sidebar-tree-children {
+            display: flex;
+        }
 
+        .sidebar-tree.open .tree-arrow {
+            transform: rotate(-90deg);
+        }
+
+
+        /* =====================================================
+           TREE HEADER
+        ===================================================== */
+
+        .sidebar-tree-header {
+            position: relative;
+
+            display: flex;
+            align-items: center;
+
+            width: 100%;
+            min-height: 48px;
+
+            padding: 0 14px;
+
+            border: none;
+            border-radius: 11px;
+
+            background: transparent;
+
+            color: var(--text-sidebar);
+
+            font-family: inherit;
+
+            font-size: 16px;
+            font-weight: 700;
+
+            cursor: pointer;
+
+            text-align: right;
+
+            transition:
+                background 0.2s ease,
+                color 0.2s ease;
+        }
+
+        .sidebar-tree-header:hover {
+            background: var(--sidebar-soft);
+            color: white;
+        }
+
+        .sidebar-tree-header.active-parent {
+            background: var(--sidebar-soft);
+
+            color: white;
+
+            font-weight: 800;
+        }
+
+        .tree-icon {
+            width: 22px;
+
+            flex-shrink: 0;
+
+            text-align: center;
+
+            font-size: 20px;
+
+            line-height: 1;
+        }
+
+        .tree-title {
+            flex: 1;
+
+            margin-right: 12px;
+
+            text-align: right;
+        }
+
+        .tree-arrow {
+            width: 22px;
+            height: 22px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 20px;
+
+            transition:
+                transform 0.2s ease;
+        }
+
+
+        /* =====================================================
+           TREE CHILDREN
+        ===================================================== */
+
+        .sidebar-tree-children {
+            display: none;
+
+            flex-direction: column;
+
+            gap: 3px;
+
+            margin-right: 18px;
+
+            padding-right: 12px;
+
+            border-right:
+                1px solid
+                rgba(255, 255, 255, 0.10);
+        }
+
+        .sidebar-tree-link {
+            position: relative;
+
+            display: flex;
+            align-items: center;
+
+            min-height: 42px;
+
+            padding: 0 12px;
+
+            border-radius: 9px;
+
+            color: #bfc9d9;
+
+            font-size: 15px;
+            font-weight: 600;
+
+            transition:
+                background 0.2s ease,
+                color 0.2s ease,
+                transform 0.2s ease;
+        }
+
+        .sidebar-tree-link::before {
+            content: "";
+
+            width: 6px;
+            height: 6px;
+
+            flex-shrink: 0;
+
+            margin-left: 9px;
+
+            border-radius: 50%;
+
+            background:
+                rgba(255, 255, 255, 0.30);
+        }
+
+        .sidebar-tree-link:hover {
+            background:
+                rgba(255, 255, 255, 0.06);
+
+            color: white;
+
+            transform: translateX(-1px);
+        }
+
+        .sidebar-tree-link.active {
+            background:
+                rgba(79, 111, 143, 0.25);
+
+            color: white;
+
+            font-weight: 800;
+        }
+
+        .sidebar-tree-link.active::before {
+            background: var(--primary);
+        }
+
+
+        /* =====================================================
+           LOAN BADGE
+        ===================================================== */
+
+        .loan-badge {
             margin-right: auto;
 
             min-width: 24px;
@@ -335,7 +525,6 @@
             border-radius: 20px;
 
             background: #d9534f;
-
             color: white;
 
             font-size: 13px;
@@ -343,29 +532,30 @@
         }
 
 
-        /* =========================
+        /* =====================================================
            MAIN
-        ========================= */
+        ===================================================== */
 
         .main {
-
             margin-right: var(--sidebar-width);
 
             min-height: 100vh;
 
             transition:
-                margin-right .2s ease;
+                margin-right 0.2s ease;
         }
 
 
-        .topbar {
+        /* =====================================================
+           TOPBAR
+        ===================================================== */
 
+        .topbar {
             height: 78px;
 
             padding: 0 30px;
 
             display: flex;
-
             align-items: center;
             justify-content: space-between;
 
@@ -380,31 +570,25 @@
             background: var(--surface);
 
             border-bottom:
-                1px solid var(--border);
+                1px solid
+                var(--border);
         }
 
-
         .page-title {
-
             color: var(--text);
 
             font-size: 22px;
             font-weight: 800;
         }
 
-
         .topbar-actions {
-
             display: flex;
-
             align-items: center;
 
             gap: 9px;
         }
 
-
         .topbar-button {
-
             display: inline-flex;
 
             align-items: center;
@@ -417,7 +601,8 @@
             padding: 0 13px;
 
             border:
-                1px solid var(--border);
+                1px solid
+                var(--border);
 
             border-radius: 9px;
 
@@ -433,15 +618,13 @@
             cursor: pointer;
 
             transition:
-                background .2s ease,
-                border-color .2s ease,
-                color .2s ease,
-                transform .2s ease;
+                background 0.2s ease,
+                border-color 0.2s ease,
+                color 0.2s ease,
+                transform 0.2s ease;
         }
 
-
         .topbar-button:hover {
-
             background: var(--primary-soft);
 
             border-color: var(--primary);
@@ -451,9 +634,7 @@
             transform: translateY(-1px);
         }
 
-
         .theme-toggle {
-
             width: 40px;
 
             padding: 0;
@@ -461,9 +642,7 @@
             font-size: 18px;
         }
 
-
         .back-to-site {
-
             display: inline-flex;
 
             align-items: center;
@@ -476,7 +655,8 @@
             padding: 0 14px;
 
             border:
-                1px solid var(--border);
+                1px solid
+                var(--border);
 
             border-radius: 9px;
 
@@ -488,14 +668,12 @@
             font-weight: 600;
 
             transition:
-                background .2s ease,
-                border-color .2s ease,
-                transform .2s ease;
+                background 0.2s ease,
+                border-color 0.2s ease,
+                transform 0.2s ease;
         }
 
-
         .back-to-site:hover {
-
             background: var(--primary-soft);
 
             border-color: var(--primary);
@@ -504,22 +682,25 @@
         }
 
 
-        .content {
+        /* =====================================================
+           CONTENT
+        ===================================================== */
 
+        .content {
             padding: 28px 30px 40px;
         }
 
 
-        /* =========================
-           GENERIC ELEMENTS
-        ========================= */
+        /* =====================================================
+           GENERIC CARD
+        ===================================================== */
 
         .dashboard-card {
-
             background: var(--surface);
 
             border:
-                1px solid var(--border);
+                1px solid
+                var(--border);
 
             border-radius: var(--radius);
 
@@ -527,9 +708,9 @@
         }
 
 
-        /* =========================
-           MOBILE SIDEBAR
-        ========================= */
+        /* =====================================================
+           TABLET
+        ===================================================== */
 
         @media (max-width: 1000px) {
 
@@ -537,28 +718,22 @@
                 --sidebar-width: 82px;
             }
 
-
             .sidebar {
                 padding: 18px 9px;
             }
 
-
             .sidebar-brand {
-
                 justify-content: center;
 
                 padding-left: 0;
                 padding-right: 0;
             }
 
-
             .sidebar-brand-text {
                 display: none;
             }
 
-
             .sidebar-link {
-
                 justify-content: center;
 
                 padding: 0;
@@ -566,14 +741,31 @@
                 gap: 0;
             }
 
-
             .sidebar-link > span:nth-child(2) {
                 display: none;
             }
 
+            .sidebar-tree-header {
+                justify-content: center;
+
+                padding: 0;
+
+                gap: 0;
+            }
+
+            .sidebar-tree-header .tree-title {
+                display: none;
+            }
+
+            .sidebar-tree-header .tree-arrow {
+                display: none;
+            }
+
+            .sidebar-tree-children {
+                display: none !important;
+            }
 
             .loan-badge {
-
                 position: absolute;
 
                 top: 4px;
@@ -585,12 +777,15 @@
                 font-size: 11px;
             }
 
-
             .content {
                 padding: 22px;
             }
         }
 
+
+        /* =====================================================
+           MOBILE
+        ===================================================== */
 
         @media (max-width: 600px) {
 
@@ -598,27 +793,21 @@
                 --sidebar-width: 68px;
             }
 
-
             .topbar {
-
                 height: 68px;
 
                 padding: 0 15px;
             }
 
-
             .page-title {
                 font-size: 18px;
             }
-
 
             .topbar-actions {
                 gap: 6px;
             }
 
-
             .topbar-button {
-
                 width: 36px;
 
                 min-height: 36px;
@@ -628,9 +817,7 @@
                 font-size: 16px;
             }
 
-
             .back-to-site {
-
                 width: auto;
 
                 padding: 0 9px;
@@ -638,27 +825,27 @@
                 font-size: 13px;
             }
 
-
             .content {
-
                 padding:
                     16px 12px 30px;
             }
         }
 
     </style>
-
 </head>
 
 
 <body>
 
 
-    <!-- =========================
+    <!-- =====================================================
          SIDEBAR
-    ========================== -->
+    ===================================================== -->
 
     <aside class="sidebar">
+
+
+        <!-- BRAND -->
 
         <div class="sidebar-brand">
 
@@ -682,173 +869,547 @@
         </div>
 
 
+        <!-- MENU -->
+
         <nav class="sidebar-menu">
 
 
-            <!-- Dashboard -->
+            <!-- =================================================
+                 DASHBOARD
+            ================================================== -->
 
             {% if perms.accounts.access_dashboard %}
 
-                <a
-                    href="{% url 'dashboard_home' %}"
-                    class="sidebar-link
-                    {% if request.resolver_match.url_name == 'dashboard_home' %}
-                        active
-                    {% endif %}"
-                >
+                {% if request.resolver_match.url_name == 'dashboard_home' %}
 
-                    <span>
-                        🏠
-                    </span>
+                    <a
+                        href="{% url 'dashboard_home' %}"
+                        class="sidebar-link active"
+                    >
 
-                    <span>
-                        داشبورد
-                    </span>
+                        <span>
+                            🏠
+                        </span>
 
-                </a>
+                        <span>
+                            داشبورد
+                        </span>
+
+                    </a>
+
+                {% else %}
+
+                    <a
+                        href="{% url 'dashboard_home' %}"
+                        class="sidebar-link"
+                    >
+
+                        <span>
+                            🏠
+                        </span>
+
+                        <span>
+                            داشبورد
+                        </span>
+
+                    </a>
+
+                {% endif %}
 
             {% endif %}
 
 
-            <!-- Books -->
+
+            <!-- =================================================
+                 BOOKS
+            ================================================== -->
 
             {% if perms.blog.manage_books %}
 
-                <a
-                    href="{% url 'manage_books' %}"
-                    class="sidebar-link
-                    {% if request.resolver_match.url_name == 'manage_books'
-                       or request.resolver_match.url_name == 'add_book'
-                       or request.resolver_match.url_name == 'edit_book'
-                       or request.resolver_match.url_name == 'delete_book' %}
-                        active
-                    {% endif %}"
-                >
+                {% if request.resolver_match.url_name == 'manage_books' or request.resolver_match.url_name == 'add_book' or request.resolver_match.url_name == 'edit_book' or request.resolver_match.url_name == 'delete_book' %}
 
-                    <span>
-                        📚
-                    </span>
+                    <div class="sidebar-tree open">
 
-                    <span>
-                        کتاب‌ها
-                    </span>
+                        <button
+                            type="button"
+                            class="sidebar-tree-header active-parent"
+                        >
 
-                </a>
+                            <span class="tree-icon">
+                                📚
+                            </span>
+
+                            <span class="tree-title">
+                                کتاب‌ها
+                            </span>
+
+                            <span class="tree-arrow">
+                                ‹
+                            </span>
+
+                        </button>
+
+
+                        <div class="sidebar-tree-children">
+
+                            <a
+                                href="{% url 'manage_books' %}"
+                                class="sidebar-tree-link {% if request.resolver_match.url_name == 'manage_books' %}active{% endif %}"
+                            >
+                                مدیریت کتاب‌ها
+                            </a>
+
+
+                            <a
+                                href="{% url 'add_book' %}"
+                                class="sidebar-tree-link {% if request.resolver_match.url_name == 'add_book' %}active{% endif %}"
+                            >
+                                افزودن کتاب
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                {% else %}
+
+                    <div class="sidebar-tree">
+
+                        <button
+                            type="button"
+                            class="sidebar-tree-header"
+                        >
+
+                            <span class="tree-icon">
+                                📚
+                            </span>
+
+                            <span class="tree-title">
+                                کتاب‌ها
+                            </span>
+
+                            <span class="tree-arrow">
+                                ‹
+                            </span>
+
+                        </button>
+
+
+                        <div class="sidebar-tree-children">
+
+                            <a
+                                href="{% url 'manage_books' %}"
+                                class="sidebar-tree-link"
+                            >
+                                مدیریت کتاب‌ها
+                            </a>
+
+
+                            <a
+                                href="{% url 'add_book' %}"
+                                class="sidebar-tree-link"
+                            >
+                                افزودن کتاب
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                {% endif %}
+
+            {% endif %}
 
 
 
-            <!-- Categories -->
+            <!-- =================================================
+                 CATEGORIES
+            ================================================== -->
 
             {% if perms.blog.manage_categories %}
 
-                <a
-                    href="{% url 'manage_categories' %}"
-                    class="sidebar-link
-                    {% if request.resolver_match.url_name == 'manage_categories'
-                       or request.resolver_match.url_name == 'add_category'
-                       or request.resolver_match.url_name == 'edit_category'
-                       or request.resolver_match.url_name == 'delete_category' %}
-                        active
-                    {% endif %}"
-                >
+                {% if request.resolver_match.url_name == 'manage_categories' or request.resolver_match.url_name == 'add_category' or request.resolver_match.url_name == 'edit_category' or request.resolver_match.url_name == 'delete_category' %}
 
-                    <span>
-                        📂
-                    </span>
+                    <div class="sidebar-tree open">
 
-                    <span>
-                        دسته‌بندی‌ها
-                    </span>
+                        <button
+                            type="button"
+                            class="sidebar-tree-header active-parent"
+                        >
 
-                </a>
+                            <span class="tree-icon">
+                                📂
+                            </span>
+
+                            <span class="tree-title">
+                                دسته‌بندی‌ها
+                            </span>
+
+                            <span class="tree-arrow">
+                                ‹
+                            </span>
+
+                        </button>
+
+
+                        <div class="sidebar-tree-children">
+
+                            <a
+                                href="{% url 'manage_categories' %}"
+                                class="sidebar-tree-link {% if request.resolver_match.url_name == 'manage_categories' %}active{% endif %}"
+                            >
+                                مدیریت دسته‌بندی‌ها
+                            </a>
+
+
+                            <a
+                                href="{% url 'add_category' %}"
+                                class="sidebar-tree-link {% if request.resolver_match.url_name == 'add_category' %}active{% endif %}"
+                            >
+                                افزودن دسته‌بندی
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                {% else %}
+
+                    <div class="sidebar-tree">
+
+                        <button
+                            type="button"
+                            class="sidebar-tree-header"
+                        >
+
+                            <span class="tree-icon">
+                                📂
+                            </span>
+
+                            <span class="tree-title">
+                                دسته‌بندی‌ها
+                            </span>
+
+                            <span class="tree-arrow">
+                                ‹
+                            </span>
+
+                        </button>
+
+
+                        <div class="sidebar-tree-children">
+
+                            <a
+                                href="{% url 'manage_categories' %}"
+                                class="sidebar-tree-link"
+                            >
+                                مدیریت دسته‌بندی‌ها
+                            </a>
+
+
+                            <a
+                                href="{% url 'add_category' %}"
+                                class="sidebar-tree-link"
+                            >
+                                افزودن دسته‌بندی
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                {% endif %}
+
+            {% endif %}
 
 
 
-            <!-- Loans -->
+            <!-- =================================================
+                 LOANS
+            ================================================== -->
 
             {% if perms.blog.manage_loans %}
 
-                <a
-                    href="{% url 'manage_loans' %}"
-                    class="sidebar-link
-                    {% if request.resolver_match.url_name == 'manage_loans'
-                       or request.resolver_match.url_name == 'return_loan' %}
-                        active
-                    {% endif %}"
-                >
+                {% if request.resolver_match.url_name == 'manage_loans' or request.resolver_match.url_name == 'create_loan' or request.resolver_match.url_name == 'return_loan' %}
 
-                    <span>
-                        📋
-                    </span>
+                    <div class="sidebar-tree open">
 
-                    <span>
-                        امانت‌ها
-                    </span>
+                        <button
+                            type="button"
+                            class="sidebar-tree-header active-parent"
+                        >
 
-                    {% if pending_loans_count %}
+                            <span class="tree-icon">
+                                📋
+                            </span>
 
-                        <span class="loan-badge">
-                            {{ pending_loans_count }}
-                        </span>
-
-                    {% endif %}
-
-                </a>
+                            <span class="tree-title">
+                                امانت‌ها
+                            </span>
 
 
+                            {% if pending_loans_count %}
 
-            <!-- Users -->
+                                <span class="loan-badge">
+                                    {{ pending_loans_count }}
+                                </span>
+
+                            {% endif %}
+
+
+                            <span class="tree-arrow">
+                                ‹
+                            </span>
+
+                        </button>
+
+
+                        <div class="sidebar-tree-children">
+
+                            <a
+                                href="{% url 'manage_loans' %}#loanHistoryCard"
+                                class="sidebar-tree-link {% if request.resolver_match.url_name == 'manage_loans' %}active{% endif %}"
+                            >
+                                مدیریت امانت‌ها
+                            </a>
+
+
+                            <a
+                                href="{% url 'create_loan' %}"
+                                class="sidebar-tree-link {% if request.resolver_match.url_name == 'create_loan' %}active{% endif %}"
+                            >
+                                ایجاد امانت
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                {% else %}
+
+                    <div class="sidebar-tree">
+
+                        <button
+                            type="button"
+                            class="sidebar-tree-header"
+                        >
+
+                            <span class="tree-icon">
+                                📋
+                            </span>
+
+                            <span class="tree-title">
+                                امانت‌ها
+                            </span>
+
+
+                            {% if pending_loans_count %}
+
+                                <span class="loan-badge">
+                                    {{ pending_loans_count }}
+                                </span>
+
+                            {% endif %}
+
+
+                            <span class="tree-arrow">
+                                ‹
+                            </span>
+
+                        </button>
+
+
+                        <div class="sidebar-tree-children">
+
+                            <a
+                                href="{% url 'manage_loans' %}#loanHistoryCard"
+                                class="sidebar-tree-link {% if request.resolver_match.url_name == 'manage_loans' %}active{% endif %}"
+                            >
+                                مدیریت امانت‌ها
+                            </a>
+
+
+                            <a
+                                href="{% url 'create_loan' %}"
+                                class="sidebar-tree-link"
+                            >
+                                ایجاد امانت
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                {% endif %}
+
+            {% endif %}
+
+
+
+            <!-- =================================================
+                 USERS
+            ================================================== -->
 
             {% if perms.accounts.view_user %}
 
-                <a
-                    href="{% url 'manage_users' %}"
-                    class="sidebar-link
-                    {% if request.resolver_match.url_name == 'manage_users'
-                       or request.resolver_match.url_name == 'edit_user'
-                       or request.resolver_match.url_name == 'toggle_user_active'
-                       or request.resolver_match.url_name == 'delete_user' %}
-                        active
-                    {% endif %}"
-                >
+                {% if request.resolver_match.url_name == 'manage_users' or request.resolver_match.url_name == 'edit_user' or request.resolver_match.url_name == 'toggle_user_active' or request.resolver_match.url_name == 'delete_user' %}
 
-                    <span>
-                        👥
-                    </span>
+                    <div class="sidebar-tree open">
 
-                    <span>
-                        کاربران
-                    </span>
+                        <button
+                            type="button"
+                            class="sidebar-tree-header active-parent"
+                        >
 
-                </a>
+                            <span class="tree-icon">
+                                👥
+                            </span>
 
-                <a
-                    href="{% url 'support_logs' %}"
-                    class="sidebar-link"
-                >
-                    <span class="sidebar-icon">
-                        🛠
-                    </span>
+                            <span class="tree-title">
+                                کاربران
+                            </span>
 
-                    <span>
-                        پشتیبانی
-                    </span>
-                </a>
+                            <span class="tree-arrow">
+                                ‹
+                            </span>
+
+                        </button>
+
+
+                        <div class="sidebar-tree-children">
+
+                            <a
+                                href="{% url 'manage_users' %}"
+                                class="sidebar-tree-link {% if request.resolver_match.url_name == 'manage_users' %}active{% endif %}"
+                            >
+                                مدیریت کاربران
+                            </a>
+
+
+                            <a
+                                href="{% url 'manage_users' %}#add-user"
+                                class="sidebar-tree-link"
+                                data-add-user-link
+                            >
+                                افزودن کاربر
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                {% else %}
+
+                    <div class="sidebar-tree">
+
+                        <button
+                            type="button"
+                            class="sidebar-tree-header"
+                        >
+
+                            <span class="tree-icon">
+                                👥
+                            </span>
+
+                            <span class="tree-title">
+                                کاربران
+                            </span>
+
+                            <span class="tree-arrow">
+                                ‹
+                            </span>
+
+                        </button>
+
+
+                        <div class="sidebar-tree-children">
+
+                            <a
+                                href="{% url 'manage_users' %}"
+                                class="sidebar-tree-link"
+                            >
+                                مدیریت کاربران
+                            </a>
+
+
+                            <a
+                                href="{% url 'manage_users' %}#add-user"
+                                class="sidebar-tree-link"
+                            >
+                                افزودن کاربر
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                {% endif %}
+
+            {% endif %}
+
+
+
+            <!-- =================================================
+                 SUPPORT
+            ================================================== -->
+
+            {% if perms.accounts.view_user %}
+
+                {% if request.resolver_match.url_name == 'support_logs' %}
+
+                    <a
+                        href="{% url 'support_logs' %}"
+                        class="sidebar-link active"
+                    >
+
+                        <span>
+                            🛠
+                        </span>
+
+                        <span>
+                            پشتیبانی
+                        </span>
+
+                    </a>
+
+                {% else %}
+
+                    <a
+                        href="{% url 'support_logs' %}"
+                        class="sidebar-link"
+                    >
+
+                        <span>
+                            🛠
+                        </span>
+
+                        <span>
+                            پشتیبانی
+                        </span>
+
+                    </a>
+
+                {% endif %}
+
+            {% endif %}
+
 
         </nav>
 
     </aside>
 
 
-    <!-- =========================
+
+    <!-- =====================================================
          MAIN
-    ========================== -->
+    ===================================================== -->
 
     <main class="main">
 
 
-        <header class="topbar">
+        <!-- TOPBAR -->
 
+        <header class="topbar">
 
             <div class="page-title">
 
@@ -862,6 +1423,8 @@
             <div class="topbar-actions">
 
 
+                <!-- THEME BUTTON -->
+
                 <button
                     type="button"
                     class="topbar-button theme-toggle"
@@ -873,21 +1436,23 @@
                 </button>
 
 
+                <!-- BACK TO SITE -->
+
                 <a
                     href="{% url 'home' %}"
                     class="back-to-site"
                 >
-
                     ←
                     مشاهده سایت
-
                 </a>
-
 
             </div>
 
         </header>
 
+
+
+        <!-- PAGE CONTENT -->
 
         <section class="content">
 
@@ -900,7 +1465,16 @@
     </main>
 
 
+
+    <!-- =====================================================
+         JAVASCRIPT
+    ===================================================== -->
+
     <script>
+
+        /* =====================================================
+           THEME
+        ===================================================== */
 
         const savedTheme =
             localStorage.getItem(
@@ -953,6 +1527,7 @@
             document.body.classList.add(
                 "dark-mode"
             );
+
         }
 
 
@@ -991,9 +1566,126 @@
 
         }
 
+
+
+        /* =====================================================
+           TREE MENU
+        ===================================================== */
+
+        const treeMenus =
+            document.querySelectorAll(
+                ".sidebar-tree"
+            );
+
+
+        treeMenus.forEach(
+            function (tree) {
+
+                const button =
+                    tree.querySelector(
+                        ".sidebar-tree-header"
+                    );
+
+
+                if (!button) {
+                    return;
+                }
+
+
+                button.addEventListener(
+                    "click",
+                    function () {
+
+                        if (
+                            window.innerWidth <= 1000
+                        ) {
+                            return;
+                        }
+
+
+                        tree.classList.toggle(
+                            "open"
+                        );
+
+                    }
+                );
+
+            }
+        );
+
     </script>
 
+<script>
+document.addEventListener("DOMContentLoaded", function () {
 
+    const addUserLinks =
+        document.querySelectorAll("[data-add-user-link]");
+
+    addUserLinks.forEach(function (link) {
+
+        link.addEventListener("click", function (event) {
+
+            const currentPath =
+                window.location.pathname;
+
+            const usersPath =
+                "{% url 'manage_users' %}";
+
+            /*
+             * اگر همین الان داخل صفحه مدیریت کاربران هستیم،
+             * اجازه نمی‌دهیم صفحه دوباره reload شود.
+             * فقط فرم افزودن کاربر را باز می‌کنیم.
+             */
+            if (currentPath === usersPath) {
+
+                const addUserBox =
+                    document.getElementById("add-user");
+
+                const addUserFormWrapper =
+                    document.getElementById(
+                        "add-user-form-wrapper"
+                    );
+
+                const toggleAddUser =
+                    document.getElementById(
+                        "toggle-add-user"
+                    );
+
+                if (
+                    addUserBox &&
+                    addUserFormWrapper
+                ) {
+
+                    event.preventDefault();
+
+                    addUserFormWrapper.classList.add(
+                        "open"
+                    );
+
+                    if (toggleAddUser) {
+                        toggleAddUser.textContent =
+                            "بستن فرم";
+                    }
+
+                    window.history.replaceState(
+                        null,
+                        "",
+                        "#add-user"
+                    );
+
+                    addUserBox.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start"
+                    });
+                }
+            }
+
+        });
+
+    });
+
+});
+</script>
 </body>
 
 </html>

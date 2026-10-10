@@ -1,22 +1,17 @@
 {% extends "dashboard/base.html" %}
 
 {% block title %}
-    {% if edit_mode %}
-        ویرایش کتاب
-    {% else %}
-        افزودن کتاب
-    {% endif %}
+    {% if edit_mode %}ویرایش کتاب{% else %}افزودن کتاب{% endif %}
 {% endblock %}
 
 {% block page_title %}
-    {% if edit_mode %}
-        ویرایش کتاب
-    {% else %}
-        افزودن کتاب جدید
-    {% endif %}
+    {% if edit_mode %}ویرایش کتاب{% else %}افزودن کتاب جدید{% endif %}
 {% endblock %}
 
 {% block content %}
+
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/css/tom-select.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/js/tom-select.complete.min.js"></script>
 
 <style>
     .book-form-page {
@@ -31,6 +26,7 @@
         border-radius: var(--radius);
         padding: 30px;
         box-shadow: var(--shadow);
+        box-sizing: border-box;
     }
 
     .form-header {
@@ -74,11 +70,8 @@
         font-family: inherit;
         font-size: 16px;
         outline: none;
-        transition:
-            border-color .2s ease,
-            background .2s ease,
-            box-shadow .2s ease;
         box-sizing: border-box;
+        transition: border-color .2s ease, background .2s ease, box-shadow .2s ease;
     }
 
     .form-control::placeholder {
@@ -117,6 +110,7 @@
 
     .person-row .form-control {
         flex: 1;
+        min-width: 0;
     }
 
     .add-person-btn,
@@ -129,11 +123,7 @@
         font-size: 21px;
         font-weight: 700;
         cursor: pointer;
-        transition:
-            background .2s ease,
-            border-color .2s ease,
-            color .2s ease,
-            transform .2s ease;
+        transition: background .2s ease, border-color .2s ease, color .2s ease, transform .2s ease;
     }
 
     .add-person-btn {
@@ -187,28 +177,6 @@
         line-height: 1.8;
     }
 
-    .copies-info strong {
-        color: var(--text);
-        font-weight: 800;
-    }
-
-    .registration-info {
-        padding: 12px 14px;
-        border: 1px solid var(--border);
-        border-radius: 9px;
-        background: var(--surface-soft);
-        color: var(--text-soft);
-        font-size: 15px;
-        line-height: 1.8;
-    }
-
-    .registration-number {
-        color: var(--text);
-        font-size: 20px;
-        font-weight: 900;
-        letter-spacing: 1px;
-    }
-
     .file-box {
         border: 1.5px dashed var(--border);
         border-radius: 12px;
@@ -216,9 +184,7 @@
         text-align: center;
         background: var(--surface-soft);
         cursor: pointer;
-        transition:
-            border-color .2s ease,
-            background .2s ease;
+        transition: border-color .2s ease, background .2s ease;
     }
 
     .file-box:hover {
@@ -337,6 +303,119 @@
         font-size: 15px;
     }
 
+    /* فهرست محل‌های کتاب قابل جست‌وجو */
+    .location-search-control {
+        width: 100%;
+    }
+
+    .ts-wrapper {
+        width: 100%;
+        font-family: inherit;
+    }
+
+    .ts-wrapper.single .ts-control {
+        min-height: 48px;
+        padding: 12px 14px;
+        border: 1px solid var(--border);
+        border-radius: 9px;
+        background: var(--surface-soft);
+        color: var(--text);
+        font-family: inherit;
+        font-size: 16px;
+        box-shadow: none;
+        display: flex;
+        align-items: center;
+    }
+
+    .ts-wrapper.single .ts-control input {
+        font-family: inherit;
+        font-size: 16px;
+        color: var(--text);
+        min-width: 100px;
+    }
+
+    .ts-wrapper.single .ts-control input::placeholder {
+        color: var(--text-soft);
+    }
+
+    .ts-wrapper.focus .ts-control {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(232, 155, 61, .12);
+    }
+
+    .ts-dropdown {
+        margin-top: 5px;
+        border: 1px solid var(--border);
+        border-radius: 9px;
+        background: var(--surface);
+        color: var(--text);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        font-family: inherit;
+    }
+
+    .ts-dropdown .option,
+    .ts-dropdown .no-results {
+        padding: 11px 14px;
+        font-family: inherit;
+        font-size: 15px;
+        line-height: 1.8;
+        color: var(--text);
+    }
+
+    .ts-dropdown .active {
+        background: var(--primary-soft);
+        color: var(--text);
+    }
+
+    .ts-dropdown .selected {
+        background: var(--surface-soft);
+        color: var(--text);
+    }
+
+    .ts-dropdown .no-results {
+        color: var(--text-soft);
+        text-align: center;
+    }
+
+    /* پیام‌های خطا و موفقیت */
+    .form-messages {
+        margin-bottom: 22px;
+    }
+
+    .form-message {
+        padding: 13px 16px;
+        margin-bottom: 10px;
+        border: 1px solid var(--border);
+        border-radius: 9px;
+        font-size: 15px;
+        line-height: 1.9;
+        overflow-wrap: anywhere;
+    }
+
+    .form-message.error {
+        color: #a52b2b;
+        background: rgba(220, 53, 69, .08);
+        border-color: rgba(220, 53, 69, .3);
+    }
+
+    .form-message.success {
+        color: #176b3a;
+        background: rgba(40, 167, 69, .08);
+        border-color: rgba(40, 167, 69, .3);
+    }
+
+    .form-message.warning {
+        color: #855b0b;
+        background: rgba(255, 193, 7, .10);
+        border-color: rgba(255, 193, 7, .35);
+    }
+
+    .form-message.info {
+        color: var(--text);
+        background: var(--surface-soft);
+    }
+
     .form-actions {
         display: flex;
         align-items: center;
@@ -357,12 +436,7 @@
         cursor: pointer;
         text-decoration: none;
         text-align: center;
-        transition:
-            background .2s ease,
-            border-color .2s ease,
-            color .2s ease,
-            transform .2s ease,
-            box-shadow .2s ease;
+        transition: background .2s ease, border-color .2s ease, color .2s ease, transform .2s ease, box-shadow .2s ease;
     }
 
     .btn-primary {
@@ -459,13 +533,10 @@
     }
 </style>
 
-
 <section class="book-form-page">
-
     <div class="form-box">
 
         <div class="form-header">
-
             <h2>
                 {% if edit_mode %}
                     ویرایش اطلاعات کتاب
@@ -481,169 +552,96 @@
                     اطلاعات کتاب جدید را وارد کنید تا به کتابخانه اضافه شود.
                 {% endif %}
             </p>
-
         </div>
 
+        <!-- نمایش پیام‌های Django -->
+        {% if messages %}
+            <div class="form-messages" aria-live="polite">
+                {% for message in messages %}
+                    <div class="form-message {{ message.tags|default:'info' }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
 
         <form method="post" enctype="multipart/form-data">
-
             {% csrf_token %}
 
-
             <!-- نام کتاب -->
-
             <div class="form-group">
-
-                <label for="title">
-                    نام کتاب
-                </label>
-
+                <label for="title">نام کتاب</label>
                 <input
                     id="title"
                     type="text"
                     name="title"
                     class="form-control"
-                    value="{% if form_data %}{{ form_data.title }}{% else %}{{ book.title|default:'' }}{% endif %}"
+                    value="{% if form_data %}{{ form_data.title|default:'' }}{% else %}{{ book.title|default:'' }}{% endif %}"
                     placeholder="مثلاً: مبانی برنامه‌نویسی"
                     required
                 >
-
             </div>
 
-
-            <!-- شابک و شماره ثبت -->
-
+            <!-- موضوع و محل قرارگیری -->
             <div class="two-column">
 
                 <div class="form-group">
-
-                    <label for="isbn">
-                        شابک
-                    </label>
-
+                    <label for="subject">موضوع کتاب</label>
                     <input
-                        id="isbn"
+                        id="subject"
                         type="text"
-                        name="isbn"
+                        name="subject"
                         class="form-control"
-                        value="{% if form_data %}{{ form_data.isbn }}{% else %}{{ book.isbn|default:'' }}{% endif %}"
-                        placeholder="مثلاً: 9789640000000"
-                        maxlength="20"
-                        inputmode="numeric"
+                        value="{% if form_data %}{{ form_data.subject|default:'' }}{% else %}{{ book.subject.name|default:'' }}{% endif %}"
+                        placeholder="موضوع کتاب را وارد کنید"
+                        autocomplete="off"
+                        required
                     >
-
                     <div class="field-description">
-                        شابک کتاب را وارد کنید. در صورت ثبت، شابک باید یکتا باشد.
+                        موضوع را به‌صورت متنی وارد کنید؛ این فیلد فهرست انتخابی ندارد.
                     </div>
-
                 </div>
 
-
                 <div class="form-group">
+                    <label for="location">محل قرارگیری کتاب</label>
 
-                    <label>
-                        شماره ثبت
-                    </label>
+                    <select
+                        id="location"
+                        name="location"
+                        class="form-control location-search-control"
+                        required
+                    >
+                        <option value="">کد یا توضیحات محل را جست‌وجو کنید...</option>
 
-                    {% if edit_mode and book %}
+                        {% for location in locations %}
+                            <option
+                                value="{{ location.pk }}"
+                                {% if form_data and form_data.location|stringformat:"s" == location.pk|stringformat:"s" %}
+                                    selected
+                                {% elif not form_data and book and book.location_id == location.pk %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ location.code }}{% if location.description %} - {{ location.description }}{% endif %}
+                            </option>
+                        {% endfor %}
+                    </select>
 
-                        <div class="registration-info">
-
-                            شماره ثبت این کتاب:
-
-                            <span class="registration-number">
-                                {{ book.registration_number|stringformat:"05d" }}
-                            </span>
-
-                            <br>
-
-                            شماره ثبت توسط سیستم تعیین شده و قابل تغییر نیست.
-
-                        </div>
-
-                    {% else %}
-
-                        <div class="registration-info">
-
-                            شماره ثبت پس از ذخیره کتاب توسط سیستم تولید می‌شود.
-
-                        </div>
-
-                    {% endif %}
-
+                    <div class="field-description">
+                        محل فیزیکی قرارگیری کتاب را انتخاب کنید.
+                    </div>
                 </div>
 
             </div>
 
-
             <!-- مؤلفان -->
-
             <div class="form-group">
+                <label>مؤلفان</label>
 
-                <label>
-                    مؤلفان
-                </label>
-
-                <div
-                    id="authors-container"
-                    class="people-list"
-                >
-
-                    {% if edit_mode %}
-
-                        {% for author in book.authors.all %}
-
-                            <div class="person-row">
-
-                                <input
-                                    type="text"
-                                    name="authors"
-                                    class="form-control"
-                                    value="{{ author.name }}"
-                                    placeholder="نام مؤلف"
-                                    required
-                                >
-
-                                <button
-                                    type="button"
-                                    class="remove-person-btn"
-                                    onclick="removePerson(this)"
-                                >
-                                    −
-                                </button>
-
-                            </div>
-
-                        {% empty %}
-
-                            <div class="person-row">
-
-                                <input
-                                    type="text"
-                                    name="authors"
-                                    class="form-control"
-                                    placeholder="نام مؤلف"
-                                    required
-                                >
-
-                                <button
-                                    type="button"
-                                    class="remove-person-btn"
-                                    onclick="removePerson(this)"
-                                >
-                                    −
-                                </button>
-
-                            </div>
-
-                        {% endfor %}
-
-                    {% elif author_values %}
-
+                <div id="authors-container" class="people-list">
+                    {% if form_data %}
                         {% for author in author_values %}
-
                             <div class="person-row">
-
                                 <input
                                     type="text"
                                     name="authors"
@@ -652,23 +650,51 @@
                                     placeholder="نام مؤلف"
                                     required
                                 >
-
                                 <button
                                     type="button"
                                     class="remove-person-btn"
                                     onclick="removePerson(this)"
-                                >
-                                    −
-                                </button>
-
+                                    aria-label="حذف مؤلف"
+                                >−</button>
                             </div>
-
                         {% endfor %}
-
+                    {% elif edit_mode %}
+                        {% for author in book.authors.all %}
+                            <div class="person-row">
+                                <input
+                                    type="text"
+                                    name="authors"
+                                    class="form-control"
+                                    value="{{ author.name }}"
+                                    placeholder="نام مؤلف"
+                                    required
+                                >
+                                <button
+                                    type="button"
+                                    class="remove-person-btn"
+                                    onclick="removePerson(this)"
+                                    aria-label="حذف مؤلف"
+                                >−</button>
+                            </div>
+                        {% empty %}
+                            <div class="person-row">
+                                <input
+                                    type="text"
+                                    name="authors"
+                                    class="form-control"
+                                    placeholder="نام مؤلف"
+                                    required
+                                >
+                                <button
+                                    type="button"
+                                    class="remove-person-btn"
+                                    onclick="removePerson(this)"
+                                    aria-label="حذف مؤلف"
+                                >−</button>
+                            </div>
+                        {% endfor %}
                     {% else %}
-
                         <div class="person-row">
-
                             <input
                                 type="text"
                                 name="authors"
@@ -676,108 +702,36 @@
                                 placeholder="نام مؤلف"
                                 required
                             >
-
                             <button
                                 type="button"
                                 class="remove-person-btn"
                                 onclick="removePerson(this)"
-                            >
-                                −
-                            </button>
-
+                                aria-label="حذف مؤلف"
+                            >−</button>
                         </div>
-
                     {% endif %}
-
                 </div>
-
 
                 <button
                     type="button"
                     class="add-person-btn"
-                    onclick="addPerson(
-                        'authors-container',
-                        'authors',
-                        'نام مؤلف'
-                    )"
+                    onclick="addPerson('authors-container', 'authors', 'نام مؤلف')"
                     title="افزودن مؤلف"
-                >
-                    +
-                </button>
+                >+</button>
 
                 <div class="person-description">
-                    در صورت وجود چند مؤلف، برای هر مؤلف یک مورد جداگانه اضافه کنید.
+                    برای هر مؤلف یک مورد جداگانه وارد کنید.
                 </div>
-
             </div>
 
-
             <!-- مترجمان -->
-
             <div class="form-group">
+                <label>مترجمان</label>
 
-                <label>
-                    مترجمان
-                </label>
-
-                <div
-                    id="translators-container"
-                    class="people-list"
-                >
-
-                    {% if edit_mode %}
-
-                        {% for translator in book.translators.all %}
-
-                            <div class="person-row">
-
-                                <input
-                                    type="text"
-                                    name="translators"
-                                    class="form-control"
-                                    value="{{ translator.name }}"
-                                    placeholder="نام مترجم"
-                                >
-
-                                <button
-                                    type="button"
-                                    class="remove-person-btn"
-                                    onclick="removePerson(this)"
-                                >
-                                    −
-                                </button>
-
-                            </div>
-
-                        {% empty %}
-
-                            <div class="person-row">
-
-                                <input
-                                    type="text"
-                                    name="translators"
-                                    class="form-control"
-                                    placeholder="نام مترجم"
-                                >
-
-                                <button
-                                    type="button"
-                                    class="remove-person-btn"
-                                    onclick="removePerson(this)"
-                                >
-                                    −
-                                </button>
-
-                            </div>
-
-                        {% endfor %}
-
-                    {% elif translator_values %}
-
+                <div id="translators-container" class="people-list">
+                    {% if form_data %}
                         {% for translator in translator_values %}
-
                             <div class="person-row">
-
                                 <input
                                     type="text"
                                     name="translators"
@@ -785,212 +739,146 @@
                                     value="{{ translator }}"
                                     placeholder="نام مترجم"
                                 >
-
                                 <button
                                     type="button"
                                     class="remove-person-btn"
                                     onclick="removePerson(this)"
-                                >
-                                    −
-                                </button>
-
+                                    aria-label="حذف مترجم"
+                                >−</button>
                             </div>
-
                         {% endfor %}
-
+                    {% elif edit_mode %}
+                        {% for translator in book.translators.all %}
+                            <div class="person-row">
+                                <input
+                                    type="text"
+                                    name="translators"
+                                    class="form-control"
+                                    value="{{ translator.name }}"
+                                    placeholder="نام مترجم"
+                                >
+                                <button
+                                    type="button"
+                                    class="remove-person-btn"
+                                    onclick="removePerson(this)"
+                                    aria-label="حذف مترجم"
+                                >−</button>
+                            </div>
+                        {% empty %}
+                            <div class="person-row">
+                                <input
+                                    type="text"
+                                    name="translators"
+                                    class="form-control"
+                                    placeholder="نام مترجم"
+                                >
+                                <button
+                                    type="button"
+                                    class="remove-person-btn"
+                                    onclick="removePerson(this)"
+                                    aria-label="حذف مترجم"
+                                >−</button>
+                            </div>
+                        {% endfor %}
                     {% else %}
-
                         <div class="person-row">
-
                             <input
                                 type="text"
                                 name="translators"
                                 class="form-control"
                                 placeholder="نام مترجم"
                             >
-
                             <button
                                 type="button"
                                 class="remove-person-btn"
                                 onclick="removePerson(this)"
-                            >
-                                −
-                            </button>
-
+                                aria-label="حذف مترجم"
+                            >−</button>
                         </div>
-
                     {% endif %}
-
                 </div>
-
 
                 <button
                     type="button"
                     class="add-person-btn"
-                    onclick="addPerson(
-                        'translators-container',
-                        'translators',
-                        'نام مترجم'
-                    )"
+                    onclick="addPerson('translators-container', 'translators', 'نام مترجم')"
                     title="افزودن مترجم"
-                >
-                    +
-                </button>
+                >+</button>
 
                 <div class="person-description">
-                    مترجم اختیاری است و می‌توانید بیش از یک مترجم ثبت کنید.
+                    ثبت مترجم اختیاری است و می‌توانید چند مترجم وارد کنید.
                 </div>
-
             </div>
-
-
-            <!-- موضوع و محل قرارگیری -->
-
-            <div class="two-column">
-
-                <div class="form-group">
-
-                    <label for="subject">
-                        موضوع
-                    </label>
-
-                    <input
-                        id="subject"
-                        type="text"
-                        name="subject"
-                        class="form-control"
-                        value="{% if form_data %}{{ form_data.subject }}{% else %}{{ book.subject.name|default:'' }}{% endif %}"
-                        list="subjects-list"
-                        placeholder="مثلاً: تاریخ"
-                        required
-                    >
-
-                    <datalist id="subjects-list">
-
-                        {% for subject in subjects %}
-
-                            <option value="{{ subject.name }}"></option>
-
-                        {% endfor %}
-
-                    </datalist>
-
-                    <div class="field-description">
-                        موضوع کتاب را وارد کنید؛ اگر قبلاً ثبت شده باشد همان موضوع استفاده می‌شود.
-                    </div>
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label for="category">
-                        محل قرارگیری
-                    </label>
-
-                    <input
-                        id="category"
-                        type="text"
-                        name="category"
-                        class="form-control"
-                        value="{% if form_data %}{{ form_data.category }}{% else %}{{ book.location.code|default:'' }}{% endif %}"
-                        list="locations-list"
-                        placeholder="مثلاً: h10020"
-                        required
-                    >
-
-                    <datalist id="locations-list">
-
-                        {% for location in locations %}
-
-                            <option value="{{ location.code }}"></option>
-
-                        {% endfor %}
-
-                    </datalist>
-
-                    <div class="field-description">
-                        کد محل قرارگیری کتاب را وارد کنید؛ برای مثال h10020.
-                    </div>
-
-                </div>
-
-            </div>
-
 
             <!-- ناشر و سال انتشار -->
-
             <div class="two-column">
 
                 <div class="form-group">
-
-                    <label for="publisher">
-                        ناشر
-                    </label>
-
+                    <label for="publisher">ناشر</label>
                     <input
                         id="publisher"
                         type="text"
                         name="publisher"
                         class="form-control"
-                        value="{% if form_data %}{{ form_data.publisher }}{% else %}{{ book.publisher.name|default:'' }}{% endif %}"
+                        value="{% if form_data %}{{ form_data.publisher|default:'' }}{% else %}{{ book.publisher.name|default:'' }}{% endif %}"
                         list="publishers-list"
                         placeholder="نام ناشر"
+                        autocomplete="off"
                         required
                     >
 
                     <datalist id="publishers-list">
-
                         {% for publisher in publishers %}
-
                             <option value="{{ publisher.name }}"></option>
-
                         {% endfor %}
-
                     </datalist>
-
                 </div>
 
-
                 <div class="form-group">
-
-                    <label for="publication_year">
-                        سال انتشار شمسی
-                    </label>
-
+                    <label for="publication_year">سال انتشار شمسی</label>
                     <input
                         id="publication_year"
                         type="text"
                         name="publication_year"
                         class="form-control"
-                        value="{% if form_data %}{{ form_data.publication_year }}{% else %}{{ book.publication_year|default:'' }}{% endif %}"
+                        value="{% if form_data %}{{ form_data.publication_year|default:'' }}{% else %}{{ book.publication_year|default:'' }}{% endif %}"
                         inputmode="numeric"
                         placeholder="مثلاً: 1402"
+                        required
                     >
-
                     <div class="field-description">
-                        سال را بر اساس تقویم شمسی وارد کنید.
+                        سال انتشار را بر اساس تقویم شمسی وارد کنید.
                     </div>
-
                 </div>
 
             </div>
 
+            <!-- شابک -->
+            <div class="form-group">
+                <label for="isbn">شابک (ISBN)</label>
+                <input
+                    id="isbn"
+                    type="text"
+                    name="isbn"
+                    class="form-control"
+                    value="{% if form_data %}{{ form_data.isbn|default:'' }}{% else %}{{ book.isbn|default:'' }}{% endif %}"
+                    placeholder="شابک کتاب، در صورت وجود"
+                    autocomplete="off"
+                >
+                <div class="field-description">
+                    در صورت نداشتن شابک، این قسمت را خالی بگذارید.
+                </div>
+            </div>
 
             <!-- تعداد نسخه‌ها -->
-
             <div class="form-group">
-
-                <label for="total_copies">
-                    تعداد نسخه‌ها
-                </label>
-
+                <label for="total_copies">تعداد نسخه‌ها</label>
                 <input
                     id="total_copies"
                     type="number"
                     name="total_copies"
                     class="form-control"
-                    value="{% if form_data %}{{ form_data.total_copies }}{% else %}{{ book.total_copies|default:'1' }}{% endif %}"
+                    value="{% if form_data %}{{ form_data.total_copies|default:'' }}{% else %}{{ book.total_copies|default:'1' }}{% endif %}"
                     min="1"
                     step="1"
                     placeholder="مثلاً: 3"
@@ -1002,63 +890,33 @@
                 </div>
 
                 {% if edit_mode %}
-
                     <div class="copies-info">
-
-                        <strong>
-                            توجه:
-                        </strong>
-
-                        اگر تعدادی از نسخه‌های این کتاب در حال امانت باشند،
-                        تعداد نسخه‌ها را نمی‌توان کمتر از تعداد نسخه‌های در حال امانت قرار داد.
-
+                        <strong>توجه:</strong>
+                        تعداد نسخه‌ها نمی‌تواند کمتر از تعداد نسخه‌های در حال امانت باشد.
                     </div>
-
                 {% endif %}
-
             </div>
 
-
             <!-- توضیحات -->
-
             <div class="form-group">
-
-                <label for="description">
-                    توضیحات
-                </label>
-
+                <label for="description">توضیحات</label>
                 <textarea
                     id="description"
                     name="description"
                     class="form-control"
                     placeholder="توضیحات کتاب..."
-                >{% if form_data %}{{ form_data.description }}{% else %}{{ book.description|default:'' }}{% endif %}</textarea>
-
+                >{% if form_data %}{{ form_data.description|default:'' }}{% else %}{{ book.description|default:'' }}{% endif %}</textarea>
             </div>
 
-
-            <!-- جلد -->
-
+            <!-- تصویر جلد -->
             <div class="form-group">
-
-                <label>
-                    تصویر جلد کتاب
-                </label>
+                <label for="cover">تصویر جلد کتاب</label>
 
                 <div class="file-box">
-
-                    <div class="file-icon">
-                        🖼️
-                    </div>
+                    <div class="file-icon">🖼️</div>
 
                     <div class="file-title">
-
-                        {% if edit_mode %}
-                            انتخاب جلد جدید
-                        {% else %}
-                            انتخاب تصویر جلد
-                        {% endif %}
-
+                        {% if edit_mode %}انتخاب جلد جدید{% else %}انتخاب تصویر جلد{% endif %}
                     </div>
 
                     <div class="file-description">
@@ -1066,226 +924,162 @@
                     </div>
 
                     <input
+                        id="cover"
                         type="file"
                         name="cover"
                         accept="image/*"
                     >
-
                 </div>
-
 
                 {% if edit_mode and book.cover %}
-
                     <div class="current-cover">
-
-                        <p class="current-cover-title">
-                            جلد فعلی
-                        </p>
-
-                        <img
-                            src="{{ book.cover.url }}"
-                            alt="{{ book.title }}"
-                        >
-
+                        <p class="current-cover-title">جلد فعلی</p>
+                        <img src="{{ book.cover.url }}" alt="{{ book.title }}">
                     </div>
-
                 {% endif %}
-
             </div>
-
 
             <!-- وضعیت موجودی -->
-
             <div class="form-group">
-
                 <div class="availability-info">
-
-                    <div class="availability-icon">
-                        📚
-                    </div>
+                    <div class="availability-icon">📚</div>
 
                     <div class="availability-text">
-
-                        <strong>
-                            وضعیت موجودی به‌صورت خودکار محاسبه می‌شود
-                        </strong>
-
+                        <strong>وضعیت موجودی به‌صورت خودکار محاسبه می‌شود</strong>
                         <span>
-                            با توجه به تعداد کل نسخه‌ها و نسخه‌های در حال امانت،
-                            سیستم تعداد نسخه‌های موجود را محاسبه می‌کند.
+                            سیستم تعداد نسخه‌های موجود را با توجه به تعداد کل نسخه‌ها و نسخه‌های در حال امانت محاسبه می‌کند.
                         </span>
-
                     </div>
-
                 </div>
-
             </div>
 
-
             <!-- دکمه‌ها -->
-
             <div class="form-actions">
-
-                <button
-                    type="submit"
-                    class="btn btn-primary"
-                >
-
-                    {% if edit_mode %}
-                        ذخیره تغییرات
-                    {% else %}
-                        ذخیره کتاب
-                    {% endif %}
-
+                <button type="submit" class="btn btn-primary">
+                    {% if edit_mode %}ذخیره تغییرات{% else %}ذخیره کتاب{% endif %}
                 </button>
 
-
-                <a
-                    href="{% url 'manage_books' %}"
-                    class="btn btn-secondary"
-                >
+                <a href="{% url 'manage_books' %}" class="btn btn-secondary">
                     انصراف
                 </a>
-
             </div>
 
         </form>
-
     </div>
-
 </section>
 
-
 <script>
-
     function addPerson(containerId, inputName, placeholder) {
-
-        const container =
-            document.getElementById(containerId);
+        const container = document.getElementById(containerId);
 
         if (!container) {
             return;
         }
 
-        const row =
-            document.createElement("div");
+        const row = document.createElement("div");
+        row.className = "person-row";
 
-        row.className =
-            "person-row";
+        const input = document.createElement("input");
+        input.type = "text";
+        input.name = inputName;
+        input.className = "form-control";
+        input.placeholder = placeholder;
 
-        row.innerHTML = `
-            <input
-                type="text"
-                name="${inputName}"
-                class="form-control"
-                placeholder="${placeholder}"
-            >
+        if (inputName === "authors") {
+            input.required = true;
+        }
 
-            <button
-                type="button"
-                class="remove-person-btn"
-                onclick="removePerson(this)"
-            >
-                −
-            </button>
-        `;
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "remove-person-btn";
+        button.textContent = "−";
+        button.setAttribute("aria-label", "حذف مورد");
 
+        button.addEventListener("click", function () {
+            removePerson(button);
+        });
+
+        row.appendChild(input);
+        row.appendChild(button);
         container.appendChild(row);
 
         updateRemoveButtons(container);
-
-        const input =
-            row.querySelector("input");
-
-        if (input) {
-            input.focus();
-        }
+        input.focus();
     }
 
-
     function removePerson(button) {
-
-        const row =
-            button.closest(".person-row");
+        const row = button.closest(".person-row");
 
         if (!row) {
             return;
         }
 
-        const container =
-            row.parentElement;
-
+        const container = row.parentElement;
         row.remove();
+
+        if (container.querySelectorAll(".person-row").length === 0) {
+            if (container.id === "authors-container") {
+                addPerson(
+                    container.id,
+                    "authors",
+                    "نام مؤلف"
+                );
+            } else if (container.id === "translators-container") {
+                addPerson(
+                    container.id,
+                    "translators",
+                    "نام مترجم"
+                );
+            }
+        }
 
         updateRemoveButtons(container);
     }
 
-
     function updateRemoveButtons(container) {
-
         if (!container) {
             return;
         }
 
-        const rows =
-            container.querySelectorAll(".person-row");
+        const rows = container.querySelectorAll(".person-row");
 
-        rows.forEach(function(row) {
+        rows.forEach(function (row) {
+            const button = row.querySelector(".remove-person-btn");
 
-            const removeButton =
-                row.querySelector(
-                    ".remove-person-btn"
-                );
-
-            if (!removeButton) {
-                return;
+            if (button) {
+                button.style.display =
+                    rows.length > 1 ? "block" : "none";
             }
-
-            if (rows.length > 1) {
-                removeButton.style.display = "block";
-            } else {
-                removeButton.style.display = "none";
-            }
-
         });
     }
 
+    document.addEventListener("DOMContentLoaded", function () {
+        updateRemoveButtons(
+            document.getElementById("authors-container")
+        );
 
-    document.addEventListener(
-        "DOMContentLoaded",
-        function() {
+        updateRemoveButtons(
+            document.getElementById("translators-container")
+        );
 
-            const authorsContainer =
-                document.getElementById(
-                    "authors-container"
-                );
+        const locationSelect = document.getElementById("location");
 
-            const translatorsContainer =
-                document.getElementById(
-                    "translators-container"
-                );
-
-
-            if (authorsContainer) {
-
-                updateRemoveButtons(
-                    authorsContainer
-                );
-
-            }
-
-
-            if (translatorsContainer) {
-
-                updateRemoveButtons(
-                    translatorsContainer
-                );
-
-            }
-
+        if (locationSelect && typeof TomSelect !== "undefined") {
+            new TomSelect(locationSelect, {
+                create: false,
+                maxOptions: null,
+                searchField: ["text"],
+                placeholder: "کد یا توضیحات محل را جست‌وجو کنید...",
+                allowEmptyOption: true,
+                closeAfterSelect: true,
+                render: {
+                    no_results: function () {
+                        return '<div class="no-results">محل موردنظر پیدا نشد.</div>';
+                    }
+                }
+            });
         }
-    );
-
+    });
 </script>
 
 {% endblock %}

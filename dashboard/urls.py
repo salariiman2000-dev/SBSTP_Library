@@ -40,7 +40,7 @@ urlpatterns = [
         views.support_logs,
         name="support_logs",
     ),
-
+    path("users/add/", views.add_user, name="add_user"),
     path(
         "loans/export-excel/",
         views.export_loans_excel,

@@ -581,6 +581,92 @@ class RegisterForm(UserCreationForm):
 
         return password2
 
+
+class AdminUserCreateForm(RegisterForm):
+
+    phone_number = forms.CharField(
+        label="شماره موبایل",
+        max_length=11,
+        min_length=11,
+        required=True,
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-input",
+                "placeholder": "09123456789",
+                "inputmode": "numeric",
+                "autocomplete": "tel",
+                "dir": "ltr",
+                "maxlength": "11",
+            }
+        ),
+        error_messages={
+            "required": "لطفاً شماره موبایل را وارد کنید.",
+            "max_length": "شماره موبایل باید ۱۱ رقم باشد.",
+            "min_length": "شماره موبایل باید ۱۱ رقم باشد.",
+        },
+    )
+
+    class Meta(RegisterForm.Meta):
+        fields = (
+            "first_name",
+            "last_name",
+            "father_name",
+            "national_code",
+            "birth_year",
+            "birth_month",
+            "birth_day",
+            "birth_date",
+            "home_address",
+            "profile_image",
+            "phone_number",
+            "username",
+            "password1",
+            "password2",
+        )
+
+    def clean_phone_number(self):
+        phone = self.cleaned_data["phone_number"]
+
+        phone = normalize_digits(phone)
+
+        phone = (
+            phone
+            .replace(" ", "")
+            .replace("-", "")
+            .replace("(", "")
+            .replace(")", "")
+        )
+
+        if phone.startswith("+98"):
+            phone = "0" + phone[3:]
+
+        elif phone.startswith("98"):
+            phone = "0" + phone[2:]
+
+        if not phone.startswith("09"):
+            raise forms.ValidationError(
+                "شماره موبایل باید با 09 شروع شود."
+            )
+
+        if len(phone) != 11:
+            raise forms.ValidationError(
+                "شماره موبایل باید ۱۱ رقم باشد."
+            )
+
+        if not phone.isdigit():
+            raise forms.ValidationError(
+                "شماره موبایل فقط باید شامل عدد باشد."
+            )
+
+        if User.objects.filter(
+            phone_number=phone
+        ).exists():
+            raise forms.ValidationError(
+                "این شماره موبایل قبلاً استفاده شده است."
+            )
+
+        return phone
+
 class LoginForm(AuthenticationForm):
 
     username = forms.CharField(

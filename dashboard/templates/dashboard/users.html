@@ -447,10 +447,532 @@
             font-size: 15px;
         }
     }
+
+
 </style>
+<style>
 
+    /* =========================
+       ADD USER
+    ========================= */
+
+    .add-user-box {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+        box-shadow: var(--shadow);
+    }
+
+    .add-user-header {
+        padding: 22px 25px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .add-user-header h2 {
+        margin: 0;
+        color: var(--text);
+        font-size: 22px;
+        font-weight: 800;
+    }
+
+    .add-user-header p {
+        margin: 6px 0 0;
+        color: var(--text-soft);
+        font-size: 15px;
+    }
+
+    .add-user-toggle {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--primary);
+        color: #fff;
+        padding: 10px 16px;
+        font-family: inherit;
+        font-size: 15px;
+        font-weight: 800;
+        cursor: pointer;
+    }
+
+    .add-user-toggle:hover {
+        opacity: .92;
+    }
+
+    .add-user-form-wrapper {
+        display: none;
+        padding: 25px;
+    }
+
+    .add-user-form-wrapper.open {
+        display: block;
+    }
+
+    .add-user-form {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+    }
+
+    .form-field {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+    }
+
+    .form-field.full {
+        grid-column: 1 / -1;
+    }
+
+    .form-field label {
+        color: var(--text);
+        font-size: 15px;
+        font-weight: 800;
+    }
+
+    .form-input {
+        width: 100%;
+        min-height: 45px;
+        padding: 9px 12px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--surface-soft);
+        color: var(--text);
+        outline: none;
+        font-family: inherit;
+        font-size: 15px;
+        box-sizing: border-box;
+    }
+
+    textarea.form-input {
+        resize: vertical;
+        min-height: 105px;
+    }
+
+    .form-input:focus {
+        border-color: var(--primary);
+        background: var(--surface);
+        box-shadow: 0 0 0 3px var(--primary-soft);
+    }
+
+    .birth-fields {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 10px;
+    }
+
+    .field-errors {
+        color: #c46a38;
+        font-size: 13px;
+        line-height: 1.8;
+    }
+
+    .field-errors ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .non-field-errors {
+        grid-column: 1 / -1;
+        padding: 12px 15px;
+        border-radius: 8px;
+        background: rgba(196, 93, 56, .09);
+        color: #c46a38;
+        font-size: 14px;
+    }
+
+    .non-field-errors ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .form-actions {
+        grid-column: 1 / -1;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 10px;
+        padding-top: 5px;
+    }
+
+    .submit-user-button {
+        min-height: 44px;
+        padding: 0 22px;
+        border: 0;
+        border-radius: 8px;
+        background: var(--primary);
+        color: #fff;
+        font-family: inherit;
+        font-size: 15px;
+        font-weight: 800;
+        cursor: pointer;
+    }
+
+    .submit-user-button:hover {
+        opacity: .92;
+    }
+
+    .required-note {
+        color: var(--text-soft);
+        font-size: 13px;
+    }
+
+    .image-help {
+        color: var(--text-soft);
+        font-size: 13px;
+    }
+
+    @media (max-width: 800px) {
+
+        .add-user-form {
+            grid-template-columns: 1fr;
+        }
+
+        .form-field.full {
+            grid-column: auto;
+        }
+
+        .non-field-errors,
+        .form-actions {
+            grid-column: auto;
+        }
+    }
+
+    @media (max-width: 500px) {
+
+        .add-user-header {
+            align-items: flex-start;
+            flex-direction: column;
+            padding: 19px;
+        }
+
+        .add-user-form-wrapper {
+            padding: 19px;
+        }
+
+        .birth-fields {
+            grid-template-columns: 1fr;
+        }
+    }
+
+</style>
 <div class="users-page">
+<!-- ADD USER -->
 
+<div
+    id="add-user"
+    class="add-user-box"
+>
+
+    <div class="add-user-header">
+
+        <div>
+            <h2>
+                افزودن کاربر
+            </h2>
+
+            <p>
+                ایجاد حساب کاربری جدید با اطلاعات کامل ثبت‌نام
+            </p>
+        </div>
+
+        <button
+            type="button"
+            id="toggle-add-user"
+            class="add-user-toggle"
+        >
+            افزودن کاربر
+        </button>
+
+    </div>
+
+    <div
+        id="add-user-form-wrapper"
+        class="add-user-form-wrapper"
+    >
+
+        <form
+            method="post"
+            action="{% url 'add_user' %}"
+            enctype="multipart/form-data"
+            class="add-user-form"
+        >
+
+            {% csrf_token %}
+
+            {% if add_user_form.non_field_errors %}
+                <div class="non-field-errors">
+                    {{ add_user_form.non_field_errors }}
+                </div>
+            {% endif %}
+
+
+            <!-- نام -->
+
+            <div class="form-field">
+
+                <label for="{{ add_user_form.first_name.id_for_label }}">
+                    {{ add_user_form.first_name.label }}
+                </label>
+
+                {{ add_user_form.first_name }}
+
+                {% if add_user_form.first_name.errors %}
+                    <div class="field-errors">
+                        {{ add_user_form.first_name.errors }}
+                    </div>
+                {% endif %}
+
+            </div>
+
+
+            <!-- نام خانوادگی -->
+
+            <div class="form-field">
+
+                <label for="{{ add_user_form.last_name.id_for_label }}">
+                    {{ add_user_form.last_name.label }}
+                </label>
+
+                {{ add_user_form.last_name }}
+
+                {% if add_user_form.last_name.errors %}
+                    <div class="field-errors">
+                        {{ add_user_form.last_name.errors }}
+                    </div>
+                {% endif %}
+
+            </div>
+
+
+            <!-- نام پدر -->
+
+            <div class="form-field">
+
+                <label for="{{ add_user_form.father_name.id_for_label }}">
+                    {{ add_user_form.father_name.label }}
+                </label>
+
+                {{ add_user_form.father_name }}
+
+                {% if add_user_form.father_name.errors %}
+                    <div class="field-errors">
+                        {{ add_user_form.father_name.errors }}
+                    </div>
+                {% endif %}
+
+            </div>
+
+
+            <!-- کد ملی -->
+
+            <div class="form-field">
+
+                <label for="{{ add_user_form.national_code.id_for_label }}">
+                    {{ add_user_form.national_code.label }}
+                </label>
+
+                {{ add_user_form.national_code }}
+
+                {% if add_user_form.national_code.errors %}
+                    <div class="field-errors">
+                        {{ add_user_form.national_code.errors }}
+                    </div>
+                {% endif %}
+
+            </div>
+
+
+            <!-- تاریخ تولد -->
+
+            <div class="form-field full">
+
+                <label>
+                    تاریخ تولد
+                </label>
+
+                <div class="birth-fields">
+
+                    <div>
+                        {{ add_user_form.birth_year }}
+
+                        {% if add_user_form.birth_year.errors %}
+                            <div class="field-errors">
+                                {{ add_user_form.birth_year.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        {{ add_user_form.birth_month }}
+
+                        {% if add_user_form.birth_month.errors %}
+                            <div class="field-errors">
+                                {{ add_user_form.birth_month.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        {{ add_user_form.birth_day }}
+
+                        {% if add_user_form.birth_day.errors %}
+                            <div class="field-errors">
+                                {{ add_user_form.birth_day.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                </div>
+
+                {{ add_user_form.birth_date }}
+
+            </div>
+
+
+            <!-- آدرس -->
+
+            <div class="form-field full">
+
+                <label for="{{ add_user_form.home_address.id_for_label }}">
+                    {{ add_user_form.home_address.label }}
+                </label>
+
+                {{ add_user_form.home_address }}
+
+                {% if add_user_form.home_address.errors %}
+                    <div class="field-errors">
+                        {{ add_user_form.home_address.errors }}
+                    </div>
+                {% endif %}
+
+            </div>
+
+
+            <!-- تصویر -->
+
+            <div class="form-field full">
+
+                <label for="{{ add_user_form.profile_image.id_for_label }}">
+                    {{ add_user_form.profile_image.label }}
+                </label>
+
+                {{ add_user_form.profile_image }}
+
+                <span class="image-help">
+                    انتخاب تصویر پروفایل الزامی است.
+                </span>
+
+                {% if add_user_form.profile_image.errors %}
+                    <div class="field-errors">
+                        {{ add_user_form.profile_image.errors }}
+                    </div>
+                {% endif %}
+
+            </div>
+
+
+            <!-- موبایل -->
+
+            <div class="form-field">
+
+                <label for="{{ add_user_form.phone_number.id_for_label }}">
+                    {{ add_user_form.phone_number.label }}
+                </label>
+
+                {{ add_user_form.phone_number }}
+
+                {% if add_user_form.phone_number.errors %}
+                    <div class="field-errors">
+                        {{ add_user_form.phone_number.errors }}
+                    </div>
+                {% endif %}
+
+            </div>
+
+
+            <!-- نام کاربری -->
+
+            <div class="form-field">
+
+                <label for="{{ add_user_form.username.id_for_label }}">
+                    {{ add_user_form.username.label }}
+                </label>
+
+                {{ add_user_form.username }}
+
+                {% if add_user_form.username.errors %}
+                    <div class="field-errors">
+                        {{ add_user_form.username.errors }}
+                    </div>
+                {% endif %}
+
+            </div>
+
+
+            <!-- رمز عبور -->
+
+            <div class="form-field">
+
+                <label for="{{ add_user_form.password1.id_for_label }}">
+                    {{ add_user_form.password1.label }}
+                </label>
+
+                {{ add_user_form.password1 }}
+
+                {% if add_user_form.password1.errors %}
+                    <div class="field-errors">
+                        {{ add_user_form.password1.errors }}
+                    </div>
+                {% endif %}
+
+            </div>
+
+
+            <!-- تکرار رمز -->
+
+            <div class="form-field">
+
+                <label for="{{ add_user_form.password2.id_for_label }}">
+                    {{ add_user_form.password2.label }}
+                </label>
+
+                {{ add_user_form.password2 }}
+
+                {% if add_user_form.password2.errors %}
+                    <div class="field-errors">
+                        {{ add_user_form.password2.errors }}
+                    </div>
+                {% endif %}
+
+            </div>
+
+
+            <div class="form-actions">
+
+                <button
+                    type="submit"
+                    class="submit-user-button"
+                >
+                    ایجاد کاربر
+                </button>
+
+                <span class="required-note">
+                    تمام اطلاعات این فرم الزامی هستند.
+                </span>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
     <div class="users-box">
 
         <!-- HEADER -->
@@ -863,6 +1385,220 @@
                 );
             }
         );
+
+/* =========================
+   ADD USER FORM
+========================= */
+
+const toggleAddUser =
+    document.getElementById("toggle-add-user");
+
+const addUserFormWrapper =
+    document.getElementById("add-user-form-wrapper");
+
+if (toggleAddUser && addUserFormWrapper) {
+
+    toggleAddUser.addEventListener(
+        "click",
+        function () {
+
+            addUserFormWrapper.classList.toggle(
+                "open"
+            );
+
+            if (
+                addUserFormWrapper.classList.contains(
+                    "open"
+                )
+            ) {
+                this.textContent = "بستن فرم";
+            } else {
+                this.textContent = "افزودن کاربر";
+            }
+        }
+    );
+
+
+    /*
+     * اگر از منوی درختی روی «افزودن کاربر»
+     * وارد صفحه شده باشیم، فرم خودکار باز شود.
+     */
+    if (window.location.hash === "#add-user") {
+
+        addUserFormWrapper.classList.add(
+            "open"
+        );
+
+        toggleAddUser.textContent =
+            "بستن فرم";
+
+        setTimeout(
+            function () {
+
+                const addUserBox =
+                    document.getElementById(
+                        "add-user"
+                    );
+
+                if (addUserBox) {
+
+                    addUserBox.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start"
+                    });
+
+                }
+
+            },
+            100
+        );
+    }
+}
+
+
+/* =========================
+   BIRTH DATE
+========================= */
+
+const birthMonth =
+    document.getElementById(
+        "id_birth_month"
+    );
+
+const birthDay =
+    document.getElementById(
+        "id_birth_day"
+    );
+
+const birthYear =
+    document.getElementById(
+        "id_birth_year"
+    );
+
+
+function updateBirthDays() {
+
+    if (!birthMonth || !birthDay) {
+        return;
+    }
+
+    const month =
+        parseInt(
+            birthMonth.value,
+            10
+        );
+
+    const previousDay =
+        birthDay.value;
+
+    let days = 31;
+
+    if (
+        month >= 7 &&
+        month <= 11
+    ) {
+        days = 30;
+    }
+
+    if (month === 12) {
+
+        days = 29;
+
+        if (birthYear) {
+
+            const year =
+                parseInt(
+                    birthYear.value,
+                    10
+                );
+
+            if (
+                year &&
+                (
+                    year % 33 === 1 ||
+                    year % 33 === 5 ||
+                    year % 33 === 9 ||
+                    year % 33 === 13 ||
+                    year % 33 === 17 ||
+                    year % 33 === 22 ||
+                    year % 33 === 26 ||
+                    year % 33 === 30
+                )
+            ) {
+                days = 30;
+            }
+        }
+    }
+
+    birthDay.innerHTML = "";
+
+    for (
+        let day = 1;
+        day <= days;
+        day++
+    ) {
+
+        const option =
+            document.createElement(
+                "option"
+            );
+
+        option.value = day;
+        option.textContent = day;
+
+        birthDay.appendChild(
+            option
+        );
+    }
+
+    if (
+        previousDay &&
+        parseInt(previousDay, 10) <= days
+    ) {
+        birthDay.value =
+            previousDay;
+    }
+}
+
+
+if (birthMonth) {
+
+    birthMonth.addEventListener(
+        "change",
+        updateBirthDays
+    );
+}
+
+if (birthYear) {
+
+    birthYear.addEventListener(
+        "change",
+        updateBirthDays
+    );
+}
+
+updateBirthDays();
+
+
+/* =========================
+   OPEN FORM WHEN VALIDATION ERROR
+========================= */
+
+{% if add_user_form.errors %}
+
+if (addUserFormWrapper) {
+
+    addUserFormWrapper.classList.add(
+        "open"
+    );
+
+    if (toggleAddUser) {
+        toggleAddUser.textContent =
+            "بستن فرم";
+    }
+}
+
+{% endif %}
 </script>
 
 {% endblock %}

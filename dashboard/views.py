@@ -10,6 +10,11 @@ from .decorators import permission_required
 from .models import ActivityLog
 from blog.models import *
 import jdatetime
+from accounts.forms import (
+    LoginForm,
+    ProfileForm,
+    AdminUserCreateForm,
+)
 from openpyxl import Workbook
 from django.http import HttpResponse
 from datetime import timedelta
@@ -222,11 +227,13 @@ def normalize_digits(value):
     return value.translate(translation_table)
 
 
+
 def get_book_form_context(book=None, form_data=None):
     context = {
         "book": book,
         "edit_mode": book is not None,
         "subjects": Subject.objects.all().order_by("name"),
+        "categories": Category.objects.all().order_by("name"),
         "authors": Author.objects.all().order_by("name"),
         "translators": Translator.objects.all().order_by("name"),
         "publishers": Publisher.objects.all().order_by("name"),
@@ -242,11 +249,38 @@ def get_book_form_context(book=None, form_data=None):
 
 
 
+
 def get_filtered_books(request):
     query = request.GET.get("q", "").strip()
     search_by = request.GET.get("search_by", "title").strip()
     sort = request.GET.get("sort", "newest").strip()
     availability = request.GET.get("availability", "").strip()
+
+    valid_search_fields = {
+        "title",
+        "isbn",
+        "registration_number",
+        "author",
+        "translator",
+        "publisher",
+        "subject",
+        "category",
+        "location",
+        "description",
+    }
+
+    if search_by not in valid_search_fields:
+        search_by = "title"
+
+    valid_sort_options = {
+        "newest",
+        "oldest",
+        "title_asc",
+        "title_desc",
+    }
+
+    if sort not in valid_sort_options:
+        sort = "newest"
 
     books = (
         Book.objects
@@ -254,6 +288,7 @@ def get_filtered_books(request):
             "subject",
             "publisher",
             "location",
+            "category",
         )
         .prefetch_related(
             "authors",
@@ -276,25 +311,21 @@ def get_filtered_books(request):
         )
     )
 
-    # -------------------------
-    # جستجو
-    # -------------------------
-
     if query:
         if search_by == "title":
-            books = books.filter(
-                title__icontains=query
-            )
+            books = books.filter(title__icontains=query)
 
         elif search_by == "isbn":
-            books = books.filter(
-                isbn__icontains=query
-            )
+            books = books.filter(isbn__icontains=query)
 
         elif search_by == "registration_number":
-            books = books.filter(
-                registration_number__icontains=query
-            )
+            normalized_query = normalize_digits(query)
+            if normalized_query.isdigit():
+                books = books.filter(
+                    registration_number=int(normalized_query)
+                )
+            else:
+                books = books.none()
 
         elif search_by == "author":
             books = books.filter(
@@ -316,14 +347,23 @@ def get_filtered_books(request):
                 subject__name__icontains=query
             )
 
-        elif search_by == "location":
+        elif search_by == "category":
             books = books.filter(
-                location__code__icontains=query
+                category__name__icontains=query
             )
 
-    # -------------------------
-    # مرتب‌سازی
-    # -------------------------
+        elif search_by == "location":
+            books = books.filter(
+                Q(location__code__icontains=query)
+                | Q(location__description__icontains=query)
+            )
+
+        elif search_by == "description":
+            books = books.filter(
+                description__icontains=query
+            )
+
+        books = books.distinct()
 
     if sort == "newest":
         books = books.order_by("-created_at")
@@ -337,18 +377,14 @@ def get_filtered_books(request):
     elif sort == "title_desc":
         books = books.order_by("-title")
 
-    # -------------------------
-    # فیلتر وضعیت موجودی
-    # -------------------------
-
     if availability == "available":
         books = books.filter(
-            borrowed_count__lt=F("total_copies")
+            available_copies__gt=0
         )
 
     elif availability == "unavailable":
         books = books.filter(
-            borrowed_count__gte=F("total_copies")
+            available_copies__lte=0
         )
 
     return books, {
@@ -357,6 +393,7 @@ def get_filtered_books(request):
         "sort": sort,
         "availability": availability,
     }
+
 
 
 
@@ -536,57 +573,20 @@ def print_books(request):
 
 @permission_required("blog.manage_books")
 def add_book(request):
-
     if request.method == "POST":
-
-        print("========== ADD BOOK POST ==========")
-        print(request.POST)
-        print("authors:", request.POST.getlist("authors"))
-        print("translators:", request.POST.getlist("translators"))
-        print("===================================")
-
-        title = request.POST.get(
-            "title",
-            ""
-        ).strip()
-
-        isbn = request.POST.get(
-            "isbn",
-            ""
-        ).strip()
-
-        subject_name = request.POST.get(
-            "subject",
-            ""
-        ).strip()
-
-        location_code = request.POST.get(
-            "category",
-            ""
-        ).strip()
-
-        publisher_name = request.POST.get(
-            "publisher",
-            ""
-        ).strip()
-
-        description = request.POST.get(
-            "description",
-            ""
-        ).strip()
-
+        title = request.POST.get("title", "").strip()
+        isbn = request.POST.get("isbn", "").strip()
+        subject_name = request.POST.get("subject", "").strip()
+        location_id = request.POST.get("location", "").strip()
+        publisher_name = request.POST.get("publisher", "").strip()
+        description = request.POST.get("description", "").strip()
         cover = request.FILES.get("cover")
 
-        total_copies = request.POST.get(
-            "total_copies",
-            "1"
-        ).strip()
-
+        total_copies = normalize_digits(
+            request.POST.get("total_copies", "1").strip()
+        )
         publication_year = normalize_digits(
-            request.POST.get(
-                "publication_year",
-                ""
-            ).strip()
+            request.POST.get("publication_year", "").strip()
         )
 
         author_names = [
@@ -603,243 +603,84 @@ def add_book(request):
 
         form_data = request.POST
 
-        # -----------------------------------------
-        # عنوان
-        # -----------------------------------------
-
-        if not title:
-
-            messages.error(
-                request,
-                "عنوان کتاب را وارد کنید."
-            )
-
+        def render_form_error(message):
+            messages.error(request, message)
             return render(
                 request,
                 "dashboard/book_form.html",
-                get_book_form_context(
-                    form_data=form_data
-                )
+                get_book_form_context(form_data=form_data),
             )
 
-        # -----------------------------------------
-        # شابک
-        # -----------------------------------------
+        if not title:
+            return render_form_error("عنوان کتاب را وارد کنید.")
 
-        if isbn:
-
-            isbn_exists = Book.objects.filter(
-                isbn=isbn
-            ).exists()
-
-            if isbn_exists:
-
-                messages.error(
-                    request,
-                    "این شابک قبلاً برای یک کتاب ثبت شده است."
-                )
-
-                return render(
-                    request,
-                    "dashboard/book_form.html",
-                    get_book_form_context(
-                        form_data=form_data
-                    )
-                )
-
-        # -----------------------------------------
-        # مؤلف
-        # -----------------------------------------
+        if isbn and Book.objects.filter(isbn=isbn).exists():
+            return render_form_error(
+                "این شابک قبلاً برای یک کتاب ثبت شده است."
+            )
 
         if not author_names:
-
-            messages.error(
-                request,
+            return render_form_error(
                 "حداقل یک مؤلف برای کتاب وارد کنید."
             )
 
-            return render(
-                request,
-                "dashboard/book_form.html",
-                get_book_form_context(
-                    form_data=form_data
-                )
-            )
-
-        # -----------------------------------------
-        # موضوع
-        # -----------------------------------------
-
         if not subject_name:
+            return render_form_error("موضوع کتاب را وارد کنید.")
 
-            messages.error(
-                request,
-                "موضوع کتاب را وارد کنید."
+        if not location_id:
+            return render_form_error(
+                "دسته‌بندی یا محل قفسه کتاب را انتخاب کنید."
             )
-
-            return render(
-                request,
-                "dashboard/book_form.html",
-                get_book_form_context(
-                    form_data=form_data
-                )
-            )
-
-        # -----------------------------------------
-        # محل قرارگیری
-        # -----------------------------------------
-
-        if not location_code:
-
-            messages.error(
-                request,
-                "کد محل قرارگیری کتاب را وارد کنید."
-            )
-
-            return render(
-                request,
-                "dashboard/book_form.html",
-                get_book_form_context(
-                    form_data=form_data
-                )
-            )
-
-        # -----------------------------------------
-        # ناشر
-        # -----------------------------------------
 
         if not publisher_name:
-
-            messages.error(
-                request,
-                "نام ناشر را وارد کنید."
-            )
-
-            return render(
-                request,
-                "dashboard/book_form.html",
-                get_book_form_context(
-                    form_data=form_data
-                )
-            )
-
-        # -----------------------------------------
-        # تعداد نسخه
-        # -----------------------------------------
+            return render_form_error("نام ناشر را وارد کنید.")
 
         try:
-
-            total_copies = int(
-                normalize_digits(
-                    total_copies
-                )
-            )
-
+            total_copies = int(total_copies)
         except (TypeError, ValueError):
-
-            messages.error(
-                request,
+            return render_form_error(
                 "تعداد نسخه‌ها باید یک عدد باشد."
             )
 
-            return render(
-                request,
-                "dashboard/book_form.html",
-                get_book_form_context(
-                    form_data=form_data
-                )
-            )
-
         if total_copies < 1:
-
-            messages.error(
-                request,
+            return render_form_error(
                 "تعداد نسخه‌ها باید حداقل ۱ باشد."
             )
 
-            return render(
-                request,
-                "dashboard/book_form.html",
-                get_book_form_context(
-                    form_data=form_data
-                )
+        if not publication_year:
+            return render_form_error(
+                "سال انتشار کتاب را وارد کنید."
             )
 
-        # -----------------------------------------
-        # سال انتشار
-        # -----------------------------------------
+        try:
+            publication_year = int(publication_year)
+        except (TypeError, ValueError):
+            return render_form_error(
+                "سال انتشار باید یک عدد باشد."
+            )
 
-        if publication_year:
+        if not 1000 <= publication_year <= 1600:
+            return render_form_error(
+                "سال انتشار شمسی واردشده معتبر نیست."
+            )
 
-            try:
+        location = BookLocation.objects.filter(
+            pk=location_id
+        ).first()
 
-                publication_year = int(
-                    publication_year
-                )
-
-            except (TypeError, ValueError):
-
-                messages.error(
-                    request,
-                    "سال انتشار باید یک عدد باشد."
-                )
-
-                return render(
-                    request,
-                    "dashboard/book_form.html",
-                    get_book_form_context(
-                        form_data=form_data
-                    )
-                )
-
-            if not 1000 <= publication_year <= 1600:
-
-                messages.error(
-                    request,
-                    "سال انتشار شمسی واردشده معتبر نیست."
-                )
-
-                return render(
-                    request,
-                    "dashboard/book_form.html",
-                    get_book_form_context(
-                        form_data=form_data
-                    )
-                )
-
-        else:
-
-            publication_year = None
-
-        # -----------------------------------------
-        # ساخت / دریافت موضوع
-        # -----------------------------------------
-
-        subject, _ = Subject.objects.get_or_create(
-            name=subject_name
-        )
-
-        # -----------------------------------------
-        # ساخت / دریافت ناشر
-        # -----------------------------------------
-
-        publisher, _ = Publisher.objects.get_or_create(
-            name=publisher_name
-        )
-
-        # -----------------------------------------
-        # ساخت / دریافت محل قرارگیری
-        # -----------------------------------------
-
-        location, _ = BookLocation.objects.get_or_create(
-            code=location_code
-        )
-
-        # -----------------------------------------
-        # ایجاد کتاب
-        # -----------------------------------------
+        if location is None:
+            return render_form_error(
+                "محل قفسه انتخاب‌شده معتبر نیست. دوباره انتخاب کنید."
+            )
 
         with transaction.atomic():
+            subject, _ = Subject.objects.get_or_create(
+                name=subject_name
+            )
+
+            publisher, _ = Publisher.objects.get_or_create(
+                name=publisher_name
+            )
 
             book = Book.objects.create(
                 title=title,
@@ -854,28 +695,16 @@ def add_book(request):
                 is_available=True,
             )
 
-            # -----------------------------------------
-            # مؤلفان
-            # -----------------------------------------
-
             for name in author_names:
-
                 author, _ = Author.objects.get_or_create(
                     name=name
                 )
-
                 book.authors.add(author)
 
-            # -----------------------------------------
-            # مترجمان
-            # -----------------------------------------
-
             for name in translator_names:
-
                 translator, _ = Translator.objects.get_or_create(
                     name=name
                 )
-
                 book.translators.add(translator)
 
         log_activity(
@@ -899,66 +728,45 @@ def add_book(request):
     return render(
         request,
         "dashboard/book_form.html",
-        get_book_form_context()
+        get_book_form_context(),
     )
+
+
 
 
 @permission_required("blog.manage_books")
 def edit_book(request, pk):
-
     book = get_object_or_404(
-        Book.objects
-        .select_related(
+        Book.objects.select_related(
             "subject",
             "publisher",
+            "category",
             "location",
-        )
-        .prefetch_related(
+        ).prefetch_related(
             "authors",
             "translators",
         ),
-        pk=pk
+        pk=pk,
     )
 
     if request.method == "POST":
-
-        title = request.POST.get(
-            "title",
-            ""
-        ).strip()
-
-        subject_name = request.POST.get(
-            "subject",
-            ""
-        ).strip()
-
-        location_code = request.POST.get(
-            "category",
-            ""
-        ).strip()
-
-        publisher_name = request.POST.get(
-            "publisher",
-            ""
-        ).strip()
-
-        description = request.POST.get(
-            "description",
-            ""
-        ).strip()
-
+        title = request.POST.get("title", "").strip()
+        isbn = request.POST.get("isbn", "").strip()
+        subject_name = request.POST.get("subject", "").strip()
+        location_id = request.POST.get("location", "").strip()
+        publisher_name = request.POST.get("publisher", "").strip()
+        description = request.POST.get("description", "").strip()
         cover = request.FILES.get("cover")
 
-        total_copies = request.POST.get(
-            "total_copies",
-            str(book.total_copies)
-        ).strip()
+        total_copies = normalize_digits(
+            request.POST.get(
+                "total_copies",
+                str(book.total_copies),
+            ).strip()
+        )
 
         publication_year = normalize_digits(
-            request.POST.get(
-                "publication_year",
-                ""
-            ).strip()
+            request.POST.get("publication_year", "").strip()
         )
 
         author_names = [
@@ -975,267 +783,130 @@ def edit_book(request, pk):
 
         form_data = request.POST
 
-        # -----------------------------------------
-        # اعتبارسنجی
-        # -----------------------------------------
-
-        if not title:
-
-            messages.error(
-                request,
-                "عنوان کتاب را وارد کنید."
-            )
-
+        def render_form_error(message):
+            messages.error(request, message)
             return render(
                 request,
                 "dashboard/book_form.html",
-                get_book_form_context(
-                    book,
-                    form_data
-                )
+                get_book_form_context(book, form_data),
+            )
+
+        if not title:
+            return render_form_error("عنوان کتاب را وارد کنید.")
+
+        if isbn and Book.objects.filter(isbn=isbn).exclude(
+            pk=book.pk
+        ).exists():
+            return render_form_error(
+                "این شابک قبلاً برای کتاب دیگری ثبت شده است."
             )
 
         if not author_names:
-
-            messages.error(
-                request,
+            return render_form_error(
                 "حداقل یک مؤلف برای کتاب وارد کنید."
             )
 
-            return render(
-                request,
-                "dashboard/book_form.html",
-                get_book_form_context(
-                    book,
-                    form_data
-                )
-            )
-
         if not subject_name:
+            return render_form_error("موضوع کتاب را وارد کنید.")
 
-            messages.error(
-                request,
-                "موضوع کتاب را وارد کنید."
-            )
-
-            return render(
-                request,
-                "dashboard/book_form.html",
-                get_book_form_context(
-                    book,
-                    form_data
-                )
-            )
-
-        if not location_code:
-
-            messages.error(
-                request,
-                "دسته‌بندی یا محل قرارگیری کتاب را وارد کنید."
-            )
-
-            return render(
-                request,
-                "dashboard/book_form.html",
-                get_book_form_context(
-                    book,
-                    form_data
-                )
+        if not location_id:
+            return render_form_error(
+                "دسته‌بندی یا محل قفسه کتاب را انتخاب کنید."
             )
 
         if not publisher_name:
-
-            messages.error(
-                request,
-                "نام ناشر را وارد کنید."
-            )
-
-            return render(
-                request,
-                "dashboard/book_form.html",
-                get_book_form_context(
-                    book,
-                    form_data
-                )
-            )
+            return render_form_error("نام ناشر را وارد کنید.")
 
         try:
-
-            total_copies = int(
-                normalize_digits(
-                    total_copies
-                )
-            )
-
+            total_copies = int(total_copies)
         except (TypeError, ValueError):
-
-            messages.error(
-                request,
+            return render_form_error(
                 "تعداد نسخه‌ها باید یک عدد باشد."
             )
 
-            return render(
-                request,
-                "dashboard/book_form.html",
-                get_book_form_context(
-                    book,
-                    form_data
-                )
-            )
-
         if total_copies < 1:
-
-            messages.error(
-                request,
+            return render_form_error(
                 "تعداد نسخه‌ها باید حداقل ۱ باشد."
             )
 
-            return render(
-                request,
-                "dashboard/book_form.html",
-                get_book_form_context(
-                    book,
-                    form_data
-                )
+        if not publication_year:
+            return render_form_error(
+                "سال انتشار کتاب را وارد کنید."
             )
 
-        # -----------------------------------------
-        # تعداد نسخه‌های امانت
-        # -----------------------------------------
-
-        borrowed_count = Loan.objects.filter(
-            book=book,
-            status=Loan.STATUS_BORROWED
-        ).count()
-
-        if total_copies < borrowed_count:
-
-            messages.error(
-                request,
-                f"تعداد نسخه‌ها نمی‌تواند کمتر از "
-                f"{borrowed_count} نسخه‌ای باشد که "
-                f"در حال حاضر امانت هستند."
+        try:
+            publication_year = int(publication_year)
+        except (TypeError, ValueError):
+            return render_form_error(
+                "سال انتشار باید یک عدد باشد."
             )
 
-            return render(
-                request,
-                "dashboard/book_form.html",
-                get_book_form_context(
-                    book,
-                    form_data
-                )
+        if not 1000 <= publication_year <= 1600:
+            return render_form_error(
+                "سال انتشار شمسی واردشده معتبر نیست."
             )
 
-        # -----------------------------------------
-        # سال انتشار
-        # -----------------------------------------
+        location = BookLocation.objects.filter(
+            pk=location_id
+        ).first()
 
-        if publication_year:
-
-            try:
-
-                publication_year = int(
-                    publication_year
-                )
-
-            except (TypeError, ValueError):
-
-                messages.error(
-                    request,
-                    "سال انتشار باید یک عدد باشد."
-                )
-
-                return render(
-                    request,
-                    "dashboard/book_form.html",
-                    get_book_form_context(
-                        book,
-                        form_data
-                    )
-                )
-
-            if not 1000 <= publication_year <= 1600:
-
-                messages.error(
-                    request,
-                    "سال انتشار شمسی واردشده معتبر نیست."
-                )
-
-                return render(
-                    request,
-                    "dashboard/book_form.html",
-                    get_book_form_context(
-                        book,
-                        form_data
-                    )
-                )
-
-        else:
-
-            publication_year = None
-
-        # -----------------------------------------
-        # روابط
-        # -----------------------------------------
-
-        subject, _ = Subject.objects.get_or_create(
-            name=subject_name
-        )
-
-        publisher, _ = Publisher.objects.get_or_create(
-            name=publisher_name
-        )
-
-        location, _ = BookLocation.objects.get_or_create(
-            code=location_code
-        )
-
-        # -----------------------------------------
-        # ذخیره کتاب
-        # -----------------------------------------
+        if location is None:
+            return render_form_error(
+                "محل قفسه انتخاب‌شده معتبر نیست. دوباره انتخاب کنید."
+            )
 
         with transaction.atomic():
+            borrowed_count = Loan.objects.filter(
+                book=book,
+                status=Loan.STATUS_BORROWED,
+            ).count()
+
+            if total_copies < borrowed_count:
+                return render_form_error(
+                    f"تعداد نسخه‌ها نمی‌تواند کمتر از "
+                    f"{borrowed_count} نسخه‌ای باشد که "
+                    f"در حال حاضر امانت هستند."
+                )
+
+            subject, _ = Subject.objects.get_or_create(
+                name=subject_name
+            )
+
+            publisher, _ = Publisher.objects.get_or_create(
+                name=publisher_name
+            )
 
             book.title = title
+            book.isbn = isbn or None
             book.subject = subject
             book.publisher = publisher
             book.publication_year = publication_year
             book.location = location
             book.description = description
             book.total_copies = total_copies
-            book.is_available = (
-                borrowed_count < total_copies
-            )
+            book.is_available = borrowed_count < total_copies
 
             if cover:
                 book.cover = cover
 
             book.save()
 
-            # مؤلفان
-
             authors = []
 
             for name in author_names:
-
                 author, _ = Author.objects.get_or_create(
                     name=name
                 )
-
                 authors.append(author)
 
             book.authors.set(authors)
 
-            # مترجمان
-
             translators = []
 
             for name in translator_names:
-
                 translator, _ = Translator.objects.get_or_create(
                     name=name
                 )
-
                 translators.append(translator)
 
             book.translators.set(translators)
@@ -1261,7 +932,7 @@ def edit_book(request, pk):
     return render(
         request,
         "dashboard/book_form.html",
-        get_book_form_context(book)
+        get_book_form_context(book),
     )
 
 
@@ -1314,252 +985,159 @@ def delete_book(request, pk):
 
 @permission_required("blog.manage_categories")
 def manage_categories(request):
-
-    query = request.GET.get(
-        "q",
-        ""
-    ).strip()
-
-    subjects = (
-        Subject.objects
-        .all()
-        .order_by("name")
-    )
-
-    if query:
-        subjects = subjects.filter(
-            name__icontains=query
-        )
-
-    context = {
-        "categories": subjects,
-        "query": query,
-    }
+    categories = Category.objects.all().order_by("name")
 
     return render(
         request,
         "dashboard/categories.html",
-        context
+        {
+            "categories": categories,
+        },
     )
 
 
 @permission_required("blog.manage_categories")
 def add_category(request):
-
     if request.method == "POST":
-
-        name = request.POST.get(
-            "name",
-            ""
+        name = (
+            request.POST.get("name")
+            or request.POST.get("category")
+            or ""
         ).strip()
 
         if not name:
-
             messages.error(
                 request,
-                "نام موضوع را وارد کنید."
+                "نام دسته‌بندی را وارد کنید."
             )
-
-            context = {
-                "category": None,
-            }
 
             return render(
                 request,
                 "dashboard/category_form.html",
-                context
+                {
+                    "category": None,
+                    "edit_mode": False,
+                },
             )
 
-        subject, created = Subject.objects.get_or_create(
-            name=name
-        )
-
-        if not created:
-
-            messages.warning(
-                request,
-                "این موضوع قبلاً وجود دارد."
-            )
-
-        else:
-
-            log_activity(
-                request=request,
-                action=ActivityLog.ACTION_CREATE,
-                section="موضوعات",
-                description=(
-                    f"موضوع «{subject.name}» اضافه شد."
-                ),
-                object_id=subject.pk,
-            )
-
-            messages.success(
-                request,
-                "موضوع با موفقیت اضافه شد."
-            )
-
-        return redirect(
-            "manage_categories"
-        )
-
-    context = {
-        "category": None,
-    }
-
-    return render(
-        request,
-        "dashboard/category_form.html",
-        context
-    )
-
-
-@permission_required("blog.manage_categories")
-def edit_category(request, pk):
-
-    subject = get_object_or_404(
-        Subject,
-        pk=pk
-    )
-
-    if request.method == "POST":
-
-        name = request.POST.get(
-            "name",
-            ""
-        ).strip()
-
-        if not name:
-
-            messages.error(
-                request,
-                "نام موضوع را وارد کنید."
-            )
-
-            context = {
-                "category": subject,
-            }
-
-            return render(
-                request,
-                "dashboard/category_form.html",
-                context
-            )
-
-        duplicate_exists = (
-            Subject.objects
-            .filter(name=name)
-            .exclude(pk=subject.pk)
-            .exists()
-        )
-
-        if duplicate_exists:
-
-            messages.error(
-                request,
-                "موضوعی با این نام قبلاً وجود دارد."
-            )
-
-            context = {
-                "category": subject,
-            }
-
-            return render(
-                request,
-                "dashboard/category_form.html",
-                context
-            )
-
-        subject.name = name
-
-        subject.save()
+        category = Category(name=name)
+        category.save()
 
         log_activity(
             request=request,
-            action=ActivityLog.ACTION_UPDATE,
-            section="موضوعات",
+            action=ActivityLog.ACTION_CREATE,
+            section="دسته‌بندی‌ها",
             description=(
-                f"موضوع «{subject.name}» ویرایش شد."
+                f"دسته‌بندی «{category.name}» ایجاد شد."
             ),
-            object_id=subject.pk,
+            object_id=category.pk,
         )
 
         messages.success(
             request,
-            "موضوع با موفقیت ویرایش شد."
+            "دسته‌بندی با موفقیت اضافه شد."
         )
 
-        return redirect(
-            "manage_categories"
-        )
-
-    context = {
-        "category": subject,
-    }
+        return redirect("manage_categories")
 
     return render(
         request,
         "dashboard/category_form.html",
-        context
+        {
+            "category": None,
+            "edit_mode": False,
+        },
+    )
+
+
+
+@permission_required("blog.manage_categories")
+def edit_category(request, pk):
+    category = get_object_or_404(Category, pk=pk)
+
+    if request.method == "POST":
+        name = (
+            request.POST.get("name")
+            or request.POST.get("category")
+            or ""
+        ).strip()
+
+        if not name:
+            messages.error(
+                request,
+                "نام دسته‌بندی را وارد کنید."
+            )
+
+            return render(
+                request,
+                "dashboard/category_form.html",
+                {
+                    "category": category,
+                    "edit_mode": True,
+                },
+            )
+
+        old_name = category.name
+
+        category.name = name
+        category.save()
+
+        log_activity(
+            request=request,
+            action=ActivityLog.ACTION_UPDATE,
+            section="دسته‌بندی‌ها",
+            description=(
+                f"دسته‌بندی «{old_name}» "
+                f"به «{category.name}» تغییر کرد."
+            ),
+            object_id=category.pk,
+        )
+
+        messages.success(
+            request,
+            "دسته‌بندی با موفقیت ویرایش شد."
+        )
+
+        return redirect("manage_categories")
+
+    return render(
+        request,
+        "dashboard/category_form.html",
+        {
+            "category": category,
+            "edit_mode": True,
+        },
     )
 
 
 @permission_required("blog.manage_categories")
 def delete_category(request, pk):
+    category = get_object_or_404(Category, pk=pk)
 
-    subject = get_object_or_404(
-        Subject,
-        pk=pk
+    if request.method != "POST":
+        return redirect("manage_categories")
+
+    category_name = category.name
+    category_id = category.pk
+
+    category.delete()
+
+    log_activity(
+        request=request,
+        action=ActivityLog.ACTION_DELETE,
+        section="دسته‌بندی‌ها",
+        description=(
+            f"دسته‌بندی «{category_name}» حذف شد."
+        ),
+        object_id=category_id,
     )
 
-    if request.method == "POST":
-
-        # چون Book.subject از PROTECT استفاده می‌کند،
-        # موضوعی که به کتاب متصل باشد نباید حذف شود.
-
-        if subject.books.exists():
-
-            messages.error(
-                request,
-                "این موضوع به یک یا چند کتاب متصل است و نمی‌توان آن را حذف کرد."
-            )
-
-            return redirect(
-                "manage_categories"
-            )
-
-        subject_name = subject.name
-        subject_pk = subject.pk
-
-        subject.delete()
-
-        log_activity(
-            request=request,
-            action=ActivityLog.ACTION_DELETE,
-            section="موضوعات",
-            description=(
-                f"موضوع «{subject_name}» حذف شد."
-            ),
-            object_id=subject_pk,
-        )
-
-        messages.success(
-            request,
-            "موضوع با موفقیت حذف شد."
-        )
-
-        return redirect(
-            "manage_categories"
-        )
-
-    context = {
-        "category": subject,
-    }
-
-    return render(
+    messages.success(
         request,
-        "dashboard/category_delete.html",
-        context
+        "دسته‌بندی با موفقیت حذف شد."
     )
+
+    return redirect("manage_categories")
 
 
 # =========================================================
@@ -2275,6 +1853,7 @@ def return_loan(request, pk):
 
 @permission_required("accounts.view_user")
 def manage_users(request):
+
     users = (
         User.objects
         .prefetch_related("groups")
@@ -2291,6 +1870,7 @@ def manage_users(request):
 
     context = {
         "users": users,
+        "add_user_form": AdminUserCreateForm(),
     }
 
     return render(
@@ -3124,3 +2704,80 @@ def export_support_excel(request):
 
 
     return response
+
+
+
+@permission_required("accounts.change_user")
+def add_user(request):
+
+    if request.method != "POST":
+        return redirect("manage_users")
+
+    form = AdminUserCreateForm(
+        request.POST,
+        request.FILES
+    )
+
+    if form.is_valid():
+
+        user = form.save(
+            commit=False
+        )
+
+        user.phone_number = (
+            form.cleaned_data["phone_number"]
+        )
+
+        user.is_active = True
+        user.is_staff = False
+        user.is_superuser = False
+
+        user.save()
+
+        log_activity(
+            request=request,
+            action=ActivityLog.ACTION_CREATE,
+            section="کاربران",
+            description=(
+                f"کاربر «{user.username}» "
+                f"با موفقیت توسط مدیر ایجاد شد."
+            ),
+            object_id=user.pk,
+        )
+
+        messages.success(
+            request,
+            f"کاربر «{user.username}» با موفقیت اضافه شد."
+        )
+
+        return redirect(
+            "manage_users"
+        )
+
+    # اگر فرم خطا داشت، دوباره صفحه مدیریت کاربران
+    # را همراه با همان خطاها نمایش می‌دهیم.
+
+    users = (
+        User.objects
+        .prefetch_related("groups")
+        .annotate(
+            active_loans_count=Count(
+                "loans",
+                filter=Q(
+                    loans__status=Loan.STATUS_BORROWED
+                ),
+            )
+        )
+        .order_by("-date_joined")
+    )
+
+    context = {
+        "users": users,
+        "add_user_form": form,
+    }
+
+    return render(
+        request,
+        "dashboard/users.html",
+        context
+    )

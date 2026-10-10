@@ -1,24 +1,13 @@
+
 {% extends "dashboard/base.html" %}
 
-{% block title %}
-    مدیریت کتاب‌ها
-{% endblock %}
-
-{% block page_title %}
-    مدیریت کتاب‌ها
-{% endblock %}
+{% block title %}مدیریت کتاب‌ها{% endblock %}
+{% block page_title %}مدیریت کتاب‌ها{% endblock %}
 
 {% block content %}
 
 <style>
-    /* =========================================================
-       BOOKS PAGE
-       ========================================================= */
-
-    .books-page {
-        padding: 5px 0 30px;
-    }
-
+    .books-page { padding: 5px 0 30px; }
     .books-box {
         width: 100%;
         background: var(--surface);
@@ -27,12 +16,6 @@
         overflow: hidden;
         box-shadow: var(--shadow);
     }
-
-
-    /* =========================================================
-       HEADER
-       ========================================================= */
-
     .books-header {
         padding: 22px 25px;
         display: flex;
@@ -41,100 +24,19 @@
         gap: 20px;
         flex-wrap: wrap;
         border-bottom: 1px solid var(--border);
-        background: var(--surface);
     }
-
     .books-header h2 {
         margin: 0;
         color: var(--text);
         font-size: 23px;
         font-weight: 800;
-        line-height: 1.7;
     }
-
     .books-header p {
         margin: 6px 0 0;
         color: var(--text-soft);
         font-size: 15px;
         line-height: 1.8;
     }
-
-    .add-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 7px;
-        min-height: 44px;
-        padding: 0 18px;
-        border-radius: 9px;
-        background: var(--primary);
-        color: #ffffff;
-        font-size: 15px;
-        font-weight: 800;
-        text-decoration: none;
-        transition:
-            background .2s ease,
-            transform .2s ease,
-            box-shadow .2s ease;
-        white-space: nowrap;
-    }
-
-    .add-btn:hover {
-        background: var(--primary-dark);
-        color: #ffffff;
-        transform: translateY(-1px);
-        box-shadow: 0 7px 18px rgba(232, 155, 61, .18);
-    }
-
-
-    /* =========================================================
-       SEARCH / FILTERS
-       ========================================================= */
-
-    .filters-wrapper {
-        padding: 20px 25px;
-        background: var(--surface-soft);
-        border-bottom: 1px solid var(--border);
-    }
-
-    .filters-form {
-        display: flex;
-        flex-direction: column;
-        gap: 14px;
-        margin: 0;
-    }
-
-    .search-group {
-        display: flex;
-        align-items: stretch;
-        gap: 10px;
-        width: 100%;
-    }
-
-    .search-select,
-    .search-input,
-    .filter-select {
-        height: 45px;
-        border: 1px solid var(--border);
-        border-radius: 9px;
-        background: var(--surface);
-        color: var(--text);
-        padding: 0 13px;
-        font-family: inherit;
-        font-size: 15px;
-        outline: none;
-        transition:
-            border-color .2s ease,
-            box-shadow .2s ease,
-            background .2s ease;
-    }
-
-
-
-/* =========================================================
-   HEADER ACTIONS
-   ========================================================= */
-
     .books-header-actions {
         display: flex;
         align-items: center;
@@ -142,8 +44,7 @@
         gap: 9px;
         flex-wrap: wrap;
     }
-
-    .header-action {
+    .header-action, .add-btn {
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -155,132 +56,79 @@
         font-size: 14px;
         font-weight: 800;
         white-space: nowrap;
-        transition:
-            background .2s ease,
-            color .2s ease,
-            border-color .2s ease,
-            transform .2s ease,
-            box-shadow .2s ease;
+        transition: .2s ease;
     }
-
-    /* چاپ لیست */
-
     .print-btn {
         background: var(--sidebar);
-        color: #ffffff;
+        color: #fff;
         border: 1px solid var(--sidebar);
     }
-
-    .print-btn:hover {
-        background: var(--sidebar-soft);
-        color: #ffffff;
-        transform: translateY(-1px);
-    }
-
-    /* تبدیل به اکسل */
-
-    .excel-btn {
+    .excel-btn, .add-btn {
         background: var(--primary);
-        color: #ffffff;
+        color: #fff;
         border: 1px solid var(--primary);
     }
-
-    .excel-btn:hover {
-        background: var(--primary-dark);
-        color: #ffffff;
+    .print-btn:hover, .excel-btn:hover, .add-btn:hover {
+        color: #fff;
         transform: translateY(-1px);
-        box-shadow: 0 7px 18px rgba(232, 155, 61, .16);
     }
-
-    .search-select option,
-    .filter-select option {
+    .filters-wrapper {
+        padding: 20px 25px;
+        background: var(--surface-soft);
+        border-bottom: 1px solid var(--border);
+    }
+    .filters-form {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        margin: 0;
+    }
+    .search-group {
+        display: flex;
+        align-items: stretch;
+        gap: 10px;
+        width: 100%;
+    }
+    .search-select, .search-input, .filter-select {
+        height: 45px;
+        border: 1px solid var(--border);
+        border-radius: 9px;
         background: var(--surface);
         color: var(--text);
+        padding: 0 13px;
+        font-family: inherit;
+        font-size: 15px;
+        outline: none;
+        box-sizing: border-box;
     }
-
-    .search-select {
-        width: 190px;
-        flex: 0 0 190px;
-        cursor: pointer;
-    }
-
-    .search-input {
-        flex: 1;
-        min-width: 0;
-    }
-
-    .search-input::placeholder {
-        color: var(--text-soft);
-        opacity: .85;
-    }
-
-    .search-select:focus,
-    .search-input:focus,
-    .filter-select:focus {
+    .search-select { width: 210px; flex: 0 0 210px; }
+    .search-input { flex: 1; min-width: 0; }
+    .search-input::placeholder { color: var(--text-soft); }
+    .search-select:focus, .search-input:focus, .filter-select:focus {
         border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(232, 155, 61, .10);
+        box-shadow: 0 0 0 3px rgba(232,155,61,.10);
     }
-
-    .search-btn {
+    .search-btn, .filter-btn {
         height: 45px;
-        min-width: 105px;
         border: 0;
         border-radius: 9px;
         padding: 0 20px;
         background: var(--sidebar);
-        color: #ffffff;
+        color: #fff;
         font-family: inherit;
         font-size: 15px;
         font-weight: 800;
         cursor: pointer;
-        transition:
-            background .2s ease,
-            transform .2s ease,
-            box-shadow .2s ease;
         white-space: nowrap;
     }
-
-    .search-btn:hover {
-        background: var(--sidebar-soft);
-        color: #ffffff;
-        transform: translateY(-1px);
-    }
-
+    .filter-btn { background: var(--primary); }
     .filter-group {
         display: flex;
         align-items: center;
         gap: 10px;
         flex-wrap: wrap;
     }
-
-    .filter-select {
-        min-width: 175px;
-        cursor: pointer;
-    }
-
-    .filter-btn {
-        height: 45px;
-        border: 0;
-        border-radius: 9px;
-        padding: 0 19px;
-        background: var(--primary);
-        color: #ffffff;
-        font-family: inherit;
-        font-size: 15px;
-        font-weight: 800;
-        cursor: pointer;
-        transition:
-            background .2s ease,
-            transform .2s ease;
-        white-space: nowrap;
-    }
-
-    .filter-btn:hover {
-        background: var(--primary-dark);
-        color: #ffffff;
-        transform: translateY(-1px);
-    }
-
+    .filter-select { min-width: 175px; }
     .reset-btn {
         height: 45px;
         display: inline-flex;
@@ -294,38 +142,20 @@
         text-decoration: none;
         font-size: 14px;
         font-weight: 700;
-        white-space: nowrap;
-        transition:
-            color .2s ease,
-            border-color .2s ease,
-            background .2s ease;
     }
-
-    .reset-btn:hover {
-        color: var(--text);
-        border-color: var(--primary);
-        background: var(--surface);
-    }
-
-
-    /* =========================================================
-       TABLE
-       ========================================================= */
 
     .table-wrapper {
         width: 100%;
         overflow-x: auto;
         background: var(--surface);
     }
-
     table {
         width: 100%;
-        min-width: 1320px;
+        min-width: 2300px;
         border-collapse: collapse;
     }
-
     th {
-        padding: 14px 15px;
+        padding: 14px 13px;
         background: var(--surface-soft);
         color: var(--text-soft);
         text-align: right;
@@ -334,147 +164,83 @@
         white-space: nowrap;
         border-bottom: 1px solid var(--border);
     }
-
     td {
-        padding: 15px;
+        padding: 14px 13px;
         border-top: 1px solid var(--border);
         color: var(--text);
-        font-size: 15px;
-        vertical-align: middle;
+        font-size: 14px;
+        vertical-align: top;
+        line-height: 1.9;
         background: var(--surface);
     }
-
-    tbody tr {
-        transition: background .2s ease;
-    }
-
-    tbody tr:hover td {
-        background: var(--surface-soft);
-    }
-
-
-    /* =========================================================
-       BOOK INFORMATION
-       ========================================================= */
-
-    .book-title {
-        display: block;
-        max-width: 260px;
-        color: var(--text);
-        font-weight: 800;
-        font-size: 16px;
-        line-height: 1.8;
-    }
-
+    tbody tr:hover td { background: var(--surface-soft); }
     .registration-number {
         display: inline-flex;
-        align-items: center;
         justify-content: center;
-        min-width: 68px;
-        padding: 5px 9px;
-        border-radius: 7px;
-        direction: ltr;
-        color: var(--text);
-        background: var(--surface-soft);
-        border: 1px solid var(--border);
-        font-size: 15px;
-        font-weight: 900;
-        letter-spacing: 1px;
-        white-space: nowrap;
-    }
-
-    .isbn {
-        display: inline-block;
-        direction: ltr;
-        color: var(--text-soft);
-        font-size: 14px;
-        font-weight: 600;
-        white-space: nowrap;
-    }
-
-    .author {
-        max-width: 230px;
-        color: var(--text-soft);
-        font-size: 14px;
-        line-height: 1.9;
-    }
-
-    .subject {
-        color: var(--text);
-        font-size: 14px;
-        font-weight: 600;
-        line-height: 1.8;
-        white-space: nowrap;
-    }
-
-    .location {
-        display: inline-block;
-        direction: ltr;
-        color: var(--text);
-        background: var(--surface-soft);
-        border: 1px solid var(--border);
+        min-width: 65px;
         padding: 4px 8px;
         border-radius: 7px;
-        font-size: 14px;
+        direction: ltr;
+        background: var(--surface-soft);
+        border: 1px solid var(--border);
+        font-weight: 900;
+        white-space: nowrap;
+    }
+    .book-title {
+        display: block;
+        min-width: 170px;
+        max-width: 260px;
+        font-weight: 800;
+        font-size: 15px;
+        overflow-wrap: anywhere;
+    }
+    .isbn {
+        direction: ltr;
+        display: inline-block;
+        white-space: nowrap;
+    }
+    .text-cell {
+        min-width: 120px;
+        max-width: 250px;
+        overflow-wrap: anywhere;
+    }
+    .code-label {
+        display: inline-block;
+        direction: ltr;
+        padding: 4px 8px;
+        border-radius: 7px;
+        background: var(--surface-soft);
+        border: 1px solid var(--border);
         font-weight: 800;
         white-space: nowrap;
     }
-
-
-    /* =========================================================
-       COPIES
-       ========================================================= */
-
     .copies {
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         gap: 6px;
-        flex-wrap: wrap;
-        min-width: 210px;
+        flex-direction: column;
+        min-width: 100px;
     }
-
     .copy-item {
         display: inline-flex;
         align-items: center;
-        gap: 4px;
-        padding: 5px 8px;
+        gap: 5px;
+        padding: 3px 8px;
         border-radius: 7px;
         background: var(--surface-soft);
         border: 1px solid var(--border);
-        font-size: 13px;
-        color: var(--text-soft);
         white-space: nowrap;
     }
-
-    .copy-item strong {
-        color: var(--text);
-        font-size: 14px;
-        font-weight: 800;
-    }
-
-    .copy-item.available-count {
-        border-color: rgba(48, 150, 91, .20);
-        background: rgba(48, 150, 91, .07);
-    }
-
-    .copy-item.available-count strong {
+    .available-count {
         color: #31965b;
+        background: rgba(48,150,91,.07);
+        border-color: rgba(48,150,91,.20);
     }
-
-    .copy-item.borrowed-count {
-        border-color: rgba(200, 92, 80, .20);
-        background: rgba(200, 92, 80, .07);
-    }
-
-    .copy-item.borrowed-count strong {
+    .borrowed-count {
         color: #c85c50;
+        background: rgba(200,92,80,.07);
+        border-color: rgba(200,92,80,.20);
     }
-
-
-    /* =========================================================
-       STATUS
-       ========================================================= */
-
     .status {
         display: inline-flex;
         align-items: center;
@@ -485,405 +251,215 @@
         font-weight: 800;
         white-space: nowrap;
     }
-
     .status::before {
         content: "";
         width: 6px;
         height: 6px;
-        flex: 0 0 6px;
         border-radius: 50%;
         background: currentColor;
     }
-
-    .available {
-        background: rgba(48, 150, 91, .10);
-        color: #31965b;
+    .available { background: rgba(48,150,91,.10); color: #31965b; }
+    .unavailable { background: rgba(200,92,80,.10); color: #c85c50; }
+    .cover-thumb {
+        width: 55px;
+        height: 75px;
+        object-fit: cover;
+        border: 1px solid var(--border);
+        border-radius: 6px;
     }
-
-    .unavailable {
-        background: rgba(200, 92, 80, .10);
-        color: #c85c50;
-    }
-    .books-header-actions {
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-        gap: 9px;
-        flex-wrap: wrap;
-    }
-
-    .header-action {
+    .no-cover {
         display: inline-flex;
+        width: 55px;
+        height: 75px;
         align-items: center;
         justify-content: center;
-
-        min-height: 44px;
-        padding: 0 17px;
-
-        border-radius: 9px;
-
-        text-decoration: none;
-
-        font-family: inherit;
-        font-size: 14px;
-        font-weight: 800;
-
-        white-space: nowrap;
-
-        transition:
-            background .2s ease,
-            color .2s ease,
-            border-color .2s ease,
-            transform .2s ease,
-            box-shadow .2s ease;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        color: var(--text-soft);
+        background: var(--surface-soft);
+        font-size: 12px;
     }
-
-    /* چاپ */
-
-    .print-btn {
-        background: var(--sidebar);
-        color: #ffffff;
-        border: 1px solid var(--sidebar);
-    }
-
-    .print-btn:hover {
-        background: var(--sidebar-soft);
-        color: #ffffff;
-        transform: translateY(-1px);
-    }
-
-    /* Excel */
-
-    .excel-btn {
-        background: var(--primary);
-        color: #ffffff;
-        border: 1px solid var(--primary);
-    }
-
-    .excel-btn:hover {
-        background: var(--primary-dark);
-        color: #ffffff;
-        transform: translateY(-1px);
-        box-shadow: 0 7px 18px rgba(232, 155, 61, .16);
-    }
-
-    /* =========================================================
-       ACTIONS
-       ========================================================= */
-
     .actions {
         white-space: nowrap;
+        min-width: 155px;
     }
-
     .action-link {
         font-size: 14px;
         font-weight: 800;
         text-decoration: none;
-        transition: color .2s ease;
     }
-
-    .view {
-        color: var(--text);
-    }
-
-    .view:hover {
-        color: var(--primary-dark);
-    }
-
-    .edit {
-        color: var(--primary);
-    }
-
-    .edit:hover {
-        color: var(--primary-dark);
-    }
-
-    .delete {
-        color: #c85c50;
-    }
-
-    .delete:hover {
-        color: #a9433b;
-    }
-
-    .action-separator {
-        color: var(--border);
-        margin: 0 7px;
-    }
-
-
-    /* =========================================================
-       EMPTY
-       ========================================================= */
-
+    .view { color: var(--text); }
+    .edit { color: var(--primary); }
+    .delete { color: #c85c50; }
+    .action-separator { color: var(--border); margin: 0 5px; }
     .empty {
         padding: 60px 30px !important;
         text-align: center !important;
         color: var(--text-soft) !important;
-        font-size: 15px !important;
         line-height: 2;
     }
+    .empty strong {
+        display: block;
+        color: var(--text);
+        font-size: 17px;
+    }
 
-    .empty-icon {
-        width: 58px;
-        height: 58px;
-        margin: 0 auto 14px;
+    @media (max-width: 900px) {
+        .search-group { flex-wrap: wrap; }
+        .search-select { width: 100%; flex: 1 1 100%; }
+        .search-input { flex: 1 1 calc(100% - 115px); }
+        .search-btn { flex: 0 0 105px; }
+        .filter-group { display: grid; grid-template-columns: 1fr 1fr; }
+        .filter-select, .filter-btn, .reset-btn { width: 100%; }
+    }
+    @media (max-width: 650px) {
+        .books-header { padding: 20px 17px; align-items: stretch; }
+        .books-header-actions { width: 100%; display: grid; grid-template-columns: 1fr; }
+        .header-action, .add-btn { width: 100%; }
+        .filters-wrapper { padding: 16px 17px; }
+        .search-group { flex-direction: column; }
+        .search-select, .search-input, .search-btn { width: 100%; flex: none; }
+        .filter-group { grid-template-columns: 1fr; }
+        .filter-select, .filter-btn, .reset-btn { width: 100%; }
+    }
+
+    @media print {
+        .books-header-actions, .filters-wrapper, .actions { display: none !important; }
+        .books-box { border: none; box-shadow: none; overflow: visible; }
+        .table-wrapper { overflow: visible; }
+        table { min-width: 0; font-size: 10px; }
+        th, td { padding: 5px; font-size: 10px; }
+        .book-title { min-width: 0; }
+    }
+
+
+    .books-header-actions {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(150px, 1fr));
+        align-items: stretch;
+        gap: 14px;
+        width: 100%;
+        max-width: 1000px;
+    }
+
+    .header-action,
+    .add-btn {
         display: flex;
         align-items: center;
         justify-content: center;
-        border-radius: 15px;
-        background: var(--surface-soft);
-        border: 1px solid var(--border);
-        font-size: 26px;
-    }
-
-    .empty strong {
-        display: block;
-        margin-bottom: 5px;
-        color: var(--text);
-        font-size: 17px;
+        min-height: 75px;
+        padding: 15px 18px;
+        border-radius: 12px;
+        text-decoration: none;
+        font-family: inherit;
+        font-size: 16px;
         font-weight: 800;
+        text-align: center;
+        white-space: normal;
+        border: 1px solid var(--border);
+        box-sizing: border-box;
+        transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
     }
 
+    .print-btn {
+        background: var(--sidebar);
+        color: #fff;
+        border-color: var(--sidebar);
+    }
 
-    /* =========================================================
-       RESPONSIVE
-       ========================================================= */
+    .excel-btn {
+        background: var(--primary);
+        color: #fff;
+        border-color: var(--primary);
+    }
+
+    .add-btn {
+        background: var(--surface);
+        color: var(--primary-dark);
+        border: 2px solid var(--primary);
+    }
+
+    .category-btn {
+        background: var(--surface);
+        color: var(--text);
+        border: 2px solid var(--border);
+    }
+
+    .print-btn:hover,
+    .excel-btn:hover,
+    .add-btn:hover,
+    .category-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow);
+    }
 
     @media (max-width: 900px) {
-
-        .search-group {
-            flex-wrap: wrap;
-        }
-
-        .search-select {
-            width: 100%;
-            flex: 1 1 100%;
-        }
-
-        .search-input {
-            flex: 1 1 calc(100% - 115px);
-        }
-
-        .search-btn {
-            flex: 0 0 105px;
-        }
-
-        .filter-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-        }
-
-        .filter-select,
-        .filter-btn,
-        .reset-btn {
-            width: 100%;
+        .books-header-actions {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            max-width: 100%;
         }
     }
 
-
-    @media (max-width: 650px) {
-
+    @media (max-width: 500px) {
         .books-header-actions {
-            width: 100%;
-            display: grid;
             grid-template-columns: 1fr;
         }
 
         .header-action,
-        .books-header-actions .add-btn {
-            width: 100%;
-        }
-
-        .books-header {
-            padding: 20px 17px;
-            align-items: stretch;
-        }
-
-        .books-header h2 {
-            font-size: 20px;
-        }
-
-        .books-header p {
-            font-size: 14px;
-        }
-
         .add-btn {
-            width: 100%;
-        }
-
-        .filters-wrapper {
-            padding: 16px 17px;
-        }
-
-        .search-group {
-            flex-direction: column;
-        }
-
-        .search-select,
-        .search-input,
-        .search-btn {
-            width: 100%;
-            flex: none;
-        }
-
-        .filter-group {
-            grid-template-columns: 1fr;
-        }
-
-        .filter-select,
-        .filter-btn,
-        .reset-btn {
-            width: 100%;
-        }
-
-        th,
-        td {
-            padding: 13px 12px;
-        }
-
-        th {
-            font-size: 13px;
-        }
-
-        td {
-            font-size: 14px;
-        }
-
-        .book-title {
+            min-height: 60px;
             font-size: 15px;
         }
-
-        .author,
-        .subject {
-            font-size: 14px;
-        }
-
-        .action-link {
-            font-size: 13px;
-        }
     }
+
 </style>
 
-
 <section class="books-page">
-
     <div class="books-box">
 
-        <!-- =====================================================
-             HEADER
-             ===================================================== -->
+        <div class="books-header">
+            <div>
+                <h2>کتاب‌های کتابخانه</h2>
+                <p>مدیریت، جستجو و مشاهده اطلاعات کتاب‌ها</p>
+            </div>
 
-<div class="books-header">
-    <div>
-        <h2>کتاب‌های کتابخانه</h2>
-        <p>مدیریت، جستجو و ویرایش کتاب‌ها</p>
-    </div>
+            <div class="books-header-actions">
+                <a
+                    href="{% url 'print_books' %}?q={{ query|urlencode }}&search_by={{ search_by|urlencode }}&sort={{ sort|urlencode }}&availability={{ availability|urlencode }}"
+                    target="_blank"
+                    class="header-action print-btn"
+                >چاپ لیست</a>
 
-    <div class="books-header-actions">
+                <a
+                    href="{% url 'export_books_excel' %}?q={{ query|urlencode }}&search_by={{ search_by|urlencode }}&sort={{ sort|urlencode }}&availability={{ availability|urlencode }}"
+                    class="header-action excel-btn"
+                >تبدیل به اکسل</a>
 
-        <a
-            href="{% url 'print_books' %}?q={{ query|urlencode }}&search_by={{ search_by|urlencode }}&sort={{ sort|urlencode }}&availability={{ availability|urlencode }}"
-            target="_blank"
-            class="header-action print-btn"
-        >
-            چاپ لیست
-        </a>
-
-        <a
-            href="{% url 'export_books_excel' %}?q={{ query|urlencode }}&search_by={{ search_by|urlencode }}&sort={{ sort|urlencode }}&availability={{ availability|urlencode }}"
-            class="header-action excel-btn"
-        >
-            تبدیل به اکسل
-        </a>
-
-        <a
-            href="{% url 'add_book' %}"
-            class="add-btn"
-        >
-            + افزودن کتاب
-        </a>
-
-    </div>
-</div>
-
-
-        <!-- =====================================================
-             SEARCH & FILTERS
-             ===================================================== -->
+                <a href="{% url 'add_book' %}" class="add-btn">+ افزودن کتاب</a>
+                <a
+                    href="{% url 'add_category' %}"
+                    class="add-btn"
+                >
+                    + افزودن دسته‌بندی
+                </a>
+            </div>
+        </div>
 
         <div class="filters-wrapper">
-
             <form method="get" class="filters-form">
-
-                <!-- SEARCH -->
-
                 <div class="search-group">
-
-                    <select
-                        name="search_by"
-                        class="search-select"
-                        aria-label="جستجو بر اساس"
-                    >
-
-                        <option
-                            value="title"
-                            {% if search_by == "title" %}selected{% endif %}
-                        >
-                            جستجو بر اساس: عنوان کتاب
-                        </option>
-
-                        <option
-                            value="isbn"
-                            {% if search_by == "isbn" %}selected{% endif %}
-                        >
-                            جستجو بر اساس: شابک
-                        </option>
-
-                        <option
-                            value="registration_number"
-                            {% if search_by == "registration_number" %}selected{% endif %}
-                        >
-                            جستجو بر اساس: شماره ثبت
-                        </option>
-
-                        <option
-                            value="author"
-                            {% if search_by == "author" %}selected{% endif %}
-                        >
-                            جستجو بر اساس: مؤلف
-                        </option>
-
-                        <option
-                            value="translator"
-                            {% if search_by == "translator" %}selected{% endif %}
-                        >
-                            جستجو بر اساس: مترجم
-                        </option>
-
-                        <option
-                            value="publisher"
-                            {% if search_by == "publisher" %}selected{% endif %}
-                        >
-                            جستجو بر اساس: ناشر
-                        </option>
-
-                        <option
-                            value="subject"
-                            {% if search_by == "subject" %}selected{% endif %}
-                        >
-                            جستجو بر اساس: موضوع
-                        </option>
-
-                        <option
-                            value="location"
-                            {% if search_by == "location" %}selected{% endif %}
-                        >
-                            جستجو بر اساس: محل قرارگیری
-                        </option>
-
+                    <select name="search_by" class="search-select" aria-label="جستجو بر اساس">
+                        <option value="title" {% if search_by == "title" %}selected{% endif %}>عنوان کتاب</option>
+                        <option value="isbn" {% if search_by == "isbn" %}selected{% endif %}>شابک</option>
+                        <option value="registration_number" {% if search_by == "registration_number" %}selected{% endif %}>شماره ثبت</option>
+                        <option value="author" {% if search_by == "author" %}selected{% endif %}>مؤلف</option>
+                        <option value="translator" {% if search_by == "translator" %}selected{% endif %}>مترجم</option>
+                        <option value="publisher" {% if search_by == "publisher" %}selected{% endif %}>ناشر</option>
+                        <option value="subject" {% if search_by == "subject" %}selected{% endif %}>موضوع</option>
+                        <option value="category" {% if search_by == "category" %}selected{% endif %}>دسته‌بندی</option>
+                        <option value="location" {% if search_by == "location" %}selected{% endif %}>محل قرارگیری</option>
+                        <option value="description" {% if search_by == "description" %}selected{% endif %}>توضیحات</option>
                     </select>
-
 
                     <input
                         type="text"
@@ -894,412 +470,200 @@
                         autocomplete="off"
                     >
 
-
-                    <button
-                        type="submit"
-                        class="search-btn"
-                    >
-                        جستجو
-                    </button>
-
+                    <button type="submit" class="search-btn">جستجو</button>
                 </div>
-
-
-                <!-- OTHER FILTERS -->
 
                 <div class="filter-group">
-
-                    <select
-                        name="sort"
-                        class="filter-select"
-                    >
-
-                        <option
-                            value="newest"
-                            {% if sort == "newest" %}selected{% endif %}
-                        >
-                            مرتب‌سازی: جدیدترین
-                        </option>
-
-                        <option
-                            value="oldest"
-                            {% if sort == "oldest" %}selected{% endif %}
-                        >
-                            مرتب‌سازی: قدیمی‌ترین
-                        </option>
-
-                        <option
-                            value="title_asc"
-                            {% if sort == "title_asc" %}selected{% endif %}
-                        >
-                            مرتب‌سازی: عنوان الف تا ی
-                        </option>
-
-                        <option
-                            value="title_desc"
-                            {% if sort == "title_desc" %}selected{% endif %}
-                        >
-                            مرتب‌سازی: عنوان ی تا الف
-                        </option>
-
+                    <select name="sort" class="filter-select">
+                        <option value="newest" {% if sort == "newest" %}selected{% endif %}>مرتب‌سازی: جدیدترین</option>
+                        <option value="oldest" {% if sort == "oldest" %}selected{% endif %}>مرتب‌سازی: قدیمی‌ترین</option>
+                        <option value="title_asc" {% if sort == "title_asc" %}selected{% endif %}>عنوان الف تا ی</option>
+                        <option value="title_desc" {% if sort == "title_desc" %}selected{% endif %}>عنوان ی تا الف</option>
                     </select>
 
-
-                    <select
-                        name="availability"
-                        class="filter-select"
-                    >
-
-                        <option
-                            value=""
-                            {% if not availability %}selected{% endif %}
-                        >
-                            وضعیت: همه
-                        </option>
-
-                        <option
-                            value="available"
-                            {% if availability == "available" %}selected{% endif %}
-                        >
-                            وضعیت: موجود
-                        </option>
-
-                        <option
-                            value="unavailable"
-                            {% if availability == "unavailable" %}selected{% endif %}
-                        >
-                            وضعیت: ناموجود
-                        </option>
-
+                    <select name="availability" class="filter-select">
+                        <option value="" {% if not availability %}selected{% endif %}>وضعیت: همه</option>
+                        <option value="available" {% if availability == "available" %}selected{% endif %}>وضعیت: موجود</option>
+                        <option value="unavailable" {% if availability == "unavailable" %}selected{% endif %}>وضعیت: ناموجود</option>
                     </select>
 
-
-                    <button
-                        type="submit"
-                        class="filter-btn"
-                    >
-                        اعمال فیلتر
-                    </button>
-
-
-                    <a
-                        href="{% url 'manage_books' %}"
-                        class="reset-btn"
-                    >
-                        حذف فیلترها
-                    </a>
-
+                    <button type="submit" class="filter-btn">اعمال فیلتر</button>
+                    <a href="{% url 'manage_books' %}" class="reset-btn">حذف فیلترها</a>
                 </div>
-
             </form>
-
         </div>
 
-
-        <!-- =====================================================
-             BOOKS TABLE
-             ===================================================== -->
-
         <div class="table-wrapper">
-
             <table>
-
                 <thead>
-
                     <tr>
-
-                        <th>
-                            شماره ثبت
-                        </th>
-
-                        <th>
-                            کتاب
-                        </th>
-
-                        <th>
-                            شابک
-                        </th>
-
-                        <th>
-                            مؤلف
-                        </th>
-
-                        <th>
-                            موضوع
-                        </th>
-
-                        <th>
-                            محل قرارگیری
-                        </th>
-
-                        <th>
-                            نسخه‌ها
-                        </th>
-
-                        <th>
-                            وضعیت
-                        </th>
-
-                        <th>
-                            عملیات
-                        </th>
-
+                        <th>تصویر جلد</th>
+                        <th>شماره ثبت</th>
+                        <th>عنوان کتاب</th>
+                        <th>شابک</th>
+                        <th>مؤلفان</th>
+                        <th>مترجمان</th>
+                        <th>موضوع</th>
+                        <th>دسته‌بندی</th>
+                        <th>محل قرارگیری</th>
+                        <th>ناشر</th>
+                        <th>سال انتشار</th>
+                        <th>توضیحات</th>
+                        <th>تعداد نسخه‌ها</th>
+                        <th>وضعیت</th>
+                        <th>تاریخ ثبت</th>
+                        <th>عملیات</th>
                     </tr>
-
                 </thead>
 
-
                 <tbody>
-
                     {% for book in books %}
-
                         <tr>
-
-                            <!-- REGISTRATION NUMBER -->
-
                             <td>
-
-                                <span class="registration-number">
-                                    {{ book.registration_number }}
-                                </span>
-
+                                {% if book.cover %}
+                                    <img class="cover-thumb" src="{{ book.cover.url }}" alt="{{ book.title }}">
+                                {% elif book.processed_cover %}
+                                    <img class="cover-thumb" src="{{ book.processed_cover.url }}" alt="{{ book.title }}">
+                                {% else %}
+                                    <span class="no-cover">بدون جلد</span>
+                                {% endif %}
                             </td>
 
-
-                            <!-- BOOK -->
-
                             <td>
-
-                                <strong class="book-title">
-                                    {{ book.title }}
-                                </strong>
-
+                                <span class="registration-number">{{ book.registration_number|stringformat:"05d" }}</span>
                             </td>
 
-
-                            <!-- ISBN -->
+                            <td>
+                                <strong class="book-title">{{ book.title }}</strong>
+                            </td>
 
                             <td>
-
                                 {% if book.isbn %}
-
-                                    <span class="isbn">
-                                        {{ book.isbn }}
-                                    </span>
-
+                                    <span class="isbn">{{ book.isbn }}</span>
                                 {% else %}
-
-                                    <span class="isbn">
-                                        —
-                                    </span>
-
+                                    —
                                 {% endif %}
-
                             </td>
 
-
-                            <!-- AUTHORS -->
-
-                            <td class="author">
-
+                            <td class="text-cell">
                                 {% for author in book.authors.all %}
-
-                                    {{ author.name }}
-
-                                    {% if not forloop.last %}
-                                        ،
-                                    {% endif %}
-
+                                    {{ author.name }}{% if not forloop.last %}، {% endif %}
                                 {% empty %}
-
                                     —
-
                                 {% endfor %}
-
                             </td>
 
-
-                            <!-- SUBJECT -->
-
-                            <td class="subject">
-
-                                {% if book.subject %}
-
-                                    {{ book.subject.name }}
-
-                                {% else %}
-
+                            <td class="text-cell">
+                                {% for translator in book.translators.all %}
+                                    {{ translator.name }}{% if not forloop.last %}، {% endif %}
+                                {% empty %}
                                     —
-
-                                {% endif %}
-
+                                {% endfor %}
                             </td>
 
-
-                            <!-- LOCATION -->
+                            <td class="text-cell">
+                                {% if book.subject %}{{ book.subject.name }}{% else %}—{% endif %}
+                            </td>
 
                             <td>
+                                {% if book.category %}
+                                    <span class="code-label">{{ book.category.name }}</span>
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
 
+                            <td>
                                 {% if book.location %}
-
-                                    <span class="location">
-                                        {{ book.location.code }}
-                                    </span>
-
+                                    <span class="code-label">{{ book.location.code }}</span>
+                                    {% if book.location.description %}
+                                        <div class="text-cell">{{ book.location.description }}</div>
+                                    {% endif %}
                                 {% else %}
-
                                     —
-
                                 {% endif %}
+                            </td>
 
+                            <td class="text-cell">
+                                {% if book.publisher %}{{ book.publisher.name }}{% else %}—{% endif %}
+                            </td>
+
+                            <td>{{ book.publication_year|default:"—" }}</td>
+
+
+                            <td class="text-cell">
+                                {% if book.description %}
+                                    {{ book.description|linebreaksbr }}
+                                {% else %}
+                                    —
+                                {% endif %}
                             </td>
 
 
-                            <!-- COPIES -->
 
                             <td>
-
                                 <div class="copies">
-
                                     <span class="copy-item">
                                         کل:
-                                        <strong>
-                                            {{ book.total_copies }}
-                                        </strong>
+                                        <strong>{{ book.total_copies }}</strong>
                                     </span>
-
 
                                     <span class="copy-item borrowed-count">
                                         امانت:
-                                        <strong>
-                                            {{ book.borrowed_count }}
-                                        </strong>
+                                        <strong>{{ book.borrowed_count|default:0 }}</strong>
                                     </span>
 
 
-                                    <span class="copy-item available-count">
-                                        موجود:
-                                        <strong>
+                                <span class="copy-item available-count">
+                                    موجود:
+                                    <strong>
+                                        {% if book.available_copies > 0 %}
                                             {{ book.available_copies }}
-                                        </strong>
-                                    </span>
+                                        {% else %}
+                                            0
+                                        {% endif %}
+                                    </strong>
+                                </span>
 
                                 </div>
-
                             </td>
 
-
-                            <!-- STATUS -->
 
                             <td>
-
                                 {% if book.available_copies > 0 %}
-
-                                    <span class="status available">
-                                        موجود
-                                    </span>
-
+                                    <span class="status available">موجود</span>
                                 {% else %}
-
-                                    <span class="status unavailable">
-                                        همه نسخه‌ها امانت هستند
-                                    </span>
-
+                                    <span class="status unavailable">ناموجود</span>
                                 {% endif %}
-
                             </td>
 
-
-                            <!-- ACTIONS -->
+                            <td>{{ book.created_at|date:"Y/m/d" }}</td>
 
                             <td class="actions">
-
-                                <a
-                                    href="{% url 'book_detail' book.pk %}"
-                                    class="action-link view"
-                                >
-                                    مشاهده
-                                </a>
-
-
-                                <span class="action-separator">
-                                    |
-                                </span>
-
-
-                                <a
-                                    href="{% url 'edit_book' book.pk %}"
-                                    class="action-link edit"
-                                >
-                                    ویرایش
-                                </a>
-
-
-                                <span class="action-separator">
-                                    |
-                                </span>
-
-
-                                <a
-                                    href="{% url 'delete_book' book.pk %}"
-                                    class="action-link delete"
-                                >
-                                    حذف
-                                </a>
-
+                                <a href="{% url 'book_detail' book.pk %}" class="action-link view">مشاهده</a>
+                                <span class="action-separator">|</span>
+                                <a href="{% url 'edit_book' book.pk %}" class="action-link edit">ویرایش</a>
+                                <span class="action-separator">|</span>
+                                <a href="{% url 'delete_book' book.pk %}" class="action-link delete">حذف</a>
                             </td>
-
                         </tr>
-
-
                     {% empty %}
-
                         <tr>
-
-                            <td
-                                colspan="9"
-                                class="empty"
-                            >
-
-                                <div class="empty-icon">
-                                    📚
-                                </div>
-
-
+                            <td colspan="16" class="empty">
                                 {% if query %}
-
-                                    <strong>
-                                        نتیجه‌ای پیدا نشد
-                                    </strong>
-
-                                    کتابی برای
-                                    «{{ query }}»
-                                    در معیار انتخاب‌شده پیدا نشد.
-
+                                    <strong>نتیجه‌ای پیدا نشد</strong>
+                                    کتابی برای «{{ query }}» پیدا نشد.
                                 {% else %}
-
-                                    <strong>
-                                        هنوز کتابی ثبت نشده است
-                                    </strong>
-
+                                    <strong>هنوز کتابی ثبت نشده است</strong>
                                     برای شروع، یک کتاب جدید به کتابخانه اضافه کنید.
-
                                 {% endif %}
-
                             </td>
-
                         </tr>
-
                     {% endfor %}
-
                 </tbody>
-
             </table>
-
         </div>
-
     </div>
-
 </section>
 
 {% endblock %}

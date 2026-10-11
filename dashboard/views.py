@@ -2,19 +2,18 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, get_user_model, login
 from django.contrib.auth.models import Group
 from django.db import transaction
+
 from django.db.models import Count, F, Q, ExpressionWrapper, IntegerField
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from openpyxl.styles import Alignment
+
 from .decorators import permission_required
 from .models import ActivityLog
 from blog.models import *
 import jdatetime
-from accounts.forms import (
-    LoginForm,
-    ProfileForm,
-    AdminUserCreateForm,
-)
+
+from accounts.forms import *
 from openpyxl import Workbook
 from django.http import HttpResponse
 from datetime import timedelta
@@ -22,6 +21,8 @@ from datetime import timedelta
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.template.loader import get_template
+from decimal import Decimal, InvalidOperation
+
 User = get_user_model()
 
 
@@ -576,6 +577,7 @@ def print_books(request):
 
 
 
+
 @permission_required("blog.manage_books")
 def add_book(request):
     if request.method == "POST":
@@ -583,10 +585,15 @@ def add_book(request):
         isbn = request.POST.get("isbn", "").strip()
         subject_name = request.POST.get("subject", "").strip()
         category_id = request.POST.get("category", "").strip()
-        location_id = request.POST.get("location", "").strip()
         publisher_name = request.POST.get("publisher", "").strip()
         description = request.POST.get("description", "").strip()
         cover = request.FILES.get("cover")
+
+        # قیمت کتاب؛ اختیاری
+        price_raw = normalize_digits(
+            request.POST.get("price", "").strip()
+        )
+        price = None
 
         total_copies = normalize_digits(
             request.POST.get("total_copies", "1").strip()
@@ -644,13 +651,24 @@ def add_book(request):
                     "دسته‌بندی انتخاب‌شده معتبر نیست. دوباره انتخاب کنید."
                 )
 
-        if not location_id:
-            return render_form_error(
-                "محل قفسه کتاب را انتخاب کنید."
-            )
 
         if not publisher_name:
             return render_form_error("نام ناشر را وارد کنید.")
+
+        # اعتبارسنجی قیمت؛ خالی بودن آن مجاز است
+        if price_raw:
+            try:
+                price = Decimal(price_raw)
+
+                if not price.is_finite() or price < 0:
+                    return render_form_error(
+                        "قیمت کتاب باید عددی معتبر و غیرمنفی باشد."
+                    )
+
+            except (InvalidOperation, ValueError, TypeError):
+                return render_form_error(
+                    "قیمت کتاب باید عددی معتبر و غیرمنفی باشد."
+                )
 
         try:
             total_copies = int(total_copies)
@@ -681,14 +699,8 @@ def add_book(request):
                 "سال انتشار شمسی واردشده معتبر نیست."
             )
 
-        location = BookLocation.objects.filter(
-            pk=location_id
-        ).first()
 
-        if location is None:
-            return render_form_error(
-                "محل قفسه انتخاب‌شده معتبر نیست. دوباره انتخاب کنید."
-            )
+
 
         with transaction.atomic():
             subject, _ = Subject.objects.get_or_create(
@@ -706,10 +718,10 @@ def add_book(request):
                 publisher=publisher,
                 publication_year=publication_year,
                 category=category,
-                location=location,
                 description=description,
                 cover=cover,
                 total_copies=total_copies,
+                price=price,
                 is_available=True,
             )
 
@@ -774,7 +786,6 @@ def edit_book(request, pk):
         isbn = request.POST.get("isbn", "").strip()
         subject_name = request.POST.get("subject", "").strip()
         category_id = request.POST.get("category", "").strip()
-        location_id = request.POST.get("location", "").strip()
         publisher_name = request.POST.get("publisher", "").strip()
         description = request.POST.get("description", "").strip()
         cover = request.FILES.get("cover")
@@ -841,11 +852,6 @@ def edit_book(request, pk):
                     "دسته‌بندی انتخاب‌شده معتبر نیست. دوباره انتخاب کنید."
                 )
 
-        if not location_id:
-            return render_form_error(
-                "محل قفسه کتاب را انتخاب کنید."
-            )
-
         if not publisher_name:
             return render_form_error("نام ناشر را وارد کنید.")
 
@@ -878,14 +884,7 @@ def edit_book(request, pk):
                 "سال انتشار شمسی واردشده معتبر نیست."
             )
 
-        location = BookLocation.objects.filter(
-            pk=location_id
-        ).first()
 
-        if location is None:
-            return render_form_error(
-                "محل قفسه انتخاب‌شده معتبر نیست. دوباره انتخاب کنید."
-            )
 
         with transaction.atomic():
             borrowed_count = Loan.objects.filter(
@@ -914,7 +913,6 @@ def edit_book(request, pk):
             book.publisher = publisher
             book.publication_year = publication_year
             book.category = category
-            book.location = location
             book.description = description
             book.total_copies = total_copies
             book.is_available = borrowed_count < total_copies

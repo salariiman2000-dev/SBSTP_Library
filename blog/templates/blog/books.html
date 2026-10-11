@@ -3,442 +3,234 @@
 {% block title %}کتاب‌ها | کتابخانه پارک علم و فناوری{% endblock %}
 
 {% block extra_css %}
-
 <style>
-
     .books-page {
         direction: rtl;
         max-width: 1280px;
         margin: 0 auto;
-        padding: 34px 22px 70px;
+        padding: 25px 20px 55px;
         font-family: "B Nazanin", Tahoma, sans-serif;
     }
 
-    /* =========================
-       Header
-    ========================= */
-
     .books-intro {
-        margin-bottom: 28px;
-    }
-
-    .books-eyebrow {
-        display: inline-flex;
-        align-items: center;
-        gap: 7px;
-        margin-bottom: 8px;
-        color: var(--orange-dark);
-        font-size: 15px;
-        font-weight: 700;
-    }
-
-    .books-eyebrow::before {
-        content: "";
-        width: 22px;
-        height: 2px;
-        border-radius: 20px;
-        background: var(--orange);
+        margin-bottom: 18px;
     }
 
     .books-intro h1 {
         margin: 0;
         color: var(--heading);
-        font-size: clamp(30px, 4vw, 44px);
-        line-height: 1.25;
+        font-size: clamp(26px, 3vw, 36px);
         font-weight: 900;
     }
 
     .books-intro p {
-        max-width: 650px;
-        margin: 9px 0 0;
+        margin: 5px 0 0;
         color: var(--muted);
-        font-size: 18px;
-        line-height: 1.9;
+        font-size: 15px;
+        line-height: 1.8;
     }
 
-    /* =========================
-       Catalog tools
-    ========================= */
-
+    /* پنل جمع‌وجور جستجو و فیلتر */
     .catalog-panel {
+        margin-bottom: 22px;
+        padding: 14px 16px;
         background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 18px;
-        padding: 18px;
-        margin-bottom: 28px;
-        box-shadow: 0 8px 28px rgba(30, 40, 50, 0.05);
-    }
-
-    .catalog-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 15px;
-        margin-bottom: 14px;
-    }
-
-    .catalog-header-main {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .catalog-header-icon {
-        width: 38px;
-        height: 38px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 11px;
-        background: var(--accent-soft);
-        color: var(--orange-dark);
-        font-size: 20px;
-        font-weight: 900;
-    }
-
-    .catalog-header h2 {
-        margin: 0;
-        color: var(--heading);
-        font-size: 21px;
-        font-weight: 900;
-    }
-
-    .catalog-live {
-        color: var(--muted);
-        font-size: 14px;
-    }
-
-    /* =========================
-       Search
-    ========================= */
-
-    .books-search {
-        display: flex;
-        align-items: center;
-        gap: 9px;
-        width: 100%;
-        min-height: 58px;
-        padding: 5px;
         border: 1px solid var(--border);
         border-radius: 14px;
-        background: var(--surface-2);
-        transition:
-            border-color .2s ease,
-            box-shadow .2s ease;
+        box-shadow: 0 5px 18px rgba(30, 40, 50, .04);
     }
 
-    .books-search:focus-within {
-        border-color: rgba(232, 155, 61, .65);
-        box-shadow: 0 0 0 3px rgba(232, 155, 61, .10);
-    }
-
-    .search-icon {
-        width: 42px;
-        height: 42px;
-        flex: 0 0 42px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--orange-dark);
-        font-size: 22px;
-        font-weight: 900;
-    }
-
-    .books-search input {
-        min-width: 0;
-        flex: 1;
-        height: 46px;
-        border: 0;
-        outline: 0;
-        background: transparent;
-        color: var(--text);
-        font-family: inherit;
-        font-size: 16px;
-        font-weight: 600;
-    }
-
-    .books-search input::placeholder {
-        color: #999;
-        font-weight: 400;
-    }
-
-    .search-button {
-        min-width: 104px;
-        height: 46px;
-        flex: 0 0 auto;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 7px;
-        padding: 0 17px;
-        border: 0;
-        border-radius: 11px;
-        background: linear-gradient(
-            135deg,
-            var(--orange-dark),
-            var(--orange)
-        );
-        color: #fff;
-        font-family: inherit;
-        font-size: 15px;
-        font-weight: 900;
-        cursor: pointer;
-        box-shadow: 0 6px 16px rgba(232, 155, 61, .18);
-        transition:
-            transform .2s ease,
-            box-shadow .2s ease,
-            filter .2s ease;
-    }
-
-    .search-button:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 9px 20px rgba(232, 155, 61, .24);
-        filter: brightness(1.02);
-    }
-
-    .search-button:active {
-        transform: translateY(0);
-    }
-
-    .search-button:focus-visible {
-        outline: 3px solid rgba(232, 155, 61, .20);
-        outline-offset: 2px;
-    }
-
-    .search-button span {
-        font-size: 18px;
-        line-height: 1;
-    }
-
-    .clear-search {
-        width: 38px;
-        height: 38px;
-        flex: 0 0 38px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 9px;
-        color: var(--muted);
-        text-decoration: none;
-        font-family: Arial, sans-serif;
-        font-size: 23px;
-        transition:
-            background .2s ease,
-            color .2s ease;
-    }
-
-    .clear-search:hover {
-        background: rgba(0, 0, 0, .05);
+    .catalog-heading {
+        margin: 0 0 12px;
         color: var(--heading);
+        font-size: 18px;
+        font-weight: 900;
     }
 
-    /* =========================
-       Filters
-    ========================= */
-
-    .filter-section {
-        margin-top: 13px;
-    }
-
-    .advanced-filter-form {
-        display: grid;
-        grid-template-columns:
-            minmax(180px, 1fr)
-            minmax(180px, 1fr)
-            minmax(180px, 1fr);
+    .books-filter-form {
+        display: flex;
+        flex-direction: column;
         gap: 10px;
     }
 
-    .filter-control {
-        display: flex;
-        align-items: center;
-        gap: 9px;
+    .search-row {
+        display: grid;
+        grid-template-columns: minmax(145px, .8fr) minmax(160px, 2fr) auto;
+        gap: 8px;
+    }
+
+    .filter-select,
+    .filter-input {
+        width: 100%;
         min-width: 0;
-        height: 46px;
-        padding: 0 12px;
-
-        border: 1px solid var(--border);
-        border-radius: 11px;
-
-        background: var(--surface);
-
-        transition:
-            border-color .2s ease,
-            box-shadow .2s ease,
-            background .2s ease;
-    }
-
-    .filter-control:focus-within {
-        border-color: rgba(232, 155, 61, .65);
-
-        box-shadow:
-            0 0 0 3px rgba(232, 155, 61, .10);
-    }
-
-    .filter-control label {
-        flex: 0 0 auto;
-        color: var(--muted);
-        font-size: 14px;
-        font-weight: 700;
-    }
-
-.filter-control select {
-    min-width: 0;
-    flex: 1;
-    height: 40px;
-
-    padding: 0 8px;
-
-    border: 0;
-    outline: 0;
-
-    background: var(--surface);
-    color: var(--text);
-
-    font-family: inherit;
-    font-size: 15px;
-    font-weight: 600;
-
-    cursor: pointer;
-
-    color-scheme: light;
-}
-
-/* گزینه‌های داخل منوی select */
-    .filter-control select option {
+        height: 38px;
+        padding: 0 10px;
         background: var(--surface);
         color: var(--text);
-
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        outline: none;
         font-family: inherit;
-        font-size: 15px;
-        font-weight: 600;
-
-        padding: 10px;
+        font-size: 14px;
+        box-sizing: border-box;
     }
 
-    /* گزینه انتخاب‌شده */
-    .filter-control select option:checked {
-        background: var(--orange);
-        color: #fff;
+    .filter-select:focus,
+    .filter-input:focus {
+        border-color: var(--orange);
+        box-shadow: 0 0 0 2px rgba(232, 155, 61, .10);
     }
 
-    .clear-filters {
+    .filter-input::placeholder {
+        color: var(--muted);
+        opacity: .8;
+    }
+
+    .filter-select option {
+        background: var(--surface);
+        color: var(--text);
+    }
+
+    .search-button,
+    .reset-button {
         display: inline-flex;
         align-items: center;
         justify-content: center;
         min-height: 38px;
-        margin-top: 10px;
-        padding: 0 13px;
-        border-radius: 9px;
-        color: var(--muted);
-        background: transparent;
-        border: 1px solid var(--border);
-        text-decoration: none;
+        padding: 0 14px;
+        border-radius: 8px;
+        font-family: inherit;
         font-size: 14px;
-        font-weight: 700;
-        transition: all .2s ease;
+        font-weight: 900;
+        text-decoration: none;
+        cursor: pointer;
+        transition: .2s ease;
+        white-space: nowrap;
     }
 
-    .clear-filters:hover {
-        border-color: var(--orange);
-        color: var(--orange-dark);
-        background: var(--accent-soft);
+    .search-button {
+        border: none;
+        background: linear-gradient(135deg, var(--orange-dark), var(--orange));
+        color: #fff;
     }
 
-    /* =========================
-       Active filters
-    ========================= */
+    .search-button:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.04);
+    }
 
-    .active-filters {
+    .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .filter-field {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 0;
+    }
+
+    .filter-field label {
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 800;
+    }
+
+    .filter-section-title {
+        margin: 3px 0 0;
+        padding-bottom: 5px;
+        border-bottom: 1px solid var(--border);
+        color: var(--heading);
+        font-size: 14px;
+        font-weight: 900;
+    }
+
+    .range-fields {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px;
+    }
+
+    .filter-actions {
         display: flex;
         align-items: center;
         flex-wrap: wrap;
-        gap: 7px;
-        margin-top: 12px;
+        gap: 8px;
     }
 
-    .active-filter {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        padding: 5px 10px;
-        border-radius: 8px;
-        background: var(--accent-soft);
+    .reset-button {
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--muted);
+    }
+
+    .reset-button:hover {
+        border-color: var(--orange);
         color: var(--orange-dark);
-        font-size: 13px;
-        font-weight: 700;
+        background: var(--surface-2);
     }
 
-    /* =========================
-       Results bar
-    ========================= */
-
+    /* تعداد نتایج */
     .results-bar {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 15px;
-        margin-bottom: 18px;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 14px;
     }
 
     .results-count {
         color: var(--heading);
-        font-size: 18px;
+        font-size: 16px;
         font-weight: 900;
     }
 
-    .results-count span {
+    .results-count strong {
         color: var(--orange-dark);
     }
 
     .results-query {
         color: var(--muted);
-        font-size: 14px;
+        font-size: 13px;
     }
 
-    /* =========================
-       Books grid
-    ========================= */
-
+    /* کارت‌های کتاب */
     .books-grid-new {
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 20px;
+        gap: 18px;
     }
 
     .book-item {
+        display: flex;
+        flex-direction: column;
         min-width: 0;
         overflow: hidden;
-        border: 1px solid var(--border);
-        border-radius: 16px;
         background: var(--surface);
-        box-shadow: 0 7px 24px rgba(30, 40, 50, .05);
-        transition:
-            transform .22s ease,
-            box-shadow .22s ease,
-            border-color .22s ease;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        box-shadow: 0 5px 18px rgba(30, 40, 50, .05);
+        transition: transform .2s ease, box-shadow .2s ease;
     }
 
     .book-item:hover {
-        transform: translateY(-4px);
-        border-color: rgba(232, 155, 61, .35);
-        box-shadow: 0 14px 32px rgba(30, 40, 50, .10);
+        transform: translateY(-3px);
+        box-shadow: 0 12px 25px rgba(30, 40, 50, .09);
     }
-
-    /* =========================
-       Book cover
-    ========================= */
 
     .book-image {
         position: relative;
         width: 100%;
         aspect-ratio: 3 / 4;
         overflow: hidden;
-        background: #eee8df;
+        background: var(--surface-2);
         border-bottom: 1px solid var(--border);
     }
 
-    .book-image a {
+    .book-cover-link {
         display: block;
         width: 100%;
         height: 100%;
@@ -449,11 +241,7 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
-        object-position: center;
-        padding: 0;
-        transition:
-            transform .3s ease,
-            filter .3s ease;
+        transition: transform .25s ease;
     }
 
     .book-item:hover .book-image img {
@@ -461,54 +249,38 @@
     }
 
     .book-no-image {
-        width: 100%;
-        height: 100%;
         display: flex;
         align-items: center;
         justify-content: center;
-        flex-direction: column;
-        gap: 8px;
-        color: #a49d93;
-        text-align: center;
-    }
-
-    .book-no-image-icon {
-        font-size: 38px;
-        line-height: 1;
-    }
-
-    .book-no-image span {
-        font-size: 14px;
-        font-weight: 700;
+        width: 100%;
+        height: 100%;
+        color: var(--muted);
+        font-size: 42px;
     }
 
     .book-status {
         position: absolute;
-        top: 10px;
-        right: 10px;
+        top: 8px;
+        right: 8px;
         z-index: 2;
-        padding: 4px 9px;
+        padding: 4px 8px;
         border-radius: 7px;
-        background: rgba(255, 255, 255, .94);
-        color: var(--orange-dark);
+        background: var(--surface);
+        color: #16803a;
         font-size: 12px;
         font-weight: 900;
-        box-shadow: 0 3px 10px rgba(0,0,0,.08);
+        box-shadow: 0 3px 10px rgba(0, 0, 0, .07);
     }
 
-    /* =========================
-       Book content
-    ========================= */
+    .book-status.unavailable {
+        color: #b42323;
+    }
 
     .book-content {
-        padding: 14px 15px 16px;
-    }
-
-    .book-category {
-        margin-bottom: 5px;
-        color: var(--orange-dark);
-        font-size: 13px;
-        font-weight: 800;
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        padding: 13px;
     }
 
     .book-title {
@@ -516,724 +288,413 @@
         overflow: hidden;
         margin: 0;
         color: var(--heading);
-        font-size: 20px;
-        line-height: 1.45;
+        font-size: 17px;
         font-weight: 900;
+        line-height: 1.7;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
     }
 
+    .book-title-link {
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .book-title-link:hover {
+        color: var(--orange-dark);
+    }
+
     .book-author {
-        margin-top: 4px;
+        margin: 5px 0 0;
         color: var(--muted);
-        font-size: 15px;
-        line-height: 1.6;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        font-size: 13px;
+        line-height: 1.8;
+        overflow-wrap: anywhere;
+    }
+
+    .book-author strong {
+        color: var(--heading);
+        font-weight: 800;
+    }
+
+    .book-bottom {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: auto;
+        padding-top: 11px;
+        border-top: 1px solid var(--border);
+        margin-top: 12px;
     }
 
     .book-rating {
         display: flex;
         align-items: center;
-        gap: 6px;
-        margin-top: 10px;
-        color: var(--orange-dark);
-        font-size: 14px;
+        gap: 4px;
+        color: var(--heading);
+        font-size: 13px;
         font-weight: 800;
     }
 
-    .book-rating-stars {
-        letter-spacing: 1px;
-        font-family: Arial, sans-serif;
+    .book-rating-star {
+        color: var(--orange);
+        font-size: 19px;
+        line-height: 1;
     }
 
-    .book-rating-count {
+    .book-rating-empty {
         color: var(--muted);
         font-size: 12px;
         font-weight: 600;
     }
 
-    .book-details {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 8px;
-        margin-top: 12px;
-        padding-top: 10px;
-        border-top: 1px solid var(--border);
-    }
-
-    .book-details a {
+    .book-price {
         color: var(--orange-dark);
-        text-decoration: none;
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 900;
+        line-height: 1.7;
+        overflow-wrap: anywhere;
     }
 
-    .book-details a:hover {
-        text-decoration: underline;
-    }
-
-    /* =========================
-       Empty
-    ========================= */
-
+    /* حالت بدون نتیجه */
     .empty-books {
-        padding: 55px 20px;
+        padding: 35px 18px;
         border: 1px dashed var(--border);
-        border-radius: 16px;
+        border-radius: 14px;
         background: var(--surface);
         text-align: center;
     }
 
     .empty-books-icon {
-        margin-bottom: 12px;
-        color: #aaa;
-        font-size: 45px;
-        line-height: 1;
+        margin-bottom: 8px;
+        color: var(--muted);
+        font-size: 36px;
     }
 
-    .empty-books h3 {
+    .empty-books h2 {
         margin: 0;
         color: var(--heading);
-        font-size: 23px;
+        font-size: 21px;
         font-weight: 900;
     }
 
     .empty-books p {
         margin: 7px 0 0;
         color: var(--muted);
-        font-size: 16px;
+        font-size: 14px;
+        line-height: 1.8;
     }
 
-    /* =========================
-       Responsive
-    ========================= */
-
-    @media (max-width: 1050px) {
-
+    /* تبلت */
+    @media (max-width: 1000px) {
         .books-grid-new {
             grid-template-columns: repeat(3, minmax(0, 1fr));
         }
 
-    }
-
-    @media (max-width: 800px) {
-
-        .advanced-filter-form {
-            grid-template-columns: 1fr;
-        }
-
-        .books-grid-new {
+        .filters-grid {
             grid-template-columns: repeat(2, minmax(0, 1fr));
         }
-
-        .catalog-header {
-            align-items: flex-start;
-        }
-
     }
 
-    @media (max-width: 560px) {
-
+    /* موبایل */
+    @media (max-width: 700px) {
         .books-page {
-            padding: 25px 14px 55px;
+            padding: 22px 12px 45px;
         }
 
         .catalog-panel {
             padding: 12px;
-            border-radius: 14px;
         }
 
-        .books-search {
-            min-height: 54px;
-        }
-
-        .search-icon {
-            width: 34px;
-            flex-basis: 34px;
-        }
-
-        .books-search input {
-            font-size: 14px;
+        .search-row {
+            grid-template-columns: minmax(0, 1fr);
         }
 
         .search-button {
-            min-width: 88px;
-            height: 44px;
-            padding: 0 11px;
-            border-radius: 10px;
-            font-size: 13px;
-        }
-
-        .search-button span {
-            font-size: 16px;
-        }
-
-        .clear-search {
-            width: 32px;
-            flex-basis: 32px;
+            width: 100%;
         }
 
         .books-grid-new {
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 12px;
+            gap: 11px;
         }
 
         .book-content {
-            padding: 11px;
+            padding: 10px;
         }
 
         .book-title {
-            font-size: 17px;
+            font-size: 15px;
         }
 
-        .book-author {
-            font-size: 13px;
-        }
-
-        .book-rating {
+        .book-author,
+        .book-price {
             font-size: 12px;
         }
-
-        .results-bar {
-            align-items: flex-start;
-            flex-direction: column;
-            gap: 3px;
-        }
-
     }
 
-    @media (max-width: 380px) {
+    @media (max-width: 430px) {
+        .filters-grid {
+            grid-template-columns: minmax(0, 1fr);
+        }
 
         .books-grid-new {
-            grid-template-columns: 1fr;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 9px;
         }
 
-        .book-image {
-            aspect-ratio: 3 / 4;
+        .book-bottom {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 7px;
         }
-
     }
 
+    @media (max-width: 330px) {
+        .books-grid-new {
+            grid-template-columns: minmax(0, 1fr);
+        }
+    }
 </style>
-
 {% endblock %}
 
 
 {% block content %}
-
 <div class="books-page">
 
-    <!-- =========================
-         Search & filters
-    ========================== -->
+    <header class="books-intro">
+        <h1>کتاب‌های کتابخانه</h1>
+        <p>کتاب موردنظرت را بر اساس مشخصات آن جستجو کن یا از فیلترها برای محدود کردن نتایج استفاده کن.</p>
+    </header>
 
+    <!-- SEARCH AND FILTERS -->
     <section class="catalog-panel">
 
-        <div class="catalog-header">
+        <h2 class="catalog-heading">جستجو و فیلتر کتاب‌ها</h2>
 
-            <div class="catalog-header-main">
+        <form method="get" class="books-filter-form" id="books-filter-form">
 
-                <div class="catalog-header-icon">
-                    ⌕
-                </div>
+            <!-- Search field selector and query -->
+            <div class="search-row">
 
-                <h2>
-                    جستجو در کتابخانه
-                </h2>
-
-            </div>
-
-            <div class="catalog-live">
-                {{ books|length }} کتاب
-            </div>
-
-        </div>
-
-
-        <!-- Search -->
-
-        <form
-            class="books-search"
-            method="get"
-            id="books-search-form"
-        >
-
-            <div class="search-icon">
-                ⌕
-            </div>
-
-            <input
-                type="text"
-                name="q"
-                id="books-search-input"
-                value="{{ query }}"
-                placeholder="عنوان کتاب، نویسنده یا موضوع..."
-                autocomplete="off"
-            >
-
-            {% if query %}
-
-                <a
-                    href="{% url 'books' %}"
-                    class="clear-search"
-                    aria-label="پاک کردن جستجو"
-                    title="پاک کردن جستجو"
+                <select
+                    name="search_field"
+                    class="filter-select"
+                    aria-label="جستجو بر اساس"
                 >
-                    ×
-                </a>
+                    <option value="all" {% if search_field == "all" %}selected{% endif %}>
+                        جستجو در همه فیلدها
+                    </option>
+                    <option value="title" {% if search_field == "title" %}selected{% endif %}>
+                        عنوان کتاب
+                    </option>
+                    <option value="author" {% if search_field == "author" %}selected{% endif %}>
+                        نویسنده
+                    </option>
+                    <option value="translator" {% if search_field == "translator" %}selected{% endif %}>
+                        مترجم
+                    </option>
 
-            {% endif %}
+                    <option value="isbn" {% if search_field == "isbn" %}selected{% endif %}>
+                        شابک
+                    </option>
+                    <option value="description" {% if search_field == "description" %}selected{% endif %}>
+                        توضیحات کتاب
+                    </option>
 
-            <button
-                type="submit"
-                class="search-button"
-            >
-                <span>⌕</span>
-                جستجو
-            </button>
+                </select>
 
-        </form>
+                <input
+                    type="search"
+                    name="q"
+                    class="filter-input"
+                    value="{{ query }}"
+                    placeholder="عبارت موردنظر را وارد کن..."
+                    aria-label="عبارت جستجو"
+                >
 
+                <button type="submit" class="search-button">
+                    جستجو و اعمال فیلتر
+                </button>
 
-        <!-- Filters -->
+            </div>
 
-        <div class="filter-section">
+            <h3 class="filter-section-title">فیلتر و مرتب‌سازی</h3>
 
-            <form
-                method="get"
-                id="advanced-filter-form"
-                class="advanced-filter-form"
-            >
+            <div class="filters-grid">
 
-                {% if query %}
-                    <input
-                        type="hidden"
-                        name="q"
-                        value="{{ query }}"
-                    >
-                {% endif %}
-
-
-                <!-- دسته‌بندی -->
-
-                <div class="filter-control">
-
-                    <label for="category-filter">
-                        دسته:
-                    </label>
-
-                    <select
-                        name="category"
-                        id="category-filter"
-                        onchange="this.form.submit()"
-                    >
-
-                        <option value="">
-                            همه دسته‌ها
-                        </option>
-
-                        {% for category in categories %}
-
-                            <option
-                                value="{{ category.id }}"
-                                {% if selected_category == category.id|stringformat:"s" %}
-                                    selected
-                                {% endif %}
-                            >
-                                {{ category.name }}
-                            </option>
-
-                        {% endfor %}
-
-                    </select>
-
-                </div>
-
-
-                <!-- وضعیت -->
-
-                <div class="filter-control">
-
-                    <label for="availability-filter">
-                        وضعیت:
-                    </label>
-
+                <div class="filter-field">
+                    <label for="availability-filter">وضعیت امانت</label>
                     <select
                         name="availability"
                         id="availability-filter"
-                        onchange="this.form.submit()"
+                        class="filter-select"
                     >
-
-                        <option
-                            value=""
-                            {% if not availability %}
-                                selected
-                            {% endif %}
-                        >
-                            همه
-                        </option>
-
-                        <option
-                            value="available"
-                            {% if availability == "available" %}
-                                selected
-                            {% endif %}
-                        >
+                        <option value="">همه کتاب‌ها</option>
+                        <option value="available" {% if availability == "available" %}selected{% endif %}>
                             موجود
                         </option>
-
-                        <option
-                            value="unavailable"
-                            {% if availability == "unavailable" %}
-                                selected
-                            {% endif %}
-                        >
-                            امانت داده شده
+                        <option value="unavailable" {% if availability == "unavailable" %}selected{% endif %}>
+                            ناموجود
                         </option>
-
                     </select>
-
                 </div>
 
-
-                <!-- مرتب‌سازی -->
-
-                <div class="filter-control">
-
-                    <label for="sort-filter">
-                        مرتب‌سازی:
-                    </label>
-
+                <div class="filter-field">
+                    <label for="sort-filter">مرتب‌سازی نتایج</label>
                     <select
                         name="sort"
                         id="sort-filter"
-                        onchange="this.form.submit()"
+                        class="filter-select"
                     >
-
-                        <option
-                            value="newest"
-                            {% if sort == "newest" %}
-                                selected
-                            {% endif %}
-                        >
-                            جدیدترین
+                        <option value="newest" {% if sort == "newest" %}selected{% endif %}>
+                            جدیدترین کتاب‌ها
                         </option>
-
-                        <option
-                            value="oldest"
-                            {% if sort == "oldest" %}
-                                selected
-                            {% endif %}
-                        >
-                            قدیمی‌ترین
+                        <option value="oldest" {% if sort == "oldest" %}selected{% endif %}>
+                            قدیمی‌ترین کتاب‌ها
                         </option>
-
-                        <option
-                            value="title_asc"
-                            {% if sort == "title_asc" %}
-                                selected
-                            {% endif %}
-                        >
+                        <option value="title_asc" {% if sort == "title_asc" %}selected{% endif %}>
                             عنوان: الف تا ی
                         </option>
-
-                        <option
-                            value="title_desc"
-                            {% if sort == "title_desc" %}
-                                selected
-                            {% endif %}
-                        >
+                        <option value="title_desc" {% if sort == "title_desc" %}selected{% endif %}>
                             عنوان: ی تا الف
                         </option>
-
-                        <option
-                            value="best"
-                            {% if sort == "best" %}
-                                selected
-                            {% endif %}
-                        >
+                        <option value="best" {% if sort == "best" %}selected{% endif %}>
                             بالاترین امتیاز
                         </option>
-
+                        <option value="price_asc" {% if sort == "price_asc" %}selected{% endif %}>
+                            قیمت: ارزان به گران
+                        </option>
+                        <option value="price_desc" {% if sort == "price_desc" %}selected{% endif %}>
+                            قیمت: گران به ارزان
+                        </option>
                     </select>
-
                 </div>
 
-            </form>
+            </div>
 
 
-            <!-- فیلترهای فعال -->
+            <div class="filter-actions">
+                <button type="submit" class="search-button">
+                    اعمال فیلترها
+                </button>
 
-            {% if query or selected_category or sort != "newest" or availability %}
+                <a href="{% url 'books' %}" class="reset-button">
+                    پاک کردن همه فیلترها
+                </a>
+            </div>
 
-                <div class="active-filters">
-
-                    <span>
-                        فیلترهای فعال:
-                    </span>
-
-
-                    {% if query %}
-
-                        <span class="active-filter">
-                            جستجو: {{ query }}
-                        </span>
-
-                    {% endif %}
-
-
-                    {% if selected_category %}
-
-                        <span class="active-filter">
-                            دسته انتخاب شده
-                        </span>
-
-                    {% endif %}
-
-
-                    {% if availability == "available" %}
-
-                        <span class="active-filter">
-                            وضعیت: موجود
-                        </span>
-
-                    {% elif availability == "unavailable" %}
-
-                        <span class="active-filter">
-                            وضعیت: امانت داده شده
-                        </span>
-
-                    {% endif %}
-
-
-                    {% if sort == "oldest" %}
-
-                        <span class="active-filter">
-                            مرتب‌سازی: قدیمی‌ترین
-                        </span>
-
-                    {% elif sort == "title_asc" %}
-
-                        <span class="active-filter">
-                            مرتب‌سازی: عنوان الف تا ی
-                        </span>
-
-                    {% elif sort == "title_desc" %}
-
-                        <span class="active-filter">
-                            مرتب‌سازی: عنوان ی تا الف
-                        </span>
-
-                    {% elif sort == "best" %}
-
-                        <span class="active-filter">
-                            مرتب‌سازی: بالاترین امتیاز
-                        </span>
-
-                    {% endif %}
-
-
-                    <a
-                        href="{% url 'books' %}"
-                        class="clear-filters"
-                    >
-                        حذف فیلترها
-                    </a>
-
-                </div>
-
-            {% endif %}
-
-        </div>
-
+        </form>
     </section>
 
-
-    <!-- =========================
-         Results
-    ========================== -->
-
+    <!-- RESULTS -->
     <div class="results-bar">
-
         <div class="results-count">
-
-            <span>
-                {{ books|length }}
-            </span>
-
-            کتاب پیدا شد
-
+            تعداد نتایج: <strong>{{ books|length }}</strong>
         </div>
 
         {% if query %}
-
             <div class="results-query">
-                نتیجه جستجو برای «{{ query }}»
+                عبارت جستجو: «{{ query }}»
             </div>
-
         {% endif %}
-
     </div>
 
-
-    <!-- =========================
-         Books
-    ========================== -->
-
+    <!-- BOOK CARDS -->
     {% if books %}
-
         <div class="books-grid-new">
 
             {% for book in books %}
-
                 <article class="book-item">
 
                     <div class="book-image">
 
-                        {% if book.cover %}
-
-                            <a href="{% url 'book_detail' book.pk %}">
-
+                        <a
+                            href="{% url 'book_detail' book.pk %}"
+                            class="book-cover-link"
+                        >
+                            {% if book.processed_cover %}
+                                <img
+                                    src="{{ book.processed_cover.url }}"
+                                    alt="جلد {{ book.title }}"
+                                    loading="lazy"
+                                >
+                            {% elif book.cover %}
                                 <img
                                     src="{{ book.cover.url }}"
                                     alt="جلد {{ book.title }}"
                                     loading="lazy"
                                 >
-
-                            </a>
-
-                        {% else %}
-
-                            <div class="book-no-image">
-
-                                <div class="book-no-image-icon">
-                                    ▧
+                            {% else %}
+                                <div class="book-no-image">
+                                    کتاب
                                 </div>
+                            {% endif %}
+                        </a>
 
-                                <span>
-                                    تصویر جلد موجود نیست
-                                </span>
-
-                            </div>
-
-                        {% endif %}
-
-
-                        {% if not book.is_available %}
-
-                            <div class="book-status">
-                                امانت داده شده
-                            </div>
-
+                        {% if book.is_available %}
+                            <span class="book-status">موجود</span>
+                        {% else %}
+                            <span class="book-status unavailable">ناموجود</span>
                         {% endif %}
 
                     </div>
 
-
                     <div class="book-content">
 
-                        {% if book.category %}
-
-                            <div class="book-category">
-                                {{ book.category.name }}
-                            </div>
-
-                        {% endif %}
-
-
                         <h2 class="book-title">
-                            {{ book.title }}
+                            <a
+                                href="{% url 'book_detail' book.pk %}"
+                                class="book-title-link"
+                            >
+                                {{ book.title }}
+                            </a>
                         </h2>
 
+                        <p class="book-author">
+                            <strong>نویسنده:</strong>
+                            {% for author in book.authors.all %}
+                                {{ author.name }}{% if not forloop.last %}، {% endif %}
+                            {% empty %}
+                                {{ book.author|default:"ثبت نشده" }}
+                            {% endfor %}
+                        </p>
 
-                        {% if book.author %}
-
-                            <div class="book-author">
-                                {{ book.author }}
-                            </div>
-
-                        {% endif %}
-
-
-                        {% if book.average_rating %}
+                        <div class="book-bottom">
 
                             <div class="book-rating">
-
-                                <span class="book-rating-stars">
-                                    ★
-                                </span>
-
-                                <span>
-                                    {{ book.average_rating|floatformat:1 }}
-                                </span>
-
-                                {% if book.review_count %}
-
-                                    <span class="book-rating-count">
-                                        ({{ book.review_count }})
-                                    </span>
-
+                                {% if book.review_count > 0 %}
+                                    <span class="book-rating-star">★</span>
+                                    <span>{{ book.average_rating|floatformat:1 }}</span>
+                                {% else %}
+                                    <span class="book-rating-empty">بدون امتیاز</span>
                                 {% endif %}
-
                             </div>
 
-                        {% endif %}
-
-
-                        <div class="book-details">
-
-                            <span>
-
-                                {% if book.is_available %}
-                                    موجود
+                            <div class="book-price">
+                                {% if book.price != None and book.price != "" %}
+                                    {{ book.price|floatformat:0 }} تومان
                                 {% else %}
-                                    ناموجود
+                                    بدون قیمت / رایگان
                                 {% endif %}
-
-                            </span>
-
-                            <a href="{% url 'book_detail' book.pk %}">
-                                مشاهده کتاب
-                            </a>
+                            </div>
 
                         </div>
 
                     </div>
-
                 </article>
-
             {% endfor %}
 
         </div>
-
     {% else %}
-
         <div class="empty-books">
-
-            <div class="empty-books-icon">
-                ⌕
-            </div>
-
-            <h3>
-                کتابی پیدا نشد
-            </h3>
-
-            <p>
-                عبارت جستجو یا فیلترهای انتخابی را تغییر بده و دوباره امتحان کن.
-            </p>
-
+            <div class="empty-books-icon">⌕</div>
+            <h2>کتابی پیدا نشد</h2>
+            <p>عبارت جستجو یا فیلترهای انتخاب‌شده را تغییر بده یا همه فیلترها را پاک کن.</p>
         </div>
-
     {% endif %}
 
 </div>
-
-{% endblock %}
-
-
-{% block extra_js %}
-
 {% endblock %}

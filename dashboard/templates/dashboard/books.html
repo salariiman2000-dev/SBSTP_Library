@@ -507,6 +507,7 @@
                         <th>دسته‌بندی</th>
                         <th>محل قرارگیری</th>
                         <th>ناشر</th>
+                        <th>قیمت کتاب</th>
                         <th>سال انتشار</th>
                         <th>توضیحات</th>
                         <th>تعداد نسخه‌ها</th>
@@ -586,6 +587,17 @@
 
                             <td class="text-cell">
                                 {% if book.publisher %}{{ book.publisher.name }}{% else %}—{% endif %}
+                            </td>
+                            <td>
+                                {% if book.price %}
+                                    <span class="code-label" style="direction: rtl;">
+                                        {{ book.price|floatformat:0 }} تومان
+                                    </span>
+                                {% else %}
+                                    <span class="code-label">
+                                        بدون قیمت / رایگان
+                                    </span>
+                                {% endif %}
                             </td>
 
                             <td>{{ book.publication_year|default:"—" }}</td>

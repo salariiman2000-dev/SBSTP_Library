@@ -321,6 +321,13 @@ class Book(models.Model):
         unique=True,
         editable=False,
     )
+    price = models.DecimalField(
+        max_digits=12,
+        decimal_places=0,
+        null=True,
+        blank=True,
+        verbose_name="قیمت کتاب"
+    )
 
     class Meta:
         verbose_name = "کتاب"

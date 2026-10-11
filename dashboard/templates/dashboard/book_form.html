@@ -317,7 +317,72 @@
         transition: border-color .2s ease, background .2s ease;
 
     }
+    /* فیلد قیمت کتاب */
+    .price-field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        width: 100%;
+    }
 
+    .price-field label {
+        color: var(--text);
+        font-size: 15px;
+        font-weight: 800;
+    }
+
+    .price-input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .price-input {
+        width: 100%;
+        min-height: 46px;
+        padding: 10px 13px;
+        padding-left: 65px;
+        border: 1px solid var(--border);
+        border-radius: 9px;
+        background: var(--surface-soft);
+        color: var(--text);
+        font-family: inherit;
+        font-size: 15px;
+        outline: none;
+        box-sizing: border-box;
+        transition: border-color .2s ease, box-shadow .2s ease;
+    }
+
+    .price-input:focus {
+        border-color: var(--primary);
+        background: var(--surface);
+        box-shadow: 0 0 0 3px var(--primary-soft);
+    }
+
+    .price-input::placeholder {
+        color: var(--text-soft);
+        opacity: .8;
+    }
+
+    .price-unit {
+        position: absolute;
+        left: 13px;
+        color: var(--text-soft);
+        font-size: 13px;
+        pointer-events: none;
+    }
+
+    .price-help {
+        color: var(--text-soft);
+        font-size: 12px;
+        line-height: 1.8;
+    }
+
+    @media (max-width: 600px) {
+        .price-input {
+            font-size: 14px;
+        }
+    }
     .file-box:hover {
 
         border-color: var(--primary);
@@ -1207,7 +1272,27 @@
                 </div>
 
             </div>
+            <div class="form-group price-field">
+                <label for="price">قیمت کتاب</label>
 
+                <div class="price-input-wrapper">
+                    <input
+                        type="number"
+                        id="price"
+                        name="price"
+                        class="price-input"
+                        min="0"
+                        step="1"
+                        value="{{ form_data.price|default_if_none:'' }}"
+                        placeholder="مثلاً 250000"
+                    >
+                    <span class="price-unit">تومان</span>
+                </div>
+
+                <span class="price-help">
+                    واردکردن قیمت اختیاری است.
+                </span>
+            </div>
             <!-- مترجمان -->
 
             <div class="form-group">

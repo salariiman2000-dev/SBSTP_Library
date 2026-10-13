@@ -293,10 +293,90 @@
             padding: 26px 18px;
         }
     }
+    .admin-login-wrap {
+        width: min(920px, 100%);
+        display: flex;
+        justify-content: flex-start;
+        margin: 0 auto 16px;
+        direction: rtl;
+    }
+
+    .admin-login-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        padding: 10px 18px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: var(--surface);
+        color: var(--heading);
+        font-family: inherit;
+        font-size: 14px;
+        font-weight: 800;
+        text-decoration: none;
+        box-shadow: 0 4px 12px rgba(23, 35, 60, 0.05);
+        transition:
+            color 0.2s ease,
+            background 0.2s ease,
+            border-color 0.2s ease,
+            transform 0.2s ease,
+            box-shadow 0.2s ease;
+    }
+
+    .admin-login-link svg {
+        flex-shrink: 0;
+        color: var(--orange-dark);
+        transition: color 0.2s ease;
+    }
+
+    .admin-login-link:hover {
+        color: #fff;
+        background: var(--orange-dark);
+        border-color: var(--orange-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 7px 18px rgba(23, 35, 60, 0.12);
+    }
+
+    .admin-login-link:hover svg {
+        color: #fff;
+    }
+
+    .admin-login-link:focus-visible {
+        outline: 3px solid rgba(232, 155, 61, 0.35);
+        outline-offset: 3px;
+    }
+
+    @media (max-width: 500px) {
+        .admin-login-link {
+            padding: 9px 14px;
+            font-size: 13px;
+        }
+    }
 </style>
 
 <section class="auth-page">
-
+<div class="admin-login-wrap">
+    <a href="{% url 'dashboard_login' %}" class="admin-login-link">
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+        >
+            <path d="M12 15v2"/>
+            <path d="M6 21h12a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2Z"/>
+            <path d="M8 10V6a4 4 0 0 1 8 0v4"/>
+        </svg>
+        <span>ورود مدیر</span>
+    </a>
+</div>
     <div class="auth-shell">
 
         <!-- لوگوی پارک -->
